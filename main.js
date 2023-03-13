@@ -7,7 +7,7 @@ import 'leaflet.layerscontrol-minimap';
 import 'leaflet.layerscontrol-minimap/control.layers.minimap.css';
 import './css/style.css';
 import { rendererMap, rendererBackground, rendererLayers } from './modules/renderer';
-import { behaviorHash } from './modules/behavior/hash.js';
+import { behaviorHash } from './modules/behavior';
 
 document.querySelector('#app').innerHTML = `
 <div id="map-container"></div>

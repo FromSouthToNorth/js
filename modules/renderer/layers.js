@@ -1,26 +1,28 @@
 import { osmNode } from '../osm/node.js';
 import * as d3 from 'd3';
+import { osmLine } from '../osm/line.js';
+import { behaviorWay } from '../behavior';
 
-const disableClusteringAtZoom = 16
+const disableClusteringAtZoom = 16;
 
 export function rendererLayers(context) {
   let layers = {
     markerCluster: L.markerClusterGroup({
-      chunkedLoading: true,
-      disableClusteringAtZoom,
+      chunkedLoading: true, disableClusteringAtZoom,
     }).addTo(context.map()),
 
     markerGeoJSON: L.geoJSON(null, {
       filter: ({ geometry }) => {
         return geometry.type === 'Point';
-      },
-      pointToLayer: (geoJsonPoint, latlng) => osmNode().pointToLayer(geoJsonPoint, latlng, {
-        className: 'my-div-icon',
-        iconSize: [8, 8],
-      }).bindPopup((layer) => osmNode().bindPopup(layer)),
+      }, pointToLayer: (geoJsonPoint, latlng) => osmNode().pointToLayer(geoJsonPoint, latlng, {
+        className: 'my-div-icon', iconSize: [8, 8],
+      }).bindPopup((layer) => behaviorWay().bindPopup(layer)),
     }).on('click', ({ layer }) => {
       const latLng = layer.getLatLng();
-      context.map().setView(latLng, disableClusteringAtZoom);
+      const zoom = context.map().getZoom();
+      if (zoom < disableClusteringAtZoom) {
+        context.map().setView(latLng, disableClusteringAtZoom);
+      }
       layers.highlightFeatureGroup.clearLayers();
       const options = {
         className: 'highlight-marker',
@@ -41,6 +43,8 @@ export function rendererLayers(context) {
       if (context.isFitBounds) {
         context.map().fitBounds(layers.markerCluster.getBounds());
       }
+      context.json = () => {return json;};
+      osmLine(context).addTo();
     });
   };
 
