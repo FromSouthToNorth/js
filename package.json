@@ -1,0 +1,24 @@
+{
+  "name": "js",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^4.1.0"
+  },
+  "dependencies": {
+    "@datastructures-js/heap": "^4.3.1",
+    "@datastructures-js/priority-queue": "^6.2.0",
+    "@turf/turf": "^6.5.0",
+    "d3": "^7.8.2",
+    "leaflet": "^1.9.3",
+    "leaflet.layerscontrol-minimap": "^1.0.21",
+    "leaflet.markercluster": "^1.5.3",
+    "lodash-es": "^4.17.21"
+  }
+}
