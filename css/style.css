@@ -135,6 +135,33 @@ h1 {
   }
 }
 
+#map-container .lien-icon {
+  background-color: #FAFAFA;
+  border: 1px solid #616161;
+  border-radius: 8px;
+}
+
+#map-container .start-lien-icon, #map-container .end-lien-icon {
+  background-color: #BDBDBD;
+  border: 1px solid #616161;
+  border-radius: 8px;
+}
+
+#map-container .lien-icon:hover {
+  background-color: #444444;
+  border: 1px solid #fff;
+}
+
+#map-container .start-lien-icon:hover {
+  background-color: #444444;
+  border: 1px solid #fff;
+}
+
+#map-container .end-lien-icon:hover {
+  background-color: #444444;
+  border: 1px solid #fff;
+}
+
 #map-container path.line-casing {
   stroke: #444;
   stroke-width: 7;

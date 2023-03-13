@@ -1,18 +1,41 @@
+import { behaviorWay } from '../behavior/index.js';
+
+export const disableClusteringAtZoom = 16;
+
 export function osmNode(context) {
-  const node = {};
-  node.pointToLayer = function (geoJsonPoint, latlng, options) {
-    const icon = L.divIcon(options);
-    const marker = L.marker(latlng, { icon });
-    return marker;
+  const node = {
+    markerClusterGroup: L.markerClusterGroup({
+      chunkedLoading: true, disableClusteringAtZoom,
+    }),
+
+    markerGeoJSON: L.geoJSON(context.json(), {
+      filter: ({ geometry }) => {
+        return geometry.type === 'Point';
+      },
+      pointToLayer: (geoJsonPoint, latlng) => pointToLayer(geoJsonPoint, latlng, {
+        className: 'my-div-icon', iconSize: [8, 8],
+      }).bindPopup((layer) => behaviorWay(context).bindPopup(layer)),
+    })
+    .on('click', (e) => {
+      behaviorWay(context).layerHighlightClick(e);
+    }),
+
   };
 
-  node.bindPopup = function (layer) {
-    let html = `<p>{</p>`;
-    for (const property of Object.keys(layer.feature.properties)) {
-      html += `<p><span>'${property}'</span>: ${layer.feature.properties[property]}</p>`;
+  node.addTo = function () {
+    node.markerClusterGroup.addLayers(node.markerGeoJSON);
+    for (let key of Object.keys(node)) {
+      if (key.includes('Group')) {
+        node[key].addTo(context.map());
+      }
     }
-    html += `<p>}</p>`;
-    return `<div>${html}</div>`;
-  }
+  };
+
   return node;
+}
+
+export function pointToLayer(geoJsonPoint, latlng, options) {
+  const icon = L.divIcon(options);
+  const marker = L.marker(latlng, { icon });
+  return marker;
 }
