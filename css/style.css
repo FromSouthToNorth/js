@@ -112,23 +112,26 @@ h1 {
   opacity: 0;
 }
 
-#map-container path.line-shadow {
+#map-container path.shadow {
   stroke: #f6634f;
   stroke-width: 20;
   stroke-opacity: 0;
 }
 
-#map-container path.line-shadow.hover {
+#map-container path.shadow.hover {
   stroke-opacity: 0.3;
 }
 
-#map-container path.line-shadow.active {
+#map-container path.shadow.active {
   animation: fade 800ms infinite;
 }
 
 @keyframes fade {
   from {
     stroke-opacity: 0.3;
+  }
+  70% {
+    stroke-opacity: 0.6;
   }
   100% {
     stroke-opacity: 0.8;
@@ -160,6 +163,15 @@ h1 {
 #map-container .end-lien-icon:hover {
   background-color: #444444;
   border: 1px solid #fff;
+}
+
+#map-container path {
+  fill: none;
+}
+
+#map-container .shadow {
+  stroke-width: 16;
+  fill: none;
 }
 
 #map-container path.line-casing {
@@ -195,12 +207,37 @@ h1 {
 
 #map-container path.way {
   pointer-events: stroke;
-  fill: none;
   stroke-width: 12;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
   color: rgba(0, 0, 0, 0);
+}
+
+#map-container path.shadow {
+  stroke: #f6634f;
+  stroke-width: 16;
+  stroke-opacity: 0;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#map-container path.shadow.hover {
+  stroke-opacity: 0.3;
+}
+
+#map-container path.area-stoke {
+  stroke: rgba(170, 170, 170, 0.3);
+  stroke-width: 1;
+}
+
+#map-container path.area-fill {
+  pointer-events: visibleStroke;
+  fill-opacity: 0;
+  stroke-width: 30px;
+  stroke: rgba(246, 99, 79, 0.2);
+  fill: rgba(246, 99, 79, 0.2);
+  fill-rule: evenodd;
 }
 
 .logo {

@@ -8,7 +8,7 @@ export function osmLine(context) {
         return geometry.type === 'LineString';
       },
       style: function (feature) {
-        return { className: 'line-shadow' };
+        return { className: 'shadow' };
       },
     }),
 
@@ -57,8 +57,8 @@ export function osmLine(context) {
       behaviorWay().layerMouseover({ sourceTarget, layers: line.lineShadowGeoJSON });
     }).on('mouseout', e => {
       behaviorWay().clearActiveLine();
-    }).on('click', e => {
-      behaviorWay(context).layerHighlightClick(e);
+    }).on('click', ({ sourceTarget }) => {
+      behaviorWay(context).layerHighlightClick({ sourceTarget, layers: line.lineShadowGeoJSON });
     }),
   };
 

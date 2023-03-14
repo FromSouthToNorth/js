@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { disableClusteringAtZoom, pointToLayer } from '../osm/node.js';
 
 let activeLayer, lineMarkerFeatureGroup, highlightLayer;
+const highlightLayerGroup = L.layerGroup(null);
 
 export function behaviorWay(context) {
 
@@ -15,35 +16,12 @@ export function behaviorWay(context) {
     d3.select(activeLayer._path).classed('hover', true);
   };
 
-  behavior.layerHighlightClick = function ({ sourceTarget }) {
+  behavior.layerHighlightClick = function ({ sourceTarget, layers }) {
+    console.log(sourceTarget, layers);
     behavior.clearLineMakers();
     if (sourceTarget.feature.geometry.type !== 'Point') {
-      const latLngs = sourceTarget.getLatLngs();
-      const lineMarkers = [];
-      for (let i = 0; i < latLngs.length; i++) {
-        if (Array.isArray(latLngs[i])) {
-          for (let j = 0; j < latLngs[i].length; j++) {
-            const className = i === 0 && j === 0 ? 'start-lien-icon' : i === latLngs.length - 1 && j === latLngs[i].length - 1 ? 'end-lien-icon' : 'lien-icon';
-            const iconSize = i === 0 && j === 0 || i === latLngs.length - 1 && j === latLngs[i].length - 1 ? [10, 10] : [8, 8];
-            const divIcon = L.divIcon({ className, iconSize });
-            const lineMarker = L.marker(latLngs[i][j], { icon: divIcon });
-            lineMarkers.push(lineMarker);
-          }
-        }
-        else if (typeof latLngs === 'object') {
-          const className = i === 0 ? 'start-lien-icon' : i === latLngs.length - 1 ? 'end-lien-icon' : 'lien-icon';
-          const iconSize = i === 0 || i === latLngs.length - 1 ? [10, 10] : [8, 8];
-          const divIcon = L.divIcon({ className, iconSize });
-          const lineMarker = L.marker(latLngs[i], { icon: divIcon });
-          lineMarkers.push(lineMarker);
-        }
-      }
-      if (sourceTarget.feature.geometry.type === 'Polygon') {
-        latLngs[0].push(latLngs[0][0]);
-      }
-      lineMarkerFeatureGroup = L.featureGroup(lineMarkers).addTo(context.map());
-      highlightLayer = L.polyline(latLngs, { className: 'line-shadow' }).addTo(context.map());
-      // highlightLayer._path.setAttribute('class', highlightLayer._path.getAttribute('class') + ' active');
+      highlightLayer = layersFind(layers, sourceTarget);
+      console.log(highlightLayer);
       d3.select(highlightLayer._path).classed('active', true);
     }
     else {
@@ -57,9 +35,8 @@ export function behaviorWay(context) {
         iconSize: [240, 240],
         html: `<span class="water1"></span><sapn class="water2"></sapn><sapn class="water3"></sapn><sapn class="water4"></sapn>`,
       };
-      highlightLayer = pointToLayer(sourceTarget.feature, latLng, options)
-      .setZIndexOffset(-60)
-      .addTo(context.map());
+      highlightLayer = pointToLayer(sourceTarget.feature, latLng, options).setZIndexOffset(-999);
+      highlightLayerGroup.addLayer(highlightLayer).addTo(context.map());
     }
   };
 
@@ -72,6 +49,13 @@ export function behaviorWay(context) {
       d3.select(activeLayer._path).classed('hover', false);
     }
   };
+
+  function layersFind(layers, target) {
+    const layer = layers.getLayers().find(({ feature }) => {
+      return feature.id === target.feature.id;
+    });
+    return layer;
+  }
 
   behavior.bindPopup = function (layer) {
     let html = `<p>{</p>`;
@@ -87,7 +71,14 @@ export function behaviorWay(context) {
       lineMarkerFeatureGroup.clearLayers();
       lineMarkerFeatureGroup.remove();
     }
-    if (highlightLayer && context.map().hasLayer(highlightLayer)) {
+    if (highlightLayerGroup) {
+      highlightLayerGroup.clearLayers();
+      highlightLayerGroup.remove();
+    }
+    if (highlightLayer && highlightLayer._path) {
+      d3.select(highlightLayer._path).classed('active', false);
+    }
+    else if (highlightLayer && context.map().hasLayer(highlightLayer)) {
       context.map().removeLayer(highlightLayer);
     }
   };

@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { osmNode } from '../osm';
+import { osmArea, osmNode } from '../osm';
 import { osmLine } from '../osm';
 
 export function rendererLayers(context) {
@@ -8,6 +8,7 @@ export function rendererLayers(context) {
   layers.initPointData = function () {
     d3.json('../../data/cd.geojson').then(json => {
       context.json = () => {return json;};
+      osmArea(context).addTo();
       osmLine(context).addTo();
       const { markerClusterGroup, addTo } = osmNode(context);
       addTo();
