@@ -12,6 +12,8 @@ export function rendererMap() {
       maxZoom,
       zoomSnap,
     }).setView([30.6598628, 104.0633717], 16);
+
+    _map.addControl(L.control.scale());
   };
 
   map._map = () => {

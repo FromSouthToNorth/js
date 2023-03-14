@@ -6,6 +6,7 @@ specifiers:
   '@turf/turf': ^6.5.0
   d3: ^7.8.2
   leaflet: ^1.9.3
+  leaflet-measure: ^3.1.0
   leaflet.layerscontrol-minimap: ^1.0.21
   leaflet.markercluster: ^1.5.3
   lodash-es: ^4.17.21
@@ -17,6 +18,7 @@ dependencies:
   '@turf/turf': registry.npmmirror.com/@turf/turf/6.5.0
   d3: registry.npmmirror.com/d3/7.8.2
   leaflet: registry.npmmirror.com/leaflet/1.9.3
+  leaflet-measure: registry.npmmirror.com/leaflet-measure/3.1.0_leaflet@1.9.3
   leaflet.layerscontrol-minimap: registry.npmmirror.com/leaflet.layerscontrol-minimap/1.0.21
   leaflet.markercluster: registry.npmmirror.com/leaflet.markercluster/1.5.3_leaflet@1.9.3
   lodash-es: registry.npmmirror.com/lodash-es/4.17.21
@@ -303,6 +305,15 @@ packages:
       '@turf/helpers': registry.npmmirror.com/@turf/helpers/6.5.0
       '@turf/invariant': registry.npmmirror.com/@turf/invariant/6.5.0
       '@turf/rhumb-bearing': registry.npmmirror.com/@turf/rhumb-bearing/6.5.0
+    dev: false
+
+  registry.npmmirror.com/@turf/area/5.1.5:
+    resolution: {integrity: sha512-lz16gqtvoz+j1jD9y3zj0Z5JnGNd3YfS0h+DQY1EcZymvi75Frm9i5YbEyth0RfxYZeOVufY7YIS3LXbJlI57g==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@turf/area/-/area-5.1.5.tgz}
+    name: '@turf/area'
+    version: 5.1.5
+    dependencies:
+      '@turf/helpers': registry.npmmirror.com/@turf/helpers/5.1.5
+      '@turf/meta': registry.npmmirror.com/@turf/meta/5.2.0
     dev: false
 
   registry.npmmirror.com/@turf/area/6.5.0:
@@ -689,6 +700,15 @@ packages:
       '@turf/meta': registry.npmmirror.com/@turf/meta/6.5.0
     dev: false
 
+  registry.npmmirror.com/@turf/distance/5.1.5:
+    resolution: {integrity: sha512-sYCAgYZ2MjNKMtx17EijHlK9qHwpA0MuuQWbR4P30LTCl52UlG/reBfV899wKyF3HuDL9ux78IbILwOfeQ4zgA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@turf/distance/-/distance-5.1.5.tgz}
+    name: '@turf/distance'
+    version: 5.1.5
+    dependencies:
+      '@turf/helpers': registry.npmmirror.com/@turf/helpers/5.1.5
+      '@turf/invariant': registry.npmmirror.com/@turf/invariant/5.2.0
+    dev: false
+
   registry.npmmirror.com/@turf/distance/6.5.0:
     resolution: {integrity: sha512-xzykSLfoURec5qvQJcfifw/1mJa+5UwByZZ5TZ8iaqjGYN0vomhV9aiSLeYdUGtYRESZ+DYC/OzY+4RclZYgMg==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@turf/distance/-/distance-6.5.0.tgz}
     name: '@turf/distance'
@@ -756,6 +776,12 @@ packages:
       '@turf/invariant': registry.npmmirror.com/@turf/invariant/6.5.0
     dev: false
 
+  registry.npmmirror.com/@turf/helpers/5.1.5:
+    resolution: {integrity: sha512-/lF+JR+qNDHZ8bF9d+Cp58nxtZWJ3sqFe6n3u3Vpj+/0cqkjk4nXKYBSY0azm+GIYB5mWKxUXvuP/m0ZnKj1bw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@turf/helpers/-/helpers-5.1.5.tgz}
+    name: '@turf/helpers'
+    version: 5.1.5
+    dev: false
+
   registry.npmmirror.com/@turf/helpers/6.5.0:
     resolution: {integrity: sha512-VbI1dV5bLFzohYYdgqwikdMVpe7pJ9X3E+dlr425wa2/sMJqYDhTO++ec38/pcPvPE6oD9WEEeU3Xu3gza+VPw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@turf/helpers/-/helpers-6.5.0.tgz}
     name: '@turf/helpers'
@@ -801,6 +827,14 @@ packages:
       polygon-clipping: registry.npmmirror.com/polygon-clipping/0.15.3
     dev: false
 
+  registry.npmmirror.com/@turf/invariant/5.2.0:
+    resolution: {integrity: sha512-28RCBGvCYsajVkw2EydpzLdcYyhSA77LovuOvgCJplJWaNVyJYH6BOR3HR9w50MEkPqb/Vc/jdo6I6ermlRtQA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@turf/invariant/-/invariant-5.2.0.tgz}
+    name: '@turf/invariant'
+    version: 5.2.0
+    dependencies:
+      '@turf/helpers': registry.npmmirror.com/@turf/helpers/5.1.5
+    dev: false
+
   registry.npmmirror.com/@turf/invariant/6.5.0:
     resolution: {integrity: sha512-Wv8PRNCtPD31UVbdJE/KVAWKe7l6US+lJItRR/HOEW3eh+U/JwRCSUl/KZ7bmjM/C+zLNoreM2TU6OoLACs4eg==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@turf/invariant/-/invariant-6.5.0.tgz}
     name: '@turf/invariant'
@@ -842,6 +876,16 @@ packages:
     version: 6.5.0
     dependencies:
       '@turf/helpers': registry.npmmirror.com/@turf/helpers/6.5.0
+    dev: false
+
+  registry.npmmirror.com/@turf/length/5.1.5:
+    resolution: {integrity: sha512-0ryx68h512wCoNfwyksLdabxEfwkGNTPg61/QiY+QfGFUOUNhHbP+QimViFpwF5hyX7qmroaSHVclLUqyLGRbg==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@turf/length/-/length-5.1.5.tgz}
+    name: '@turf/length'
+    version: 5.1.5
+    dependencies:
+      '@turf/distance': registry.npmmirror.com/@turf/distance/5.1.5
+      '@turf/helpers': registry.npmmirror.com/@turf/helpers/5.1.5
+      '@turf/meta': registry.npmmirror.com/@turf/meta/5.2.0
     dev: false
 
   registry.npmmirror.com/@turf/length/6.5.0:
@@ -978,6 +1022,14 @@ packages:
     dependencies:
       '@turf/helpers': registry.npmmirror.com/@turf/helpers/6.5.0
       polygon-clipping: registry.npmmirror.com/polygon-clipping/0.15.3
+    dev: false
+
+  registry.npmmirror.com/@turf/meta/5.2.0:
+    resolution: {integrity: sha512-ZjQ3Ii62X9FjnK4hhdsbT+64AYRpaI8XMBMcyftEOGSmPMUVnkbvuv3C9geuElAXfQU7Zk1oWGOcrGOD9zr78Q==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@turf/meta/-/meta-5.2.0.tgz}
+    name: '@turf/meta'
+    version: 5.2.0
+    dependencies:
+      '@turf/helpers': registry.npmmirror.com/@turf/helpers/5.1.5
     dev: false
 
   registry.npmmirror.com/@turf/meta/6.5.0:
@@ -2113,6 +2165,20 @@ packages:
     version: 1.0.7
     dev: false
 
+  registry.npmmirror.com/leaflet-measure/3.1.0_leaflet@1.9.3:
+    resolution: {integrity: sha512-ln5c9UNaWDEd24tIzDt9hwnpb8OaCPBfSWNBg2H8rb9SA3cbXW9+NqohA6/8TdsNDGJZr36woXMrqRq07Pcl3w==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/leaflet-measure/-/leaflet-measure-3.1.0.tgz}
+    id: registry.npmmirror.com/leaflet-measure/3.1.0
+    name: leaflet-measure
+    version: 3.1.0
+    peerDependencies:
+      leaflet: ^1.0.0
+    dependencies:
+      '@turf/area': registry.npmmirror.com/@turf/area/5.1.5
+      '@turf/length': registry.npmmirror.com/@turf/length/5.1.5
+      leaflet: registry.npmmirror.com/leaflet/1.9.3
+      lodash: registry.npmmirror.com/lodash/4.17.21
+    dev: false
+
   registry.npmmirror.com/leaflet.layerscontrol-minimap/1.0.21:
     resolution: {integrity: sha512-Bc8frJb6C8209CtqzrBOzbSDzzD77Mq0EyVUjsmZ1tHZMSZPYqqVFP3WrPKUqDi8ObNWxXEuN4bngzKKV3AhBA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/leaflet.layerscontrol-minimap/-/leaflet.layerscontrol-minimap-1.0.21.tgz}
     name: leaflet.layerscontrol-minimap
@@ -2148,6 +2214,12 @@ packages:
   registry.npmmirror.com/lodash-es/4.17.21:
     resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/lodash-es/-/lodash-es-4.17.21.tgz}
     name: lodash-es
+    version: 4.17.21
+    dev: false
+
+  registry.npmmirror.com/lodash/4.17.21:
+    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/lodash/-/lodash-4.17.21.tgz}
+    name: lodash
     version: 4.17.21
     dev: false
 
