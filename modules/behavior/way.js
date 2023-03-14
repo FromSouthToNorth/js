@@ -81,12 +81,14 @@ export function behaviorWay(context) {
   }
 
   behavior.bindPopup = function (layer) {
-    let html = `<p>{</p>`;
+    let html = `<p>{</p>`, i = 0;
+    const length = Object.keys(layer.feature.properties).length;
     for (const property of Object.keys(layer.feature.properties)) {
-      html += `<p><span>'${property}'</span>: ${layer.feature.properties[property]}</p>`;
+      i++;
+      html += `<p><strong>&nbsp;&nbsp;"${property}"</strong>: ${layer.feature.properties[property]}${i !== length ? ',' : ''}</p>`;
     }
     html += `<p>}</p>`;
-    return `<div>${html}</div>`;
+    return `<div class="json">${html}</div>`;
   };
 
   behavior.clearLineMakers = function () {
