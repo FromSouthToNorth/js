@@ -31,6 +31,15 @@ export function osmNode(context) {
     }
   };
 
+  node.clearLayers = function () {
+    for (let key of Object.keys(node)) {
+      if (key.includes('Group') && context.map().hasLayer(node[key])) {
+        node[key].clearLayers();
+        context.map().removeLayer(node[key]);
+      }
+    }
+  };
+
   return node;
 }
 

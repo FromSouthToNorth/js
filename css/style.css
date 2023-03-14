@@ -52,7 +52,7 @@ h1 {
 }
 
 #map-container .my-div-icon {
-  background-color: rgba(244, 67, 54, .6);
+  background-color: rgba(224, 110, 95, 0.3);
   border: 2px solid #F5F5F5;
   line-height: 5px;
   padding: 1px;
@@ -106,7 +106,7 @@ h1 {
   left: 30%;
   top: 30%;
   border: 1px solid #FFEBEE;
-  box-shadow: 0 0 120px 30px rgba(239, 83, 80, 1) inset;
+  box-shadow: 0 0 120px 30px rgba(224, 110, 95, 0.6) inset;
   border-radius: 100%;
   z-index: 1;
   opacity: 0;
@@ -227,16 +227,16 @@ h1 {
 }
 
 #map-container path.area-stoke {
-  stroke: rgba(170, 170, 170, 0.3);
+  stroke: rgb(224, 110, 95);
   stroke-width: 1;
 }
 
 #map-container path.area-fill {
   pointer-events: visibleStroke;
   fill-opacity: 0;
-  stroke-width: 30px;
-  stroke: rgba(246, 99, 79, 0.2);
-  fill: rgba(246, 99, 79, 0.2);
+  stroke-width: 60px;
+  stroke: rgba(224, 110, 95, 0.3);
+  fill: rgba(224, 110, 95, 0.3);
   fill-rule: evenodd;
 }
 

@@ -70,6 +70,15 @@ export function osmLine(context) {
     }
   };
 
+  line.clearLayers = function () {
+    for (let key of Object.keys(line)) {
+      if (key.includes('GeoJSON') && context.map().hasLayer(line[key])) {
+        line[key].clearLayers();
+        context.map().removeLayer(line[key]);
+      }
+    }
+  };
+
   function randomClassName() {
     const classNames = ['unclassified', 'line-stroke', 'tag-highway', 'tag-highway-motorway'];
     return classNames[Math.floor(Math.random() * classNames.length)];

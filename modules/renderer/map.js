@@ -11,7 +11,7 @@ export function rendererMap() {
       minZoom,
       maxZoom,
       zoomSnap,
-    }).setView([30.6598628, 104.0633717], 10);
+    }).setView([30.6598628, 104.0633717], 16);
   };
 
   map._map = () => {

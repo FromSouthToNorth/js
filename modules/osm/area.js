@@ -50,5 +50,14 @@ export function osmArea(context) {
     }
   };
 
+  area.clearLayers = function () {
+    for (let key of Object.keys(area)) {
+      if (key.includes('GeoJSON') && context.map().hasLayer(area[key])) {
+        area[key].clearLayers();
+        context.map().removeLayer(area[key]);
+      }
+    }
+  };
+
   return area;
 }
