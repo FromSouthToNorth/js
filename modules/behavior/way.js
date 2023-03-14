@@ -21,7 +21,30 @@ export function behaviorWay(context) {
     behavior.clearLineMakers();
     if (sourceTarget.feature.geometry.type !== 'Point') {
       highlightLayer = layersFind(layers, sourceTarget);
-      console.log(highlightLayer);
+      const latLngs = highlightLayer.getLatLngs();
+      const lineMarkers = [];
+      for (let i = 0; i < latLngs.length; i++) {
+        if (Array.isArray(latLngs[i])) {
+          for (let j = 0; j < latLngs[i].length; j++) {
+            const className = i === 0 && j === 0 ? 'start-lien-icon' : i === latLngs.length - 1 && j === latLngs[i].length - 1 ? 'end-lien-icon' : 'lien-icon';
+            const iconSize = i === 0 && j === 0 || i === latLngs.length - 1 && j === latLngs[i].length - 1 ? [10, 10] : [8, 8];
+            const divIcon = L.divIcon({ className, iconSize });
+            const lineMarker = L.marker(latLngs[i][j], { icon: divIcon });
+            lineMarkers.push(lineMarker);
+          }
+        }
+        else if (typeof latLngs === 'object') {
+          const className = i === 0 ? 'start-lien-icon' : i === latLngs.length - 1 ? 'end-lien-icon' : 'lien-icon';
+          const iconSize = i === 0 || i === latLngs.length - 1 ? [10, 10] : [8, 8];
+          const divIcon = L.divIcon({ className, iconSize });
+          const lineMarker = L.marker(latLngs[i], { icon: divIcon });
+          lineMarkers.push(lineMarker);
+        }
+      }
+      if (sourceTarget.feature.geometry.type === 'Polygon') {
+        latLngs[0].push(latLngs[0][0]);
+      }
+      lineMarkerFeatureGroup = L.featureGroup(lineMarkers).addTo(context.map());
       d3.select(highlightLayer._path).classed('active', true);
     }
     else {
