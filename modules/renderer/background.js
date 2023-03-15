@@ -31,6 +31,8 @@ export function rendererBackground(context) {
 
     const baseMaps = {
       'mapboxStreets': mapboxStreets,
+      'mapboxOutdoors': mapboxOutdoors,
+      'mapboxDark': mapboxDark,
       'mapboxSatellite': mapboxSatellite,
       'mapboxSatelliteStreets': mapboxSatelliteStreets,
       'OpenStreetMap': osm,

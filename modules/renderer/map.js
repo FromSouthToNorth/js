@@ -1,5 +1,5 @@
 const minZoom = 2;
-const maxZoom = 19;
+const maxZoom = 24;
 const zoomSnap = 0.2;
 
 export function rendererMap() {
