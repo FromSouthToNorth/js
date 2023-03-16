@@ -2,17 +2,23 @@ export function rendererBackground(context) {
 
   function background() {
     const accessToken = 'pk.eyJ1IjoiaHlzZSIsImEiOiJjbGVwcWg0bDkwZXNlM3pvNXNleWUzcTQ0In0.S3VTf9vqYTAAF725ukcDjQ';
-    const mapboxStreets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/512/{z}/{x}/{y}@2x?access_token={accessToken}', {
+    // https://api.mapbox.com/styles/v1/openstreetmap/ckasmteyi1tda1ipfis6wqhuq/tiles/256/12/3431/1760?access_token=pk.eyJ1Ijoib3BlbnN0cmVldG1hcCIsImEiOiJjbGRlaXd3cHUwYXN3M29waWp0bGNnYWdyIn0.RRlhUnKlUFNhKsKjhaZ2zA
+    const position = L.tileLayer(' https://api.mapbox.com/styles/v1/openstreetmap/ckasmteyi1tda1ipfis6wqhuq/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
+      maxZoom: 19,
+      attribution: '© mapbox',
+      accessToken,
+    })
+    const mapboxStreets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/256/{z}/{x}/{y}@2x?access_token={accessToken}', {
       maxZoom: 19,
       attribution: '© mapbox',
       accessToken,
     });
-    const mapboxSatellite = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/512/{z}/{x}/{y}@2x?access_token={accessToken}', {
+    const mapboxSatellite = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/256/{z}/{x}/{y}@2x?access_token={accessToken}', {
       maxZoom: 19,
       attribution: '© mapbox',
       accessToken,
     });
-    const mapboxSatelliteStreets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v12/tiles/512/{z}/{x}/{y}@2x?access_token={accessToken}', {
+    const mapboxSatelliteStreets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v12/tiles/256/{z}/{x}/{y}@2x?access_token={accessToken}', {
       maxZoom: 19,
       attribution: '© mapbox',
       accessToken,
@@ -30,6 +36,7 @@ export function rendererBackground(context) {
     });
 
     const baseMaps = {
+      'position': position,
       'MapboxStreets': mapboxStreets,
       'MapboxSatellite': mapboxSatellite,
       'MapboxSatelliteStreets': mapboxSatelliteStreets,
@@ -40,7 +47,7 @@ export function rendererBackground(context) {
     L.control.layers.minimap(baseMaps, {}, {
       collapsed: true,
     }).addTo(context.map());
-    baseMaps['MapboxStreets'].addTo(context.map());
+    baseMaps['position'].addTo(context.map());
   }
 
   return background;
