@@ -30,17 +30,17 @@ export function rendererBackground(context) {
     });
 
     const baseMaps = {
-      'mapboxStreets': mapboxStreets,
-      'mapboxSatellite': mapboxSatellite,
-      'mapboxSatelliteStreets': mapboxSatelliteStreets,
+      'MapboxStreets': mapboxStreets,
+      'MapboxSatellite': mapboxSatellite,
+      'MapboxSatelliteStreets': mapboxSatelliteStreets,
       'OpenStreetMap': osm,
-      'services': services,
+      'Services': services,
     };
 
     L.control.layers.minimap(baseMaps, {}, {
-      collapsed: false,
+      collapsed: true,
     }).addTo(context.map());
-    baseMaps['mapboxStreets'].addTo(context.map());
+    baseMaps['MapboxStreets'].addTo(context.map());
   }
 
   return background;

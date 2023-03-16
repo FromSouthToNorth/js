@@ -1,6 +1,5 @@
 import _throttle from 'lodash-es/throttle';
-import { utilObjectOmit } from '../util/object.js';
-import { utilQsString, utilStringQs } from '../util/util.js';
+import { utilQsString, utilStringQs, utilObjectOmit } from '../util';
 
 export function behaviorHash(context) {
 
@@ -34,15 +33,15 @@ export function behaviorHash(context) {
   function behavior() {
     _throttledUpdate();
     context.map()
-    .on('moveend', _throttledUpdate);
+           .on('moveend', _throttledUpdate);
   }
 
   behavior.off = function () {
     _throttledUpdate.cancel();
     context.map()
-    .off('load', _throttledUpdate);
+           .off('load', _throttledUpdate);
     context.map()
-    .off('moveend', _throttledUpdate);
+           .off('moveend', _throttledUpdate);
   };
 
   return behavior;

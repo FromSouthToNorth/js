@@ -8,12 +8,15 @@ import 'leaflet.layerscontrol-minimap/control.layers.minimap.css';
 import 'leaflet-measure/dist/leaflet-measure.css';
 import 'leaflet-measure/dist/leaflet-measure.cn';
 import './css/style.css';
+import { coreContext } from './modules/core';
 import { rendererMap, rendererBackground, rendererLayers } from './modules/renderer';
 import { behaviorHash } from './modules/behavior';
 
 document.querySelector('#app').innerHTML = `
 <div id="map-container"></div>
 `;
+
+console.log(coreContext());
 
 /** 初始化地图 */
 const { init, _map } = rendererMap();
@@ -29,5 +32,5 @@ background();
 const behavior = behaviorHash({ map: _map });
 behavior();
 
-const layers = rendererLayers({ map: _map, isFitBounds: true });
-layers.initPointData();
+// const layers = rendererLayers({ map: _map, isFitBounds: true });
+// layers.initPointData();
