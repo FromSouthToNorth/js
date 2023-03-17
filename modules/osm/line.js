@@ -28,7 +28,7 @@ export function osmLine(context) {
         return geometry.type === 'LineString';
       },
       style: function (feature) {
-        return { className: randomClassName() };
+        return { className:  'tag-service-driveway', /**randomClassName()*/ };
       },
     }),
 
@@ -67,6 +67,9 @@ export function osmLine(context) {
       if (key.includes('GeoJSON')) {
         line[key].addTo(context.map());
       }
+    }
+    for (let layer of line.lineOnewayGeoJSON.getLayers()) {
+      layer._path.setAttribute('marker-mid', 'url(#ideditor-oneway-marker)');
     }
   };
 

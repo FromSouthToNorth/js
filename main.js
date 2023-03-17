@@ -14,7 +14,13 @@ import { behaviorHash } from './modules/behavior';
 import * as d3 from 'd3';
 
 document.querySelector('#app').innerHTML = `
-<div id="map-container"></div>
+<svg>
+<defs>
+<marker id="ideditor-oneway-marker" viewBox="0 0 10 5" refX="2.5" refY="2.5" markerWidth="2" markerHeight="2" markerUnits="strokeWidth" orient="auto"><path class="oneway-marker-path" d="M 5,3 L 0,3 L 0,2 L 5,2 L 5,0 L 10,2.5 L 5,5 z" stroke="none" fill="#000" opacity="0.75"></path></marker>
+</defs>
+</svg>
+<div id="map-container">
+</div>
 `;
 
 console.log(coreContext());
