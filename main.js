@@ -11,6 +11,7 @@ import './css/style.css';
 import { coreContext } from './modules/core';
 import { rendererMap, rendererBackground, rendererLayers } from './modules/renderer';
 import { behaviorHash } from './modules/behavior';
+import * as d3 from 'd3';
 
 document.querySelector('#app').innerHTML = `
 <div id="map-container"></div>
@@ -32,5 +33,5 @@ background();
 const behavior = behaviorHash({ map: _map });
 behavior();
 
-// const layers = rendererLayers({ map: _map, isFitBounds: true });
-// layers.initPointData();
+const layers = rendererLayers({ map: _map, isFitBounds: true });
+layers.initPointData();

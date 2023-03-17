@@ -184,8 +184,9 @@ h1 {
 }
 
 #map-container path.line-casing {
-  stroke: #444;
-  stroke-width: 7;
+  stroke: #000;
+  stop-opacity: 0.6;
+  stroke-width: 10;
 }
 
 #map-container path.line-stroke {
