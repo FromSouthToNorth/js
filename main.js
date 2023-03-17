@@ -25,6 +25,9 @@ document.querySelector('#app').innerHTML = `
 
 console.log(coreContext());
 
+const container = document.getElementById('map-container');
+const context = coreContext().containerNode(container);
+
 /** 初始化地图 */
 const { init, _map } = rendererMap();
 init('map-container');

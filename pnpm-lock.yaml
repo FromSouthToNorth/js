@@ -4,7 +4,6 @@ specifiers:
   '@datastructures-js/heap': ^4.3.1
   '@datastructures-js/priority-queue': ^6.2.0
   '@mapbox/sexagesimal': ^1.2.0
-  '@rapideditor/country-coder': ^5.2.0
   '@turf/turf': ^6.5.0
   d3: ^7.8.2
   leaflet: ^1.9.3
@@ -26,7 +25,6 @@ dependencies:
   lodash-es: registry.npmmirror.com/lodash-es/4.17.21
 
 devDependencies:
-  '@rapideditor/country-coder': registry.npmmirror.com/@rapideditor/country-coder/5.2.0
   d3: registry.npmmirror.com/d3/7.8.2
   vite: registry.npmmirror.com/vite/4.1.4
 
@@ -295,15 +293,6 @@ packages:
     engines: {node: '>=8.0.0'}
     hasBin: true
     dev: false
-
-  registry.npmmirror.com/@rapideditor/country-coder/5.2.0:
-    resolution: {integrity: sha512-6BupvfTV/cEFLrzi9kzVabry+d4ZawUQoCtjiLiA8F3op7nBJ8MMpHqaebgNNLCyAPZbVT4RP73o7RbTF1IlkA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@rapideditor/country-coder/-/country-coder-5.2.0.tgz}
-    name: '@rapideditor/country-coder'
-    version: 5.2.0
-    engines: {node: '>=16.14.0'}
-    dependencies:
-      which-polygon: registry.npmmirror.com/which-polygon/2.2.1
-    dev: true
 
   registry.npmmirror.com/@turf/along/6.5.0:
     resolution: {integrity: sha512-LLyWQ0AARqJCmMcIEAXF4GEu8usmd4Kbz3qk1Oy5HoRNpZX47+i5exQtmIWKdqJ1MMhW26fCTXgpsEs5zgJ5gw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@turf/along/-/along-6.5.0.tgz}
@@ -2232,12 +2221,6 @@ packages:
     version: 1.9.3
     dev: false
 
-  registry.npmmirror.com/lineclip/1.1.5:
-    resolution: {integrity: sha512-KlA/wRSjpKl7tS9iRUdlG72oQ7qZ1IlVbVgHwoO10TBR/4gQ86uhKow6nlzMAJJhjCWKto8OeoAzzIzKSmN25A==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/lineclip/-/lineclip-1.1.5.tgz}
-    name: lineclip
-    version: 1.1.5
-    dev: true
-
   registry.npmmirror.com/lodash-es/4.17.21:
     resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/lodash-es/-/lodash-es-4.17.21.tgz}
     name: lodash-es
@@ -2323,6 +2306,7 @@ packages:
     resolution: {integrity: sha512-qN0Gqdw4c4KGPsBOQafj6yj/PA6c/L63f6CaZ/DCF/xF4Esu3jVmKLUDYxghFx8Kb/O7y9tI7x2RjTSXwdK1iQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/quickselect/-/quickselect-1.1.1.tgz}
     name: quickselect
     version: 1.1.1
+    dev: false
 
   registry.npmmirror.com/quickselect/2.0.0:
     resolution: {integrity: sha512-RKJ22hX8mHe3Y6wH/N3wCM6BWtjaxIyyUIkpHOvfFnxdI4yD4tBXEBKSbriGujF6jnSVkJrffuo6vxACiSSxIw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/quickselect/-/quickselect-2.0.0.tgz}
@@ -2336,6 +2320,7 @@ packages:
     version: 2.0.2
     dependencies:
       quickselect: registry.npmmirror.com/quickselect/1.1.1
+    dev: false
 
   registry.npmmirror.com/rbush/3.0.1:
     resolution: {integrity: sha512-XRaVO0YecOpEuIvbhbpTrZgoiI6xBlz6hnlr6EHhd+0x9ase6EmeN+hdwwUaJvLcsFFQ8iWVF1GAK1yB0BWi0w==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/rbush/-/rbush-3.0.1.tgz}
@@ -2490,13 +2475,4 @@ packages:
       rollup: registry.npmmirror.com/rollup/3.18.0
     optionalDependencies:
       fsevents: registry.npmmirror.com/fsevents/2.3.2
-    dev: true
-
-  registry.npmmirror.com/which-polygon/2.2.1:
-    resolution: {integrity: sha512-RlpWbqz12OMT0r2lEHk7IUPXz0hb1L/ZZsGushB2P2qxuBu1aq1+bcTfsLtfoRBYHsED6ruBMiwFaidvXZfQVw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/which-polygon/-/which-polygon-2.2.1.tgz}
-    name: which-polygon
-    version: 2.2.1
-    dependencies:
-      lineclip: registry.npmmirror.com/lineclip/1.1.5
-      rbush: registry.npmmirror.com/rbush/2.0.2
     dev: true
