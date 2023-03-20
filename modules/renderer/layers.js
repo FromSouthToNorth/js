@@ -1,4 +1,4 @@
-import {json as d3_json} from 'd3-fetch';
+import { json as d3_json } from 'd3-fetch';
 import { osmArea, osmNode, osmLine } from '../osm';
 
 export function rendererLayers(context) {
@@ -12,7 +12,9 @@ export function rendererLayers(context) {
     }
     d3_json('../../data/lingshui.json').then(json => {
       layers.json = json;
-      context.json = () => {return json;};
+      context.json = () => {
+        return json;
+      };
       osmArea(context).addTo();
       osmLine(context).addTo();
       const { markerClusterGroup, addTo } = osmNode(context);
