@@ -1,4 +1,4 @@
-import * as d3 from 'd3';
+import { select as d3_select } from 'd3-selection';
 import { disableClusteringAtZoom, pointToLayer } from '../osm/node.js';
 
 let activeLayer, lineMarkerFeatureGroup, highlightLayer;
@@ -13,7 +13,7 @@ export function behaviorWay(context) {
       return e.feature.properties.id === sourceTarget.feature.properties.id;
     });
     // activeLayer._path.setAttribute('class', activeLayer._path.getAttribute('class') + ' hover');
-    d3.select(activeLayer._path).classed('hover', true);
+    d3_select(activeLayer._path).classed('hover', true);
   };
 
   behavior.layerHighlightClick = function ({ sourceTarget, layers }) {
@@ -45,7 +45,7 @@ export function behaviorWay(context) {
         latLngs[0].push(latLngs[0][0]);
       }
       lineMarkerFeatureGroup = L.featureGroup(lineMarkers).addTo(context.map());
-      d3.select(highlightLayer._path).classed('active', true);
+      d3_select(highlightLayer._path).classed('active', true);
     }
     else {
       const latLng = sourceTarget.getLatLng();
@@ -69,7 +69,7 @@ export function behaviorWay(context) {
        * activeLayer._path.
        *  setAttribute('class', activeLayer._path.getAttribute('class').replace('hover', ''));
        */
-      d3.select(activeLayer._path).classed('hover', false);
+      d3_select(activeLayer._path).classed('hover', false);
     }
   };
 
@@ -101,7 +101,7 @@ export function behaviorWay(context) {
       highlightLayerGroup.remove();
     }
     if (highlightLayer && highlightLayer._path) {
-      d3.select(highlightLayer._path).classed('active', false);
+      d3_select(highlightLayer._path).classed('active', false);
     }
     else if (highlightLayer && context.map().hasLayer(highlightLayer)) {
       context.map().removeLayer(highlightLayer);

@@ -1,4 +1,4 @@
-import * as d3 from 'd3';
+import {json as d3_json} from 'd3-fetch';
 import { osmArea, osmNode, osmLine } from '../osm';
 
 export function rendererLayers(context) {
@@ -10,7 +10,7 @@ export function rendererLayers(context) {
     if (layers.json) {
       return;
     }
-    d3.json('../../data/lingshui.json').then(json => {
+    d3_json('../../data/lingshui.json').then(json => {
       layers.json = json;
       context.json = () => {return json;};
       osmArea(context).addTo();

@@ -1,10 +1,11 @@
-import * as d3 from 'd3';
+import { select as d3_select } from 'd3-selection';
+import { dispatch as d3_dispatch } from 'd3-dispatch';
 import { utilRebind, utilStringQs } from '../util/index.js';
 import packageJSON from '../../package.json';
-import { geoRawMercator } from '../geo/raw_mercator.js';
+import { geoRawMercator } from '../geo/index.js';
 
 export function coreContext() {
-  const dispatch = d3.dispatch('enter', 'exit', 'change');
+  const dispatch = d3_dispatch('enter', 'exit', 'change');
   let context = utilRebind({}, dispatch, 'on');
   context.version = packageJSON.version;
   context.privacyVersion = '2023年3月16日14:36:47';
@@ -13,7 +14,7 @@ export function coreContext() {
   context.initialHashParams = window.location.hash ? utilStringQs(window.location.hash) : {};
 
   /* Container */
-  let _container = d3.select(null);
+  let _container = d3_select(null);
   context.container = function (val) {
     if (!arguments.length) return _container;
     _container = val;
@@ -22,7 +23,7 @@ export function coreContext() {
   };
   context.containerNode = function (val) {
     if (!arguments.length) return context.container().node();
-    context.container(d3.select(val));
+    context.container(d3_select(val));
     return context;
   };
 
