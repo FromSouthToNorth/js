@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { utilRebind, utilStringQs } from '../util/index.js';
 import packageJSON from '../../package.json';
+import { geoRawMercator } from '../geo/raw_mercator.js';
 
 export function coreContext() {
   const dispatch = d3.dispatch('enter', 'exit', 'change');
@@ -24,6 +25,10 @@ export function coreContext() {
     context.container(d3.select(val));
     return context;
   };
+
+  /* Projections */
+  context.projection = geoRawMercator();
+  context.curtainProjection = geoRawMercator();
 
   return context;
 }

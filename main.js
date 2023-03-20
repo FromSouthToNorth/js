@@ -11,7 +11,6 @@ import './css/style.css';
 import { coreContext } from './modules/core';
 import { rendererMap, rendererBackground, rendererLayers } from './modules/renderer';
 import { behaviorHash } from './modules/behavior';
-import * as d3 from 'd3';
 
 document.querySelector('#app').innerHTML = `
 <svg>
@@ -23,16 +22,15 @@ document.querySelector('#app').innerHTML = `
 </div>
 `;
 
-console.log(coreContext());
-
 const container = document.getElementById('map-container');
 const context = coreContext().containerNode(container);
+console.log('context: ', context);
 
 /** 初始化地图 */
 const { init, _map } = rendererMap();
 init('map-container');
 const map = _map();
-console.log(map);
+console.log('初始化地图: ', map);
 
 /** 初始化图层 */
 const background = rendererBackground({ map: _map });
