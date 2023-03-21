@@ -4,7 +4,7 @@ import { dispatch as d3_dispatch } from 'd3-dispatch';
 import { interpolate as d3_interpolate } from 'd3-interpolate';
 
 import { geoZoomToScale } from '../geo/index.js';
-import { utilDetect, utilZoomPan } from '../util/index.js';
+import { utilDetect, utilFastMouse, utilGetDimensions, utilRebind, utilZoomPan } from '../util/index.js';
 
 /** constants */
 const TILESIZE = 256;
@@ -22,7 +22,7 @@ export function rendererMap(context) {
   const dispatch = d3_dispatch('move', 'drawn', 'crossEditableZoom', 'hitMinZoom', 'changeHighlighting', 'changeAreaFill');
   const projection = context.projection;
   const curtainProjection = context.curtainProjection;
-  let drawLayer;
+  let drawLayers;
   let drawPoints;
   let drawVertices;
   let drawLines;
@@ -117,6 +117,26 @@ export function rendererMap(context) {
 
     return d3_event.button !== 2;
   }
+
+  function map(selection) {
+    _selection = selection;
+    map.dimensions(utilGetDimensions(selection));
+  }
+
+
+  map.dimensions = function (val) {
+    if (!arguments.length) return _dimensions;
+    _dimensions = val;
+    drawLayers.dimensions(_dimensions);
+    context.background().dimensions(_dimensions);
+    projection.clipExtent([[0, 0], _dimensions]);
+    _getMouseCoords = utilFastMouse(supersurface.node());
+
+    // scheduleRedraw();
+    return map;
+  };
+
+  return utilRebind(map, dispatch, 'on');
 
 
   // let map = {},
