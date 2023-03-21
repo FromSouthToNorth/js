@@ -24,3 +24,33 @@ export function utilQsString(obj, noencode) {
       noencode ? softEncode(obj[key]) : encodeURIComponent(obj[key]));
   }).join('&');
 }
+
+/**
+ * 一个 d3.mouse-like
+ * 1.仅适用于 HTML 元素，不适用于 SVG
+ * 2.不会引起样式重新计算
+ * @param container
+ */
+export function utilFastMouse(container) {
+  const rect = container.getBoundingClientRect(),
+    rectLeft = rect.left,
+    rectTop = rect.top,
+    clientLeft = +container.clientLeft,
+    clientTop = +container.clientTop;
+
+  return function (e) {
+    return [
+      e.clientX - rectLeft - clientLeft,
+      e.clientY - rectTop - clientTop,
+    ];
+  };
+}
+
+export function utilFunctor(value) {
+  if (typeof value === 'function') {
+    return value;
+  }
+  return function () {
+    return value;
+  }
+}

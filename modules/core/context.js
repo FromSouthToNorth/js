@@ -3,6 +3,7 @@ import { dispatch as d3_dispatch } from 'd3-dispatch';
 import { utilRebind, utilStringQs } from '../util/index.js';
 import packageJSON from '../../package.json';
 import { geoRawMercator } from '../geo/index.js';
+import { rendererMap } from '../renderer/index.js';
 
 export function coreContext() {
   const dispatch = d3_dispatch('enter', 'exit', 'change');
@@ -30,6 +31,21 @@ export function coreContext() {
   /* Projections */
   context.projection = geoRawMercator();
   context.curtainProjection = geoRawMercator();
+
+  /** Map */
+  let _map;
+  context.map = () => _map;
+  context.layers = () => _map.layers();
+  context.surface = () => _map.surface;
+
+  context.init = () => {
+    instantiateInternal();
+    return context;
+
+    function instantiateInternal() {
+      _map = rendererMap(context);
+    }
+  };
 
   return context;
 }
