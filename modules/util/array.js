@@ -1,3 +1,20 @@
+// http://2ality.com/2015/01/es6-set-operations.html
+
+// Difference (a \ b): create a set that contains those elements of set a that are not in set b.
+// This operation is also sometimes called minus (-).
+// var a = [1,2,3];
+// var b = [4,3,2];
+// utilArrayDifference(a, b)
+//   [1]
+// utilArrayDifference(b, a)
+//   [4]
+export function utilArrayDifference(a, b) {
+  const other = new Set(b);
+  return Array.from(new Set(a))
+              .filter(function (v) { return !other.has(v); });
+}
+
+
 /**
  * Returns an Array with all the duplicates removed
  * let a = [1,1,2,3,3];
@@ -31,7 +48,7 @@ export function utilArrayUniq(a) {
 //     5: [{type: 'Cat', name: 'Tiger'}, {type: 'Dog', name: 'Rover'}]
 //   }
 export function utilArrayGroupBy(a, key) {
-  return a.reduce(function(acc, item) {
+  return a.reduce(function (acc, item) {
     let group = (typeof key === 'function') ? key(item) : item[key];
     (acc[group] = acc[group] || []).push(item);
     return acc;
@@ -46,7 +63,7 @@ export function utilArrayChunk(a, chunkSize) {
   if (!chunkSize || chunkSize < 0) return [a.slice()];
 
   let result = new Array(Math.ceil(a.length / chunkSize));
-  return Array.from(result, function(item, i) {
+  return Array.from(result, function (item, i) {
     return a.slice(i * chunkSize, i * chunkSize + chunkSize);
   });
 }
@@ -58,6 +75,6 @@ export function utilArrayChunk(a, chunkSize) {
 //   [1,2,3,4]
 export function utilArrayUnion(a, b) {
   const result = new Set(a);
-  b.forEach(function(v) { result.add(v); });
+  b.forEach(function (v) { result.add(v); });
   return Array.from(result);
 }

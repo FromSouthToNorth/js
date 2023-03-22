@@ -95,6 +95,27 @@ export function rendererMap(context) {
     return [_dimensions[0] / 2, _dimensions[1] / 2];
   }
 
+  function editOff() {
+    context.features().resetStats();
+    surface.selectAll('.layer-osm *').remove();
+    surface.selectAll('.layer-touch:not(.markers) *').remove();
+
+    var allowed = {
+      'browse': true,
+      'save': true,
+      'select-note': true,
+      'select-data': true,
+      'select-error': true
+    };
+
+    var mode = context.mode();
+    if (mode && !allowed[mode.id]) {
+      context.enter(modeBrowse(context));
+    }
+
+    dispatch.call('drawn', this, {full: true});
+  }
+
   function zoomPan(event, key, transform) {
     let source = event && event.sourceEvent || event;
     let eventTransform = transform || (event && event.transform);
@@ -267,6 +288,17 @@ export function rendererMap(context) {
     function isInteger(val) {
       return typeof val === 'number' && isFinite(val) && Math.floor(val) === val;
     }
+  }
+
+  function resetTransform() {
+    if (!_isTransformed) return false;
+
+    utilSetTransform(supersurface, 0, 0);
+    _isTransformed = false;
+    if (context.inIntro()) {
+      curtainProjection.transform(projection.transform());
+    }
+    return true;
   }
 
   function redraw(difference, extent) {

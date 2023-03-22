@@ -1,11 +1,21 @@
+// vector equals
+export function geoVecEqual(a, b, epsilon) {
+  if (epsilon) {
+    return (Math.abs(a[0] - b[0]) <= epsilon) && (Math.abs(a[1] - b[1]) <= epsilon);
+  }
+  else {
+    return (a[0] === b[0]) && (a[1] === b[1]);
+  }
+}
+
 // vector addition
 export function geoVecAdd(a, b) {
-  return [ a[0] + b[0], a[1] + b[1] ];
+  return [a[0] + b[0], a[1] + b[1]];
 }
 
 // vector subtraction
 export function geoVecSubtract(a, b) {
-  return [ a[0] - b[0], a[1] - b[1] ];
+  return [a[0] - b[0], a[1] - b[1]];
 }
 
 export function geoVecLength(a, b) {

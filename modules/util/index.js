@@ -1,8 +1,16 @@
 export {
-  utilStringQs, utilFastMouse, utilQsString, utilFunctor, utilSetTransform, utilUnicodeCharsTruncated,
+  utilStringQs,
+  utilFastMouse,
+  utilQsString,
+  utilFunctor,
+  utilSetTransform,
+  utilUnicodeCharsTruncated,
+  utilPrefixCSSProperty,
+  utilCleanOsmString,
 } from './util.js';
+
 export { utilRebind } from './rebind.js';
-export { utilArrayUniq, utilArrayUnion, utilArrayChunk, utilArrayGroupBy } from './array.js';
+export { utilArrayUniq, utilArrayUnion, utilArrayChunk, utilArrayGroupBy, utilArrayDifference } from './array.js';
 export { utilObjectOmit } from './object.js';
 export { utilKeybinding } from './keybinding.js';
 export { utilZoomPan } from './zoom_pan.js';
@@ -12,3 +20,4 @@ export { utilBindOnce } from './bind_once.js';
 export { utilDoubleUp } from './double_up.js';
 export { utilTiler } from './tiler.js';
 export { JXON } from './jxon.js';
+export { utilSessionMutex } from './session_mutex.js';

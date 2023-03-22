@@ -54,13 +54,33 @@ export function utilFunctor(value) {
   }
   return function () {
     return value;
+  };
+}
+
+export function utilPrefixCSSProperty(property) {
+  var prefixes = ['webkit', 'ms', 'Moz', 'O'];
+  var i = -1;
+  var n = prefixes.length;
+  var s = document.body.style;
+
+  if (property.toLowerCase() in s) {
+    return property.toLowerCase();
   }
+
+  while (++i < n) {
+    if (prefixes[i] + property in s) {
+      return '-' + prefixes[i].toLowerCase() + property.replace(/([A-Z])/g, '-$1').toLowerCase();
+    }
+  }
+
+  return false;
 }
 
 let transformProperty;
+
 export function utilSetTransform(el, x, y, scale) {
   const prop = transformProperty = transformProperty || utilPrefixCSSProperty('Transform');
-  const translate = utilDetect().opera ? 'translate('   + x + 'px,' + y + 'px)'
+  const translate = utilDetect().opera ? 'translate(' + x + 'px,' + y + 'px)'
     : 'translate3d(' + x + 'px,' + y + 'px,0)';
   return el.style(prop, translate + (scale ? ' scale(' + scale + ')' : ''));
 }
@@ -69,4 +89,25 @@ export function utilSetTransform(el, x, y, scale) {
 // in unicode characters. Note that this runs the risk of splitting graphemes.
 export function utilUnicodeCharsTruncated(str, limit) {
   return Array.from(str).slice(0, limit).join('');
+}
+
+
+// returns a normalized and truncated string to `maxChars` utf-8 characters
+export function utilCleanOsmString(val, maxChars) {
+  // be lenient with input
+  if (val === undefined || val === null) {
+    val = '';
+  }
+  else {
+    val = val.toString();
+  }
+
+  // remove whitespace
+  val = val.trim();
+
+  // use the canonical form of the string
+  if (val.normalize) val = val.normalize('NFC');
+
+  // trim to the number of allowed characters
+  return utilUnicodeCharsTruncated(val, maxChars);
 }
