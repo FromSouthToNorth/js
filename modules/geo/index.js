@@ -1,3 +1,5 @@
 export { geoRawMercator } from './raw_mercator.js';
-export { geoVecAdd, geoVecLength, geoVecLengthSquare, geoVecAngle } from './vector.js';
-export { geoZoomToScale } from './geo.js';
+export { geoVecAdd, geoVecLength, geoVecLengthSquare, geoVecAngle, geoVecSubtract, geoVecCross } from './vector.js';
+export { geoZoomToScale, geoScaleToZoom, geoMetersToLat, geoMetersToLon } from './geo.js';
+export { geoExtent } from './extent.js';
+export { geoAngle, geoPolygonContainsPolygon, geoPointInPolygon, geoPolygonIntersectsPolygon } from './geom.js';

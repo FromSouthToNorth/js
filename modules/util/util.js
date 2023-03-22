@@ -1,3 +1,5 @@
+import { utilDetect } from './detect.js';
+
 export function utilStringQs(str) {
   let i = 0;  // advance past any leading '?' or '#' characters
   while (i < str.length && (str[i] === '?' || str[i] === '#')) i++;
@@ -53,4 +55,18 @@ export function utilFunctor(value) {
   return function () {
     return value;
   }
+}
+
+let transformProperty;
+export function utilSetTransform(el, x, y, scale) {
+  const prop = transformProperty = transformProperty || utilPrefixCSSProperty('Transform');
+  const translate = utilDetect().opera ? 'translate('   + x + 'px,' + y + 'px)'
+    : 'translate3d(' + x + 'px,' + y + 'px,0)';
+  return el.style(prop, translate + (scale ? ' scale(' + scale + ')' : ''));
+}
+
+// Returns a new string representing `str` cut from its start to `limit` length
+// in unicode characters. Note that this runs the risk of splitting graphemes.
+export function utilUnicodeCharsTruncated(str, limit) {
+  return Array.from(str).slice(0, limit).join('');
 }
