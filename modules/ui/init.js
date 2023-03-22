@@ -4,7 +4,6 @@ import { prefs } from '../core/preferences';
 import { t, localizer } from '../core/localizer';
 import { presetManager } from '../presets';
 import { behaviorHash } from '../behavior';
-import * as os from 'os';
 import { utilDetect } from '../util/index.js';
 import { uiFullScreen } from './full_screen.js';
 
@@ -13,7 +12,6 @@ export function uiInit(context) {
   let _needWidth = {};
 
   let _lastPointerType;
-
 
   function render(container) {
 
@@ -120,6 +118,8 @@ export function uiInit(context) {
     const overMap = content
       .append('div')
       .attr('class', 'over-map');
+
+    map.redrawEnable(true);
   }
 
   let ui = {};

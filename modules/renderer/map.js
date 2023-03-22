@@ -155,7 +155,7 @@ export function rendererMap(context) {
 
 
     surface
-      .call(drawLabels.observe)
+      // .call(drawLabels.observe)
       .call(_doubleUpHandler)
       .on(_pointerPrefix + 'down.zoom', function(d3_event) {
         _lastPointerEvent = d3_event;

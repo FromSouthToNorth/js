@@ -3,10 +3,6 @@ import { utilDetect } from '../util/detect';
 
 export function uiFullScreen(context) {
   let element = context.container().node();
-  console.log(element);
-
-  // var button = d3_select(null);
-
 
   function getFullScreenFn() {
     if (element.requestFullscreen) {

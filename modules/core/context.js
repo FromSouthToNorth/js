@@ -179,6 +179,24 @@ export function coreContext() {
     dispatch.call('enter', this, _mode);
   };
 
+  context.selectedIDs = () => (_mode && _mode.selectedIDs && _mode.selectedIDs()) || [];
+  context.activeID = () => _mode && _mode.activeID && _mode.activeID();
+
+  let _selectedNoteID;
+  context.selectedNoteID = function(noteID) {
+    if (!arguments.length) return _selectedNoteID;
+    _selectedNoteID = noteID;
+    return context;
+  };
+
+  // NOTE: Don't change the name of this until UI v3 is merged
+  let _selectedErrorID;
+  context.selectedErrorID = function(errorID) {
+    if (!arguments.length) return _selectedErrorID;
+    _selectedErrorID = errorID;
+    return context;
+  };
+
   /* Background */
   let _background;
   context.background = () => _background;
@@ -198,8 +216,25 @@ export function coreContext() {
   context.layers = () => _map.layers();
   context.surface = () => _map.surface;
 
+  /* Debug */
+  let _debugFlags = {
+    tile: false,        // tile boundaries
+    collision: false,   // label collision bounding boxes
+    imagery: false,     // imagery bounding polygons
+    target: false,      // touch targets
+    downloaded: false   // downloaded data from osm
+  };
+  context.debugFlags = () => _debugFlags;
+  context.getDebug = (flag) => flag && _debugFlags[flag];
+  context.setDebug = function(flag, val) {
+    if (arguments.length === 1) val = true;
+    _debugFlags[flag] = val;
+    dispatch.call('change');
+    return context;
+  };
+
   /* Container */
-  let _container = d3_select('.ideditor');
+  let _container = d3_select(null);
   context.container = function (val) {
     if (!arguments.length) return _container;
     _container = val;

@@ -259,7 +259,6 @@ export function rendererBackground(context) {
     };
 
     for (let layerID in photoOverlayLayers) {
-      console.log(layerID);
       const layer = context.layers().layer(layerID);
       if (layer && layer.enabled()) {
         photoOverlaysUsed.push(layerID);
