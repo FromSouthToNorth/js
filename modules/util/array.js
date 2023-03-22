@@ -1,9 +1,22 @@
+// Returns true if a and b have the same elements at the same indices.
+export function utilArrayIdentical(a, b) {
+  // an array is always identical to itself
+  if (a === b) return true;
+
+  var i = a.length;
+  if (i !== b.length) return false;
+  while (i--) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
 // http://2ality.com/2015/01/es6-set-operations.html
 
 // Difference (a \ b): create a set that contains those elements of set a that are not in set b.
 // This operation is also sometimes called minus (-).
-// var a = [1,2,3];
-// var b = [4,3,2];
+// let a = [1,2,3];
+// let b = [4,3,2];
 // utilArrayDifference(a, b)
 //   [1]
 // utilArrayDifference(b, a)
@@ -14,6 +27,16 @@ export function utilArrayDifference(a, b) {
               .filter(function (v) { return !other.has(v); });
 }
 
+// Intersection (a ∩ b): create a set that contains those elements of set a that are also in set b.
+// let a = [1,2,3];
+// let b = [4,3,2];
+// utilArrayIntersection(a, b)
+//   [2,3]
+export function utilArrayIntersection(a, b) {
+  let other = new Set(b);
+  return Array.from(new Set(a))
+              .filter(function (v) { return other.has(v); });
+}
 
 /**
  * Returns an Array with all the duplicates removed

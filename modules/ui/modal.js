@@ -113,4 +113,3 @@ export function uiModal(selection, blocking) {
     }
   }
 }
-

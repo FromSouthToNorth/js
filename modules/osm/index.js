@@ -3,10 +3,13 @@ export { osmNode } from './node';
 export { osmNote } from './note';
 export { osmRelation } from './relation';
 export { osmWay } from './way';
+export { QAItem } from './qa_item.js';
 
 export {
   osmLanes,
 } from './lanes';
+
+export { osmChangeset } from './changeset.js';
 
 export {
   osmOldMultipolygonOuterMemberOfRelation,

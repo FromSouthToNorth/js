@@ -6,10 +6,12 @@ import { dispatch as d3_dispatch } from 'd3-dispatch';
 import packageJSON from '../../package.json';
 
 import { t } from './localizer.js';
+import { fileFetcher } from './file_fetcher.js';
+import { localizer } from './localizer.js';
 
 import { utilCleanOsmString, utilKeybinding, utilRebind, utilStringQs } from '../util/index.js';
 import { geoRawMercator } from '../geo/index.js';
-import { rendererFeatures, rendererMap } from '../renderer/index.js';
+import { rendererBackground, rendererFeatures, rendererMap } from '../renderer/index.js';
 import { services } from '../services/index.js';
 import { coreHistory } from './history.js';
 
@@ -129,7 +131,8 @@ export function coreContext() {
         return;
       }
 
-    } else {
+    }
+    else {
       canSave = context.selectedIDs().every(id => {
         const entity = context.hasEntity(id);
         return entity && !entity.isDegenerate();
@@ -175,6 +178,10 @@ export function coreContext() {
     dispatch.call('enter', this, _mode);
   };
 
+  /* Background */
+  let _background;
+  context.background = () => _background;
+
   /* Features */
   let _features;
   context.features = () => _features;
@@ -204,6 +211,58 @@ export function coreContext() {
     return context;
   };
 
+  /* Assets */
+  let _assetPath = '';
+  context.assetPath = function (val) {
+    if (!arguments.length) return _assetPath;
+    _assetPath = val;
+    fileFetcher.assetPath(val);
+    return context;
+  };
+
+  let _assetMap = {};
+  context.assetMap = function (val) {
+    if (!arguments.length) return _assetMap;
+    _assetMap = val;
+    fileFetcher.assetMap(val);
+    return context;
+  };
+  context.asset = (val) => {
+    if (/^http(s)?:\/\//i.test(val)) return val;
+    const filename = _assetPath + val;
+    return _assetMap[filename] || filename;
+  };
+
+  context.imagePath = (val) => context.asset(`img/${val}`);
+
+  /* reset (aka flush) */
+  context.reset = context.flush = () => {
+    context.debouncedSave.cancel();
+
+    Array.from(_deferred).forEach(handle => {
+      window.cancelIdleCallback(handle);
+      _deferred.delete(handle);
+    });
+
+    Object.values(services).forEach(service => {
+      if (service && typeof service.reset === 'function') {
+        service.reset(context);
+      }
+    });
+
+    context.changeset = null;
+
+    _validator.reset();
+    _features.reset();
+    _history.reset();
+    _uploader.reset();
+
+    // don't leave stale state in the inspector
+    context.container().select('.inspector-wrap *').remove();
+
+    return context;
+  };
+
   /* Projections */
   context.projection = geoRawMercator();
   context.curtainProjection = geoRawMercator();
@@ -228,11 +287,27 @@ export function coreContext() {
       context.undo = withDebouncedSave(_history.undo);
       context.redo = withDebouncedSave(_history.redo);
 
+      _background = rendererBackground(context);
       _features = rendererFeatures(context);
       _map = rendererMap(context);
     }
 
     function initializeDependents() {
+      localizer.ensureLoaded();
+      _background.ensureLoaded();
+
+      Object.values(services).forEach(service => {
+        if (service && typeof service.init === 'function') {
+          service.init();
+        }
+      });
+      _background.init();
+      // if (!context.container().empty()) {
+      //   _ui.ensureLoaded()
+      //      .then(() => {
+      //        _background.init();
+      //      });
+      // }
     }
   };
 

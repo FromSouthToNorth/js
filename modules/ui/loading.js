@@ -1,5 +1,5 @@
 import { select as d3_select } from 'd3-selection';
-import { uiModal } from './modal.js';
+import { uiModal } from './modal';
 
 export function uiLoading(context) {
   let _modalSelection = d3_select(null);

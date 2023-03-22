@@ -1,2 +1,3 @@
 export { behaviorHash } from './hash.js';
-export { behaviorWay } from './way.js';
+export { behaviorHover } from './hover.js';
+export { behaviorEdit } from './edit.js';

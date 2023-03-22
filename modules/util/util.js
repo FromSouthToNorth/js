@@ -1,4 +1,9 @@
+import { remove as removeDiacritics } from 'diacritics';
+
 import { utilDetect } from './detect.js';
+import { geoExtent } from '../geo/index.js';
+import { presetManager } from '../presets/index.js';
+import { localizer, t } from '../core/index.js';
 
 export function utilStringQs(str) {
   let i = 0;  // advance past any leading '?' or '#' characters
@@ -14,6 +19,62 @@ export function utilStringQs(str) {
   }, {});
 }
 
+export function utilEntitySelector(ids) {
+  return ids.length ? '.' + ids.join(',.') : 'nothing';
+}
+
+// returns an selector to select entity ids for:
+//  - entityIDs passed in
+//  - deep descendant entityIDs for any of those entities that are relations
+export function utilEntityOrDeepMemberSelector(ids, graph) {
+  return utilEntitySelector(utilEntityAndDeepMemberIDs(ids, graph));
+}
+
+export function utilTotalExtent(array, graph) {
+  let extent = geoExtent();
+  let val, entity;
+  for (let i = 0; i < array.length; i++) {
+    val = array[i];
+    entity = typeof val === 'string' ? graph.hasEntity(val) : val;
+    if (entity) {
+      extent._extend(entity.extent(graph));
+    }
+  }
+  return extent;
+}
+
+// returns an Array that is the union of:
+//  - nodes for any nodeIDs passed in
+//  - child nodes of any wayIDs passed in
+//  - descendant member and child nodes of relationIDs passed in
+export function utilGetAllNodes(ids, graph) {
+  let seen = new Set();
+  let nodes = new Set();
+
+  ids.forEach(collectNodes);
+  return Array.from(nodes);
+
+  function collectNodes(id) {
+    if (seen.has(id)) return;
+    seen.add(id);
+
+    let entity = graph.hasEntity(id);
+    if (!entity) return;
+
+    if (entity.type === 'node') {
+      nodes.add(entity);
+    }
+    else if (entity.type === 'way') {
+      entity.nodes.forEach(collectNodes);
+    }
+    else {
+      entity.members
+            .map(function (member) { return member.id; })
+            .forEach(collectNodes);   // recurse
+    }
+  }
+}
+
 export function utilQsString(obj, noencode) {
   // encode everything except special characters used in certain hash parameters:
   // "/" in map states, ":", ",", {" and "}" in background
@@ -26,6 +87,54 @@ export function utilQsString(obj, noencode) {
       noencode ? softEncode(obj[key]) : encodeURIComponent(obj[key]));
   }).join('&');
 }
+
+// returns an selector to select entity ids for:
+//  - entityIDs passed in
+//  - deep descendant entityIDs for any of those entities that are relations
+export function utilEntityAndDeepMemberIDs(ids, graph) {
+  let seen = new Set();
+  ids.forEach(collectDeepDescendants);
+  return Array.from(seen);
+
+  function collectDeepDescendants(id) {
+    if (seen.has(id)) return;
+    seen.add(id);
+
+    let entity = graph.hasEntity(id);
+    if (!entity || entity.type !== 'relation') return;
+
+    entity.members
+          .map(function (member) { return member.id; })
+          .forEach(collectDeepDescendants);   // recurse
+  }
+}
+
+// returns an selector to select entity ids for:
+//  - deep descendant entityIDs for any of those entities that are relations
+export function utilDeepMemberSelector(ids, graph, skipMultipolgonMembers) {
+  let idsSet = new Set(ids);
+  let seen = new Set();
+  let returners = new Set();
+  ids.forEach(collectDeepDescendants);
+  return utilEntitySelector(Array.from(returners));
+
+  function collectDeepDescendants(id) {
+    if (seen.has(id)) return;
+    seen.add(id);
+
+    if (!idsSet.has(id)) {
+      returners.add(id);
+    }
+
+    let entity = graph.hasEntity(id);
+    if (!entity || entity.type !== 'relation') return;
+    if (skipMultipolgonMembers && entity.isMultipolygon()) return;
+    entity.members
+          .map(function (member) { return member.id; })
+          .forEach(collectDeepDescendants);   // recurse
+  }
+}
+
 
 /**
  * 一个 d3.mouse-like
@@ -58,10 +167,10 @@ export function utilFunctor(value) {
 }
 
 export function utilPrefixCSSProperty(property) {
-  var prefixes = ['webkit', 'ms', 'Moz', 'O'];
-  var i = -1;
-  var n = prefixes.length;
-  var s = document.body.style;
+  let prefixes = ['webkit', 'ms', 'Moz', 'O'];
+  let i = -1;
+  let n = prefixes.length;
+  let s = document.body.style;
 
   if (property.toLowerCase() in s) {
     return property.toLowerCase();
@@ -110,4 +219,119 @@ export function utilCleanOsmString(val, maxChars) {
 
   // trim to the number of allowed characters
   return utilUnicodeCharsTruncated(val, maxChars);
+}
+
+export function utilDisplayName(entity) {
+  let localizedNameKey = 'name:' + localizer.languageCode().toLowerCase();
+  let name = entity.tags[localizedNameKey] || entity.tags.name || '';
+  if (name) return name;
+
+  let tags = {
+    direction: entity.tags.direction,
+    from: entity.tags.from,
+    network: entity.tags.cycle_network || entity.tags.network,
+    ref: entity.tags.ref,
+    to: entity.tags.to,
+    via: entity.tags.via,
+  };
+  let keyComponents = [];
+
+  if (tags.network) {
+    keyComponents.push('network');
+  }
+  if (tags.ref) {
+    keyComponents.push('ref');
+  }
+
+  // Routes may need more disambiguation based on direction or destination
+  if (entity.tags.route) {
+    if (tags.direction) {
+      keyComponents.push('direction');
+    }
+    else if (tags.from && tags.to) {
+      keyComponents.push('from');
+      keyComponents.push('to');
+      if (tags.via) {
+        keyComponents.push('via');
+      }
+    }
+  }
+
+  if (keyComponents.length) {
+    name = t('inspector.display_name.' + keyComponents.join('_'), tags);
+  }
+
+  return name;
+}
+
+export function utilDisplayType(id) {
+  return {
+    n: t('inspector.node'),
+    w: t('inspector.way'),
+    r: t('inspector.relation'),
+  }[id.charAt(0)];
+}
+
+
+// `utilDisplayLabel`
+// Returns a string suitable for display
+// By default returns something like name/ref, fallback to preset type, fallback to OSM type
+//   "Main Street" or "Tertiary Road"
+// If `verbose=true`, include both preset name and feature name.
+//   "Tertiary Road Main Street"
+//
+export function utilDisplayLabel(entity, graphOrGeometry, verbose) {
+  let result;
+  let displayName = utilDisplayName(entity);
+  let preset = typeof graphOrGeometry === 'string' ?
+    presetManager.matchTags(entity.tags, graphOrGeometry) :
+    presetManager.match(entity, graphOrGeometry);
+  let presetName = preset && (preset.suggestion ? preset.subtitle() : preset.name());
+
+  if (verbose) {
+    result = [presetName, displayName].filter(Boolean).join(' ');
+  }
+  else {
+    result = displayName || presetName;
+  }
+
+  // Fallback to the OSM type (node/way/relation)
+  return result || utilDisplayType(entity.id);
+}
+
+// Calculates Levenshtein distance between two strings
+// see:  https://en.wikipedia.org/wiki/Levenshtein_distance
+// first converts the strings to lowercase and replaces diacritic marks with ascii equivalents.
+export function utilEditDistance(a, b) {
+  a = removeDiacritics(a.toLowerCase());
+  b = removeDiacritics(b.toLowerCase());
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  let matrix = [];
+  let i, j;
+  for (i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+  for (j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+  for (i = 1; i <= b.length; i++) {
+    for (j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      }
+      else {
+        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, // substitution
+          Math.min(matrix[i][j - 1] + 1, // insertion
+            matrix[i - 1][j] + 1)); // deletion
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
+// Returns version of `str` with all runs of special characters replaced by `_`;
+// suitable for HTML ids, classes, selectors, etc.
+export function utilSafeClassName(str) {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, '_');
 }

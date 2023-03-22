@@ -493,6 +493,25 @@ export function rendererMap(context) {
     return map;
   };
 
+  map.extent = function(val) {
+    if (!arguments.length) {
+      return new geoExtent(
+        projection.invert([0, _dimensions[1]]),
+        projection.invert([_dimensions[0], 0])
+      );
+    } else {
+      var extent = geoExtent(val);
+      map.centerZoom(extent.center(), map.extentZoom(extent));
+    }
+  };
+
+  map.trimmedExtentZoom = function (val) {
+    const trimY = 120;
+    const trimX = 40;
+    const trimmed = [_dimensions[0] - trimX, _dimensions[1] - trimY];
+    return calcExtentZoom(geoExtent(val), trimmed);
+  };
+
   function calcExtentZoom(extent, dim) {
     const tl = projection([extent[0][0], extent[1][1]]);
     const br = projection([extent[1][0], extent[0][1]]);
@@ -507,13 +526,6 @@ export function rendererMap(context) {
 
   map.extentZoom = function (val) {
     return calcExtentZoom(geoExtent(val), _dimensions);
-  };
-
-  map.trimmedExtentZoom = function (val) {
-    const trimY = 120;
-    const trimX = 40;
-    const trimmed = [_dimensions[0] - trimX, _dimensions[1] - trimY];
-    return calcExtentZoom(geoExtent(val), trimmed);
   };
 
   map.withinEditableZoom = function () {

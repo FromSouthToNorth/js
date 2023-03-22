@@ -36,12 +36,28 @@ export function geoVecAngle(a, b) {
   return Math.atan2(b[1] - a[1], b[0] - a[0]);
 }
 
+// dot product
+export function geoVecDot(a, b, origin) {
+  origin = origin || [0, 0];
+  let p = geoVecSubtract(a, origin);
+  let q = geoVecSubtract(b, origin);
+  return (p[0]) * (q[0]) + (p[1]) * (q[1]);
+}
+
 // 2D cross product of OA and OB vectors, returns magnitude of Z vector
 // Returns a positive value, if OAB makes a counter-clockwise turn,
 // negative for clockwise turn, and zero if the points are collinear.
 export function geoVecCross(a, b, origin) {
   origin = origin || [0, 0];
-  var p = geoVecSubtract(a, origin);
-  var q = geoVecSubtract(b, origin);
+  let p = geoVecSubtract(a, origin);
+  let q = geoVecSubtract(b, origin);
   return (p[0]) * (q[1]) - (p[1]) * (q[0]);
+}
+
+// linear interpolation
+export function geoVecInterp(a, b, t) {
+  return [
+    a[0] + (b[0] - a[0]) * t,
+    a[1] + (b[1] - a[1]) * t
+  ];
 }

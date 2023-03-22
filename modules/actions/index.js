@@ -1,1 +1,10 @@
 export { actionReverse } from './reverse.js';
+export { actionAddMidpoint } from './add_midpoint.js';
+export { actionDeleteMultiple } from './delete_multiple.js';
+export { actionDeleteNode } from './delete_node.js';
+export { actionDeleteRelation } from './delete_relation.js';
+export { actionDeleteWay } from './delete_way.js';
+export { actionMove } from './move.js';
+export { actionScale } from './scale.js';
+export { actionCopyEntities } from './copy_entities.js';
+export { actionNoop } from './noop.js';
