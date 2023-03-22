@@ -14,6 +14,7 @@ import { geoRawMercator } from '../geo/index.js';
 import { rendererBackground, rendererFeatures, rendererMap } from '../renderer/index.js';
 import { services } from '../services/index.js';
 import { coreHistory } from './history.js';
+import { uiInit } from '../ui/index.js';
 
 export function coreContext() {
   const dispatch = d3_dispatch('enter', 'exit', 'change');
@@ -198,7 +199,7 @@ export function coreContext() {
   context.surface = () => _map.surface;
 
   /* Container */
-  let _container = d3_select(null);
+  let _container = d3_select('.ideditor');
   context.container = function (val) {
     if (!arguments.length) return _container;
     _container = val;
@@ -290,6 +291,8 @@ export function coreContext() {
       _background = rendererBackground(context);
       _features = rendererFeatures(context);
       _map = rendererMap(context);
+
+      _ui = uiInit(context);
     }
 
     function initializeDependents() {
@@ -301,13 +304,14 @@ export function coreContext() {
           service.init();
         }
       });
-      _background.init();
-      // if (!context.container().empty()) {
-      //   _ui.ensureLoaded()
-      //      .then(() => {
-      //        _background.init();
-      //      });
-      // }
+
+      _map.init();
+      if (!context.container().empty()) {
+        _ui.ensureLoaded()
+          .then(() => {
+            _background.init();
+          });
+      }
     }
   };
 

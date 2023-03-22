@@ -74,8 +74,8 @@ export function utilZoomPan() {
     .style('-webkit-tap-highlight-color', 'rgba(0,0,0,0)');
 
     d3_select(window)
-    .on('pointermove.zoompan')
-    .on('pointerup.zoompan pointercancel.zoompan');
+    .on('pointermove.zoompan', pointermove)
+    .on('pointerup.zoompan pointercancel.zoompan', pointerup);
   }
 
   function scale(transform, k) {

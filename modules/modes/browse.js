@@ -5,7 +5,11 @@ import { behaviorLasso } from '../behavior/lasso';
 import { behaviorPaste } from '../behavior/paste';
 import { behaviorSelect } from '../behavior/select';
 
-import { modeDragNode } from './drag_node';
-import { modeDragNote } from './drag_note';
+// import { modeDragNode } from './drag_node';
+// import { modeDragNote } from './drag_note';
+//
+// import { operationPaste } from '../operations/paste';
 
-import { operationPaste } from '../operations/paste';
+export function modeBrowse(context) {
+
+}

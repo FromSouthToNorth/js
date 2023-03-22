@@ -15,8 +15,12 @@ import { utilKeybinding } from '../util';
 import { utilFastMouse } from '../util/util';
 
 
-import { operationCircularize } from '../operations/circularize';
-import { operationDelete } from '../operations/delete';
-import { operationOrthogonalize } from '../operations/orthogonalize';
-import { operationReflectLong, operationReflectShort } from '../operations/reflect';
-import { operationRotate } from '../operations/rotate';
+// import { operationCircularize } from '../operations/circularize';
+// import { operationDelete } from '../operations/delete';
+// import { operationOrthogonalize } from '../operations/orthogonalize';
+// import { operationReflectLong, operationReflectShort } from '../operations/reflect';
+// import { operationRotate } from '../operations/rotate';
+
+export function modeMove(context, entityIDs, baseGraph) {
+
+}

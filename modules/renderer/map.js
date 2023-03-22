@@ -20,6 +20,7 @@ import {
 import { geoExtent, geoRawMercator, geoScaleToZoom, geoZoomToScale } from '../geo/index.js';
 
 import { prefs } from '../core/index.js';
+import { svgLayers } from '../svg/index.js';
 
 /** constants */
 const TILESIZE = 256;
@@ -237,6 +238,10 @@ export function rendererMap(context) {
     e2._rotation = e.rotation;   // preserve the original rotation
 
     _selection.node().dispatchEvent(e2);
+  }
+
+  map.init = function () {
+    drawLayers = svgLayers(projection, context);
   }
 
 
@@ -1005,23 +1010,4 @@ export function rendererMap(context) {
 
   return utilRebind(map, dispatch, 'on');
 
-
-  // let map = {},
-  //   _map;
-  //
-  // map.init = function (id) {
-  //   _map = L.map(id, {
-  //     minZoom,
-  //     maxZoom,
-  //     zoomSnap,
-  //   }).setView([30.6598628, 104.0633717], 16);
-  //
-  //   _map.addControl(L.control.scale());
-  // };
-  //
-  // map._map = () => {
-  //   return _map;
-  // };
-  //
-  // return map;
 }
