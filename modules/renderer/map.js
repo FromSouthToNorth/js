@@ -1,14 +1,14 @@
 import _throttle from 'lodash-es/throttle';
 
-import { zoom as d3_zoom } from 'd3-zoom';
+import { zoom as d3_zoom, zoomIdentity as d3_zoomIdentity } from 'd3-zoom';
 import { select as d3_select } from 'd3-selection';
 import { dispatch as d3_dispatch } from 'd3-dispatch';
 import { interpolate as d3_interpolate } from 'd3-interpolate';
-import { zoomIdentity as d3_zoomIdentity } from 'd3-zoom';
 
 import {
   utilBindOnce,
-  utilDetect, utilDoubleUp,
+  utilDetect,
+  utilDoubleUp,
   utilFastMouse,
   utilGetDimensions,
   utilRebind,
@@ -16,7 +16,7 @@ import {
   utilZoomPan,
 } from '../util/index.js';
 
-import { geoRawMercator, geoScaleToZoom, geoZoomToScale } from '../geo/index.js';
+import { geoExtent, geoRawMercator, geoScaleToZoom, geoZoomToScale } from '../geo/index.js';
 
 import { prefs } from '../core/index.js';
 
@@ -279,16 +279,16 @@ export function rendererMap(context) {
       difference = extent = undefined;
     }
 
-    var zoom = map.zoom();
-    var z = String(~~zoom);
+    const zoom = map.zoom();
+    const z = String(~~zoom);
 
     if (surface.attr('data-zoom') !== z) {
       surface.attr('data-zoom', z);
     }
 
     // class surface as `lowzoom` around z17-z18.5 (based on latitude)
-    var lat = map.center()[1];
-    var lowzoom = d3_scaleLinear()
+    const lat = map.center()[1];
+    const lowzoom = d3_scaleLinear()
     .domain([-60, 0, 60])
     .range([17, 18.5, 17])
     .clamp(true);
@@ -461,46 +461,51 @@ export function rendererMap(context) {
     return map;
   };
 
+  function calcExtentZoom(extent, dim) {
+    const tl = projection([extent[0][0], extent[1][1]]);
+    const br = projection([extent[1][0], extent[0][1]]);
+
+    // Calculate maximum zoom that fits extent
+    const hFactor = (br[0] - tl[0]) / dim[0];
+    const vFactor = (br[1] - tl[1]) / dim[1];
+    const hZoomDiff = Math.log(Math.abs(hFactor)) / Math.LN2;
+    const vZoomDiff = Math.log(Math.abs(vFactor)) / Math.LN2;
+    return map.zoom() - Math.max(hZoomDiff, vZoomDiff);
+  }
 
   map.extentZoom = function (val) {
     return calcExtentZoom(geoExtent(val), _dimensions);
   };
 
-
   map.trimmedExtentZoom = function (val) {
-    var trimY = 120;
-    var trimX = 40;
-    var trimmed = [_dimensions[0] - trimX, _dimensions[1] - trimY];
+    const trimY = 120;
+    const trimX = 40;
+    const trimmed = [_dimensions[0] - trimX, _dimensions[1] - trimY];
     return calcExtentZoom(geoExtent(val), trimmed);
   };
-
 
   map.withinEditableZoom = function () {
     return map.zoom() >= context.minEditableZoom();
   };
 
-
   map.isInWideSelection = function () {
     return !map.withinEditableZoom() && context.selectedIDs().length;
   };
 
-
   map.editableDataEnabled = function (skipZoomCheck) {
 
-    var layer = context.layers().layer('osm');
+    const layer = context.layers().layer('osm');
     if (!layer || !layer.enabled()) return false;
 
     return skipZoomCheck || map.withinEditableZoom();
   };
 
-
   map.notesEditable = function () {
-    var layer = context.layers().layer('notes');
+    const layer = context.layers().layer('notes');
     if (!layer || !layer.enabled()) return false;
 
     return map.withinEditableZoom();
   };
-
 
   map._minZoom = function (val) {
     if (!arguments.length) return _minzoom;
@@ -508,13 +513,11 @@ export function rendererMap(context) {
     return map;
   };
 
-
   map.toggleHighlightEdited = function () {
     surface.classed('highlight-edited', !surface.classed('highlight-edited'));
     map.pan([0, 0]);  // trigger a redraw
     dispatch.call('changeHighlighting', this);
   };
-
 
   map.areaFillOptions = ['wireframe', 'partial', 'full'];
 
@@ -552,9 +555,7 @@ export function rendererMap(context) {
     });
   }
 
-
   map.layers = () => drawLayers;
-
 
   map.doubleUpHandler = function () {
     return _doubleUpHandler;
