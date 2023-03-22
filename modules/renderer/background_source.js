@@ -199,28 +199,28 @@ export function rendererBackgroundSource(data) {
     }
     else if (source.type === 'tms') {
       result = result
-      .replace('{x}', coord[0])
-      .replace('{y}', coord[1])
-      // TMS-flipped y coordinate
-      .replace(/\{[t-]y\}/, Math.pow(2, coord[2]) - coord[1] - 1)
-      .replace(/\{z(oom)?\}/, coord[2])
-      // only fetch retina tiles for retina screens
-      .replace(/\{@2x\}|\{r\}/, isRetina ? '@2x' : '');
+        .replace('{x}', coord[0])
+        .replace('{y}', coord[1])
+        // TMS-flipped y coordinate
+        .replace(/\{[t-]y\}/, Math.pow(2, coord[2]) - coord[1] - 1)
+        .replace(/\{z(oom)?\}/, coord[2])
+        // only fetch retina tiles for retina screens
+        .replace(/\{@2x\}|\{r\}/, isRetina ? '@2x' : '');
 
     }
     else if (source.type === 'bing') {
       result = result
-      .replace('{u}', function () {
-        let u = '';
-        for (let zoom = coord[2]; zoom > 0; zoom--) {
-          let b = 0;
-          let mask = 1 << (zoom - 1);
-          if ((coord[0] & mask) !== 0) b++;
-          if ((coord[1] & mask) !== 0) b += 2;
-          u += b.toString();
-        }
-        return u;
-      });
+        .replace('{u}', function () {
+          let u = '';
+          for (let zoom = coord[2]; zoom > 0; zoom--) {
+            let b = 0;
+            let mask = 1 << (zoom - 1);
+            if ((coord[0] & mask) !== 0) b++;
+            if ((coord[1] & mask) !== 0) b += 2;
+            u += b.toString();
+          }
+          return u;
+        });
     }
 
     // these apply to any type..
@@ -252,7 +252,8 @@ export function rendererBackgroundSource(data) {
   };
 
 
-  source.copyrightNotices = function () {};
+  source.copyrightNotices = function () {
+  };
 
 
   source.getMetadata = function (center, tileCoord, callback) {
@@ -296,38 +297,38 @@ rendererBackgroundSource.Bing = function (data, dispatch) {
   let metadataLastZoom = -1;
 
   d3_json(url)
-  .then(function (json) {
-    let imageryResource = json.resourceSets[0].resources[0];
+    .then(function (json) {
+      let imageryResource = json.resourceSets[0].resources[0];
 
-    //retrieve and prepare up to date imagery template
-    let template = imageryResource.imageUrl; //https://ecn.{subdomain}.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=10339
-    let subDomains = imageryResource.imageUrlSubdomains; //["t0, t1, t2, t3"]
-    let subDomainNumbers = subDomains.map((subDomain) => {
-      return subDomain.substring(1);
-    }).join(',');
+      //retrieve and prepare up to date imagery template
+      let template = imageryResource.imageUrl; //https://ecn.{subdomain}.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=10339
+      let subDomains = imageryResource.imageUrlSubdomains; //["t0, t1, t2, t3"]
+      let subDomainNumbers = subDomains.map((subDomain) => {
+        return subDomain.substring(1);
+      }).join(',');
 
-    template = template.replace('{subdomain}', `t{switch:${subDomainNumbers}}`).replace('{quadkey}', '{u}');
-    if (!new URLSearchParams(template).has(strictParam)) {
-      template += `&${strictParam}=z`;
-    }
-    bing.template(template);
+      template = template.replace('{subdomain}', `t{switch:${subDomainNumbers}}`).replace('{quadkey}', '{u}');
+      if (!new URLSearchParams(template).has(strictParam)) {
+        template += `&${strictParam}=z`;
+      }
+      bing.template(template);
 
-    providers = imageryResource.imageryProviders.map(function (provider) {
-      return {
-        attribution: provider.attribution,
-        areas: provider.coverageAreas.map(function (area) {
-          return {
-            zoom: [area.zoomMin, area.zoomMax],
-            extent: geoExtent([area.bbox[1], area.bbox[0]], [area.bbox[3], area.bbox[2]]),
-          };
-        }),
-      };
+      providers = imageryResource.imageryProviders.map(function (provider) {
+        return {
+          attribution: provider.attribution,
+          areas: provider.coverageAreas.map(function (area) {
+            return {
+              zoom: [area.zoomMin, area.zoomMax],
+              extent: geoExtent([area.bbox[1], area.bbox[0]], [area.bbox[3], area.bbox[2]]),
+            };
+          }),
+        };
+      });
+      dispatch.call('change');
+    })
+    .catch(function () {
+      /* ignore */
     });
-    dispatch.call('change');
-  })
-  .catch(function () {
-    /* ignore */
-  });
 
 
   bing.copyrightNotices = function (zoom, extent) {
@@ -369,25 +370,25 @@ rendererBackgroundSource.Bing = function (data, dispatch) {
 
     taskQueue.enqueue(() => {
       d3_json(url)
-      .then(function (result) {
-        delete inflight[tileID];
-        if (!result) {
-          throw new Error('Unknown Error');
-        }
-        let vintage = {
-          start: localeDateString(result.resourceSets[0].resources[0].vintageStart),
-          end: localeDateString(result.resourceSets[0].resources[0].vintageEnd),
-        };
-        vintage.range = vintageRange(vintage);
+        .then(function (result) {
+          delete inflight[tileID];
+          if (!result) {
+            throw new Error('Unknown Error');
+          }
+          let vintage = {
+            start: localeDateString(result.resourceSets[0].resources[0].vintageStart),
+            end: localeDateString(result.resourceSets[0].resources[0].vintageEnd),
+          };
+          vintage.range = vintageRange(vintage);
 
-        let metadata = { vintage: vintage };
-        cache[tileID].metadata = metadata;
-        if (callback) callback(null, metadata);
-      })
-      .catch(function (err) {
-        delete inflight[tileID];
-        if (callback) callback(err.message);
-      });
+          let metadata = { vintage: vintage };
+          cache[tileID].metadata = metadata;
+          if (callback) callback(null, metadata);
+        })
+        .catch(function (err) {
+          delete inflight[tileID];
+          if (callback) callback(err.message);
+        });
     });
   };
 
@@ -432,25 +433,25 @@ rendererBackgroundSource.Esri = function (data) {
 
     // make the request and introspect the response from the tilemap server
     d3_json(tilemapUrl)
-    .then(function (tilemap) {
-      if (!tilemap) {
-        throw new Error('Unknown Error');
-      }
-      let hasTiles = true;
-      for (let i = 0; i < tilemap.data.length; i++) {
-        // 0 means an individual tile in the grid doesn't exist
-        if (!tilemap.data[i]) {
-          hasTiles = false;
-          break;
+      .then(function (tilemap) {
+        if (!tilemap) {
+          throw new Error('Unknown Error');
         }
-      }
+        let hasTiles = true;
+        for (let i = 0; i < tilemap.data.length; i++) {
+          // 0 means an individual tile in the grid doesn't exist
+          if (!tilemap.data[i]) {
+            hasTiles = false;
+            break;
+          }
+        }
 
-      // if any tiles are missing at level 20 we restrict maxZoom to 19
-      esri.zoomExtent[1] = (hasTiles ? 22 : 19);
-    })
-    .catch(function () {
-      /* ignore */
-    });
+        // if any tiles are missing at level 20 we restrict maxZoom to 19
+        esri.zoomExtent[1] = (hasTiles ? 22 : 19);
+      })
+      .catch(function () {
+        /* ignore */
+      });
   };
 
 
@@ -481,52 +482,52 @@ rendererBackgroundSource.Esri = function (data) {
 
     inflight[tileID] = true;
     d3_json(url)
-    .then(function (result) {
-      delete inflight[tileID];
+      .then(function (result) {
+        delete inflight[tileID];
 
-      result = result.features.map(f => f.attributes)
-                     .filter(a => a.MinMapLevel <= zoom && a.MaxMapLevel >= zoom)[0];
+        result = result.features.map(f => f.attributes)
+          .filter(a => a.MinMapLevel <= zoom && a.MaxMapLevel >= zoom)[0];
 
-      if (!result) {
-        throw new Error('Unknown Error');
-      }
-      else if (result.features && result.features.length < 1) {
-        throw new Error('No Results');
-      }
-      else if (result.error && result.error.message) {
-        throw new Error(result.error.message);
-      }
+        if (!result) {
+          throw new Error('Unknown Error');
+        }
+        else if (result.features && result.features.length < 1) {
+          throw new Error('No Results');
+        }
+        else if (result.error && result.error.message) {
+          throw new Error(result.error.message);
+        }
 
-      // pass through the discrete capture date from metadata
-      let captureDate = localeDateString(result.SRC_DATE2);
-      vintage = {
-        start: captureDate,
-        end: captureDate,
-        range: captureDate,
-      };
-      metadata = {
-        vintage: vintage,
-        source: clean(result.NICE_NAME),
-        description: clean(result.NICE_DESC),
-        resolution: clean(+Number(result.SRC_RES).toFixed(4)),
-        accuracy: clean(+Number(result.SRC_ACC).toFixed(4)),
-      };
+        // pass through the discrete capture date from metadata
+        let captureDate = localeDateString(result.SRC_DATE2);
+        vintage = {
+          start: captureDate,
+          end: captureDate,
+          range: captureDate,
+        };
+        metadata = {
+          vintage: vintage,
+          source: clean(result.NICE_NAME),
+          description: clean(result.NICE_DESC),
+          resolution: clean(+Number(result.SRC_RES).toFixed(4)),
+          accuracy: clean(+Number(result.SRC_ACC).toFixed(4)),
+        };
 
-      // append units - meters
-      if (isFinite(metadata.resolution)) {
-        metadata.resolution += ' m';
-      }
-      if (isFinite(metadata.accuracy)) {
-        metadata.accuracy += ' m';
-      }
+        // append units - meters
+        if (isFinite(metadata.resolution)) {
+          metadata.resolution += ' m';
+        }
+        if (isFinite(metadata.accuracy)) {
+          metadata.accuracy += ' m';
+        }
 
-      cache[tileID].metadata = metadata;
-      if (callback) callback(null, metadata);
-    })
-    .catch(function (err) {
-      delete inflight[tileID];
-      if (callback) callback(err.message);
-    });
+        cache[tileID].metadata = metadata;
+        if (callback) callback(null, metadata);
+      })
+      .catch(function (err) {
+        delete inflight[tileID];
+        if (callback) callback(err.message);
+      });
 
 
     function clean(val) {
@@ -598,8 +599,8 @@ rendererBackgroundSource.Custom = function (template) {
 
     // from wms/wmts api path parameters
     cleaned = cleaned
-    .replace(/token\/(\w+)/, 'token/{apikey}')
-    .replace(/key=(\w+)/, 'key={apikey}');
+      .replace(/token\/(\w+)/, 'token/{apikey}')
+      .replace(/key=(\w+)/, 'key={apikey}');
     return 'Custom (' + cleaned + ' )';
   };
 

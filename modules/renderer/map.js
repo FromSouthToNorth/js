@@ -4,12 +4,13 @@ import { zoom as d3_zoom, zoomIdentity as d3_zoomIdentity } from 'd3-zoom';
 import { select as d3_select } from 'd3-selection';
 import { dispatch as d3_dispatch } from 'd3-dispatch';
 import { interpolate as d3_interpolate } from 'd3-interpolate';
+import { scaleLinear as d3_scaleLinear } from 'd3-scale';
 
 import {
   utilBindOnce,
   utilDetect,
-  utilDoubleUp,
-  utilFastMouse,
+  utilDoubleUp, utilEntityAndDeepMemberIDs,
+  utilFastMouse, utilFunctor,
   utilGetDimensions,
   utilRebind,
   utilSetTransform,
@@ -40,6 +41,7 @@ export function rendererMap(context) {
   let drawPoints;
   let drawVertices;
   let drawLines;
+  let drawAreas;
   let drawMidpoints;
   let drawLabels;
 
@@ -69,17 +71,17 @@ export function rendererMap(context) {
   let _zoomerPannerFunction = 'PointerEvent' in window ? utilZoomPan : d3_zoom;
 
   let _zoomerPanner = _zoomerPannerFunction()
-  .scaleExtent([kMin, kMax])
-  .interpolate(d3_interpolate)
-  .filter(zoomEventFilter)
-  .on('zoom.map', zoomPan)
-  .on('start.map', function (d3_event) {
-    _pointerDown = d3_event && (d3_event.type === 'pointerdown' ||
-      (d3_event.sourceEvent && d3_event.sourceEvent.type === 'pointerdown'));
-  })
-  .on('end.map', function () {
-    _pointerDown = false;
-  });
+    .scaleExtent([kMin, kMax])
+    .interpolate(d3_interpolate)
+    .filter(zoomEventFilter)
+    .on('zoom.map', zoomPan)
+    .on('start.map', function (d3_event) {
+      _pointerDown = d3_event && (d3_event.type === 'pointerdown' ||
+        (d3_event.sourceEvent && d3_event.sourceEvent.type === 'pointerdown'));
+    })
+    .on('end.map', function () {
+      _pointerDown = false;
+    });
 
   const _doubleUpHandler = utilDoubleUp();
 
@@ -88,6 +90,123 @@ export function rendererMap(context) {
   function map(selection) {
     _selection = selection;
     context.on('change.map', immediateRedraw);
+    const osm = context.connection();
+    if (osm) {
+      osm.on('change.map', immediateRedraw);
+    }
+
+    function didUndoOrRedo(targetTransform) {
+      const mode = context.mode().id;
+      if (mode !== 'browse' && mode !== 'select') {
+        return;
+      }
+      if (targetTransform) {
+        map.transformEase(targetTransform);
+      }
+    }
+
+    context.history()
+      .on('merge.map', function () {
+        scheduleRedraw();
+      })
+      .on('change.map', immediateRedraw)
+      .on('undone.map', function (stack, fromStack) {
+        didUndoOrRedo(fromStack.transform);
+      })
+      .on('redone.map', function (stack) {
+        didUndoOrRedo(stack.transform);
+      });
+
+    context.background()
+      .on('change.map', immediateRedraw);
+
+    context.features()
+      .on('redraw.map', immediateRedraw);
+
+    drawLayers
+      .on('change.map', function () {
+        context.background().updateImagery();
+        immediateRedraw();
+      });
+
+    selection
+      .on('wheel.map mousewheel.map', function (d3_event) {
+        // disable swipe-to-navigate browser pages on trackpad/magic mouse – #5552
+        d3_event.preventDefault();
+      })
+      .call(_zoomerPanner)
+      .call(_zoomerPanner.transform, projection.transform())
+      .on('dblclick.zoom', null); // override d3-zoom dblclick handling
+
+    map.supersurface = supersurface = selection.append('div')
+      .attr('class', 'supersurface')
+      .call(utilSetTransform, 0, 0);
+    
+    // Need a wrapper div because Opera can't cope with an absolutely positioned
+    // SVG element: http://bl.ocks.org/jfirebaugh/6fbfbd922552bf776c16
+    wrapper = supersurface
+      .append('div')
+      .attr('class', 'layer layer-data');
+
+    map.surface = surface = wrapper
+      .call(drawLayers)
+      .selectAll('.surface');
+
+
+    surface
+      .call(drawLabels.observe)
+      .call(_doubleUpHandler)
+      .on(_pointerPrefix + 'down.zoom', function(d3_event) {
+        _lastPointerEvent = d3_event;
+        if (d3_event.button === 2) {
+          d3_event.stopPropagation();
+        }
+      }, true)
+      .on(_pointerPrefix + 'up.zoom', function(d3_event) {
+        _lastPointerEvent = d3_event;
+        if (resetTransform()) {
+          immediateRedraw();
+        }
+      })
+      .on(_pointerPrefix + 'move.map', function(d3_event) {
+        _lastPointerEvent = d3_event;
+      })
+      .on(_pointerPrefix + 'over.vertices', function(d3_event) {
+        if (map.editableDataEnabled() && !_isTransformed) {
+          let hover = d3_event.target.__data__;
+          surface.call(drawVertices.drawHover, context.graph(), hover, map.extent());
+          dispatch.call('drawn', this, { full: false });
+        }
+      })
+      .on(_pointerPrefix + 'out.vertices', function(d3_event) {
+        if (map.editableDataEnabled() && !_isTransformed) {
+          let hover = d3_event.relatedTarget && d3_event.relatedTarget.__data__;
+          surface.call(drawVertices.drawHover, context.graph(), hover, map.extent());
+          dispatch.call('drawn', this, { full: false });
+        }
+      });
+
+    const detected = utilDetect();
+
+    // only WebKit supports gesture events
+    if ('GestureEvent' in window &&
+      // Listening for gesture events on iOS 13.4+ breaks double-tapping,
+      // but we only need to do this on desktop Safari anyway. – #7694
+      !detected.isMobileWebKit) {
+
+      // Desktop Safari sends gesture events for multitouch trackpad pinches.
+      // We can listen for these and translate them into map zooms.
+      surface
+        .on('gesturestart.surface', function(d3_event) {
+          d3_event.preventDefault();
+          _gestureTransformStart = projection.transform();
+        })
+        .on('gesturechange.surface', gestureChange);
+    }
+
+    // must call after surface init
+    updateAreaFill();
+
     map.dimensions(utilGetDimensions(selection));
   }
 
@@ -95,26 +214,133 @@ export function rendererMap(context) {
     return [_dimensions[0] / 2, _dimensions[1] / 2];
   }
 
+  function gestureChange(d3_event) {
+    // Remap Safari gesture events to wheel events - #5492
+    // We want these disabled most places, but enabled for zoom/unzoom on map surface
+    // https://developer.mozilla.org/en-US/docs/Web/API/GestureEvent
+    const e = d3_event;
+    e.preventDefault();
+
+    const props = {
+      deltaMode: 0,    // dummy values to ignore in zoomPan
+      deltaY: 1,       // dummy values to ignore in zoomPan
+      clientX: e.clientX,
+      clientY: e.clientY,
+      screenX: e.screenX,
+      screenY: e.screenY,
+      x: e.x,
+      y: e.y
+    };
+
+    const e2 = new WheelEvent('wheel', props);
+    e2._scale = e.scale;         // preserve the original scale
+    e2._rotation = e.rotation;   // preserve the original rotation
+
+    _selection.node().dispatchEvent(e2);
+  }
+
+
   function editOff() {
     context.features().resetStats();
     surface.selectAll('.layer-osm *').remove();
     surface.selectAll('.layer-touch:not(.markers) *').remove();
 
-    var allowed = {
+    let allowed = {
       'browse': true,
       'save': true,
       'select-note': true,
       'select-data': true,
-      'select-error': true
+      'select-error': true,
     };
 
-    var mode = context.mode();
+    let mode = context.mode();
     if (mode && !allowed[mode.id]) {
       context.enter(modeBrowse(context));
     }
 
-    dispatch.call('drawn', this, {full: true});
+    dispatch.call('drawn', this, { full: true });
   }
+
+  function drawEditable(difference, extent) {
+    const mode = context.mode();
+    const graph = context.graph();
+    const features = context.features();
+    const all = context.history().intersects(map.extent());
+    let fullRedraw = false;
+    let data;
+    let set;
+    let filter;
+    let applyFeatureLayerFilters = true;
+
+    if (map.isInWideSelection()) {
+      data = [];
+      utilEntityAndDeepMemberIDs(mode.selectedIDs(), context.graph()).forEach(function (id) {
+        const entity = context.hasEntity(id);
+        if (entity) {
+          data.push(entity);
+        }
+      });
+      fullRedraw = true;
+      filter = utilFunctor(true);
+      // selected features should always be visible, so we can skip filtering
+      applyFeatureLayerFilters = false;
+    }
+    else if (difference) {
+      const complete = difference.complete(map.extent());
+      data = Object.values(complete).filter(Boolean);
+      set = new Set(Object.keys(complete));
+      filter = function (d) {
+        return set.has(d.id);
+      };
+      features.clear(data);
+    }
+    else {
+      // force a full redraw if gatherStats detects that a feature
+      // should be auto-hidden (e.g. points or buildings)..
+      if (features.gatherStats(all, graph, _dimensions)) {
+        extent = undefined;
+      }
+
+      if (extent) {
+        data = context.history().intersects(map.extent().intersection(extent));
+        set = new Set(data.map(function (entity) {
+          return entity.id;
+        }));
+        filter = function (d) {
+          return set.has(d.id);
+        };
+      }
+      else {
+        data = all;
+        fullRedraw = true;
+        filter = utilFunctor(true);
+      }
+    }
+
+    if (applyFeatureLayerFilters) {
+      data = features.filter(data, graph);
+    }
+    else {
+      context.features().resetStats();
+    }
+
+    if (mode && mode.id === 'select') {
+      // update selected vertices - the user might have just double-clicked a way,
+      // creating a new vertex, triggering a partial redraw without a mode change
+      surface.call(drawVertices.drawSelected, graph, map.extent());
+    }
+
+    surface
+      .call(drawVertices, graph, data, filter, map.extent(), fullRedraw)
+      .call(drawLines, graph, data, filter)
+      .call(drawAreas, graph, data, filter)
+      .call(drawMidpoints, graph, data, filter, map.trimmedExtent())
+      .call(drawLabels, graph, data, filter, _dimensions, fullRedraw)
+      .call(drawPoints, graph, data, filter);
+
+    dispatch.call('drawn', this, { full: true });
+  }
+
 
   function zoomPan(event, key, transform) {
     let source = event && event.sourceEvent || event;
@@ -321,12 +547,12 @@ export function rendererMap(context) {
     // class surface as `lowzoom` around z17-z18.5 (based on latitude)
     const lat = map.center()[1];
     const lowzoom = d3_scaleLinear()
-    .domain([-60, 0, 60])
-    .range([17, 18.5, 17])
-    .clamp(true);
+      .domain([-60, 0, 60])
+      .range([17, 18.5, 17])
+      .clamp(true);
 
     surface
-    .classed('low-zoom', zoom <= lowzoom(lat));
+      .classed('low-zoom', zoom <= lowzoom(lat));
 
 
     if (!difference) {
@@ -401,10 +627,12 @@ export function rendererMap(context) {
 
     if (duration) {
       _selection
-      .transition()
-      .duration(duration)
-      .on('start', function () { map.startEase(); })
-      .call(_zoomerPanner.transform, d3_zoomIdentity.translate(t2.x, t2.y).scale(t2.k));
+        .transition()
+        .duration(duration)
+        .on('start', function () {
+          map.startEase();
+        })
+        .call(_zoomerPanner.transform, d3_zoomIdentity.translate(t2.x, t2.y).scale(t2.k));
     }
     else {
       projection.transform(t2);
@@ -481,6 +709,158 @@ export function rendererMap(context) {
     return map;
   };
 
+  function zoomIn(delta) {
+    setCenterZoom(map.center(), ~~map.zoom() + delta, 250, true);
+  }
+
+  function zoomOut(delta) {
+    setCenterZoom(map.center(), ~~map.zoom() - delta, 250, true);
+  }
+
+  map.zoomIn = function () {
+    zoomIn(1);
+  };
+  map.zoomInFurther = function () {
+    zoomIn(4);
+  };
+  map.canZoomIn = function () {
+    return map.zoom() < maxZoom;
+  };
+
+  map.zoomOut = function () {
+    zoomOut(1);
+  };
+  map.zoomOutFurther = function () {
+    zoomOut(4);
+  };
+  map.canZoomOut = function () {
+    return map.zoom() > minZoom;
+  };
+
+  map.center = function (loc2) {
+    if (!arguments.length) {
+      return projection.invert(pxCenter());
+    }
+
+    if (setCenterZoom(loc2, map.zoom())) {
+      dispatch.call('move', this, map);
+    }
+
+    scheduleRedraw();
+    return map;
+  };
+
+  map.unobscuredCenterZoomEase = function (loc, zoom) {
+    let offset = map.unobscuredOffsetPx();
+
+    let proj = geoRawMercator().transform(projection.transform());  // copy projection
+    // use the target zoom to calculate the offset center
+    proj.scale(geoZoomToScale(zoom, TILESIZE));
+
+    let locPx = proj(loc);
+    let offsetLocPx = [locPx[0] + offset[0], locPx[1] + offset[1]];
+    let offsetLoc = proj.invert(offsetLocPx);
+
+    map.centerZoomEase(offsetLoc, zoom);
+  };
+
+  map.unobscuredOffsetPx = function () {
+    let openPane = context.container().select('.map-panes .map-pane.shown');
+    if (!openPane.empty()) {
+      return [openPane.node().offsetWidth / 2, 0];
+    }
+    return [0, 0];
+  };
+
+  map.zoom = function (z2) {
+    if (!arguments.length) {
+      return Math.max(geoScaleToZoom(projection.scale(), TILESIZE), 0);
+    }
+
+    if (z2 < _minzoom) {
+      surface.interrupt();
+      dispatch.call('hitMinZoom', this, map);
+      z2 = context.minEditableZoom();
+    }
+
+    if (setCenterZoom(map.center(), z2)) {
+      dispatch.call('move', this, map);
+    }
+
+    scheduleRedraw();
+    return map;
+  };
+
+
+  map.centerZoom = function (loc2, z2) {
+    if (setCenterZoom(loc2, z2)) {
+      dispatch.call('move', this, map);
+    }
+
+    scheduleRedraw();
+    return map;
+  };
+
+
+  map.zoomTo = function (entity) {
+    let extent = entity.extent(context.graph());
+    if (!isFinite(extent.area())) return map;
+
+    let z2 = clamp(map.trimmedExtentZoom(extent), 0, 20);
+    return map.centerZoom(extent.center(), z2);
+  };
+
+
+  map.centerEase = function (loc2, duration) {
+    duration = duration || 250;
+    setCenterZoom(loc2, map.zoom(), duration);
+    return map;
+  };
+
+
+  map.zoomEase = function (z2, duration) {
+    duration = duration || 250;
+    setCenterZoom(map.center(), z2, duration, false);
+    return map;
+  };
+
+
+  map.centerZoomEase = function (loc2, z2, duration) {
+    duration = duration || 250;
+    setCenterZoom(loc2, z2, duration, false);
+    return map;
+  };
+
+
+  map.transformEase = function (t2, duration) {
+    duration = duration || 250;
+    setTransform(t2, duration, false /* don't force */);
+    return map;
+  };
+
+
+  map.zoomToEase = function (obj, duration) {
+    let extent;
+    if (Array.isArray(obj)) {
+      obj.forEach(function (entity) {
+        let entityExtent = entity.extent(context.graph());
+        if (!extent) {
+          extent = entityExtent;
+        }
+        else {
+          extent = extent.extend(entityExtent);
+        }
+      });
+    }
+    else {
+      extent = obj.extent(context.graph());
+    }
+    if (!isFinite(extent.area())) return map;
+
+    let z2 = clamp(map.trimmedExtentZoom(extent), 0, 20);
+    return map.centerZoomEase(extent.center(), z2, duration);
+  };
+
   map.startEase = function () {
     utilBindOnce(surface, _pointerPrefix + 'down.ease', function () {
       map.cancelEase();
@@ -493,15 +873,32 @@ export function rendererMap(context) {
     return map;
   };
 
-  map.extent = function(val) {
+  map.extent = function (val) {
     if (!arguments.length) {
       return new geoExtent(
         projection.invert([0, _dimensions[1]]),
-        projection.invert([_dimensions[0], 0])
+        projection.invert([_dimensions[0], 0]),
       );
-    } else {
-      var extent = geoExtent(val);
+    }
+    else {
+      const extent = geoExtent(val);
       map.centerZoom(extent.center(), map.extentZoom(extent));
+    }
+  };
+
+  map.trimmedExtent = function (val) {
+    if (!arguments.length) {
+      let headerY = 71;
+      let footerY = 30;
+      let pad = 10;
+      return new geoExtent(
+        projection.invert([pad, _dimensions[1] - footerY - pad]),
+        projection.invert([_dimensions[0] - pad, headerY + pad]),
+      );
+    }
+    else {
+      let extent = geoExtent(val);
+      map.centerZoom(extent.center(), map.trimmedExtentZoom(extent));
     }
   };
 

@@ -30,61 +30,61 @@ export function rendererBackground(context) {
 
   function ensureImageryIndex() {
     return fileFetcher.get('imagery')
-                      .then(sources => {
-                        if (_imageryIndex) return _imageryIndex;
+      .then(sources => {
+        if (_imageryIndex) return _imageryIndex;
 
-                        _imageryIndex = {
-                          imagery: sources,
-                          features: {},
-                        };
+        _imageryIndex = {
+          imagery: sources,
+          features: {},
+        };
 
-                        // use which-polygon to support efficient index and querying for imagery
-                        const features = sources.map(source => {
-                          if (!source.polygon) return null;
-                          // workaround for editor-layer-index weirdness..
-                          // Add an extra array nest to each element in `source.polygon`
-                          // so the rings are not treated as a bunch of holes:
-                          // what we have: [ [[outer],[hole],[hole]] ]
-                          // what we want: [ [[outer]],[[outer]],[[outer]] ]
-                          const rings = source.polygon.map(ring => [ring]);
+        // use which-polygon to support efficient index and querying for imagery
+        const features = sources.map(source => {
+          if (!source.polygon) return null;
+          // workaround for editor-layer-index weirdness..
+          // Add an extra array nest to each element in `source.polygon`
+          // so the rings are not treated as a bunch of holes:
+          // what we have: [ [[outer],[hole],[hole]] ]
+          // what we want: [ [[outer]],[[outer]],[[outer]] ]
+          const rings = source.polygon.map(ring => [ring]);
 
-                          const feature = {
-                            type: 'Feature',
-                            properties: { id: source.id },
-                            geometry: { type: 'MultiPolygon', coordinates: rings },
-                          };
+          const feature = {
+            type: 'Feature',
+            properties: { id: source.id },
+            geometry: { type: 'MultiPolygon', coordinates: rings },
+          };
 
-                          _imageryIndex.features[source.id] = feature;
-                          return feature;
+          _imageryIndex.features[source.id] = feature;
+          return feature;
 
-                        }).filter(Boolean);
+        }).filter(Boolean);
 
-                        _imageryIndex.query = whichPolygon({ type: 'FeatureCollection', features: features });
+        _imageryIndex.query = whichPolygon({ type: 'FeatureCollection', features: features });
 
 
-                        // Instantiate `rendererBackgroundSource` objects for each source
-                        _imageryIndex.backgrounds = sources.map(source => {
-                          if (source.type === 'bing') {
-                            return rendererBackgroundSource.Bing(source, dispatch);
-                          }
-                          else if (/^EsriWorldImagery/.test(source.id)) {
-                            return rendererBackgroundSource.Esri(source);
-                          }
-                          else {
-                            return rendererBackgroundSource(source);
-                          }
-                        });
+        // Instantiate `rendererBackgroundSource` objects for each source
+        _imageryIndex.backgrounds = sources.map(source => {
+          if (source.type === 'bing') {
+            return rendererBackgroundSource.Bing(source, dispatch);
+          }
+          else if (/^EsriWorldImagery/.test(source.id)) {
+            return rendererBackgroundSource.Esri(source);
+          }
+          else {
+            return rendererBackgroundSource(source);
+          }
+        });
 
-                        // Add 'None'
-                        _imageryIndex.backgrounds.unshift(rendererBackgroundSource.None());
+        // Add 'None'
+        _imageryIndex.backgrounds.unshift(rendererBackgroundSource.None());
 
-                        // Add 'Custom'
-                        let template = prefs('background-custom-template') || '';
-                        const custom = rendererBackgroundSource.Custom(template);
-                        _imageryIndex.backgrounds.unshift(custom);
+        // Add 'Custom'
+        let template = prefs('background-custom-template') || '';
+        const custom = rendererBackgroundSource.Custom(template);
+        _imageryIndex.backgrounds.unshift(custom);
 
-                        return _imageryIndex;
-                      });
+        return _imageryIndex;
+      });
   }
 
 
@@ -126,24 +126,24 @@ export function rendererBackground(context) {
     }
 
     let base = selection.selectAll('.layer-background')
-                        .data([0]);
+      .data([0]);
 
     base = base.enter()
-               .insert('div', '.layer-data')
-               .attr('class', 'layer layer-background')
-               .merge(base);
+      .insert('div', '.layer-data')
+      .attr('class', 'layer layer-background')
+      .merge(base);
 
     base.style('filter', baseFilter || null);
 
 
     let imagery = base.selectAll('.layer-imagery')
-                      .data([0]);
+      .data([0]);
 
     imagery.enter()
-           .append('div')
-           .attr('class', 'layer layer-imagery')
-           .merge(imagery)
-           .call(baseLayer);
+      .append('div')
+      .attr('class', 'layer layer-imagery')
+      .merge(imagery)
+      .call(baseLayer);
 
 
     let maskFilter = '';
@@ -160,31 +160,31 @@ export function rendererBackground(context) {
     }
 
     let mask = base.selectAll('.layer-unsharp-mask')
-                   .data(_sharpness > 1 ? [0] : []);
+      .data(_sharpness > 1 ? [0] : []);
 
     mask.exit()
-        .remove();
+      .remove();
 
     mask.enter()
-        .append('div')
-        .attr('class', 'layer layer-mask layer-unsharp-mask')
-        .merge(mask)
-        .call(baseLayer)
-        .style('filter', maskFilter || null)
-        .style('mix-blend-mode', mixBlendMode || null);
+      .append('div')
+      .attr('class', 'layer layer-mask layer-unsharp-mask')
+      .merge(mask)
+      .call(baseLayer)
+      .style('filter', maskFilter || null)
+      .style('mix-blend-mode', mixBlendMode || null);
 
 
     let overlays = selection.selectAll('.layer-overlay')
-                            .data(_overlayLayers, d => d.source().name());
+      .data(_overlayLayers, d => d.source().name());
 
     overlays.exit()
-            .remove();
+      .remove();
 
     overlays.enter()
-            .insert('div', '.layer-data')
-            .attr('class', 'layer layer-overlay')
-            .merge(overlays)
-            .each((layer, i, nodes) => d3_select(nodes[i]).call(layer));
+      .insert('div', '.layer-data')
+      .attr('class', 'layer layer-overlay')
+      .merge(overlays)
+      .each((layer, i, nodes) => d3_select(nodes[i]).call(layer));
   }
 
 
@@ -193,9 +193,9 @@ export function rendererBackground(context) {
     if (context.inIntro() || !currSource) return;
 
     let o = _overlayLayers
-    .filter(d => !d.source().isLocatorOverlay() && !d.source().isHidden())
-    .map(d => d.source().id)
-    .join(',');
+      .filter(d => !d.source().isLocatorOverlay() && !d.source().isHidden())
+      .map(d => d.source().id)
+      .join(',');
 
     const meters = geoOffsetToMeters(currSource.offset());
     const EPSILON = 0.01;
@@ -242,8 +242,8 @@ export function rendererBackground(context) {
     }
 
     _overlayLayers
-    .filter(d => !d.source().isLocatorOverlay() && !d.source().isHidden())
-    .forEach(d => imageryUsed.push(d.source().imageryUsed()));
+      .filter(d => !d.source().isLocatorOverlay() && !d.source().isHidden())
+      .forEach(d => imageryUsed.push(d.source().imageryUsed()));
 
     const dataLayer = context.layers().layer('data');
     if (dataLayer && dataLayer.enabled() && dataLayer.hasData()) {
@@ -276,7 +276,7 @@ export function rendererBackground(context) {
 
     let visible = {};
     (_imageryIndex.query.bbox(extent.rectangle(), true) || [])
-    .forEach(d => visible[d.id] = true);
+      .forEach(d => visible[d.id] = true);
 
     const currSource = baseLayer.source();
 
@@ -379,10 +379,10 @@ export function rendererBackground(context) {
     }
 
     layer = rendererTileLayer(context)
-    .source(d)
-    .projection(context.projection)
-    .dimensions(baseLayer.dimensions(),
-    );
+      .source(d)
+      .projection(context.projection)
+      .dimensions(baseLayer.dimensions(),
+      );
 
     _overlayLayers.push(layer);
     dispatch.call('change');
@@ -520,20 +520,20 @@ export function rendererBackground(context) {
 
       if (hash.offset) {
         const offset = hash.offset
-                           .replace(/;/g, ',')
-                           .split(',')
-                           .map(n => !isNaN(n) && n);
+          .replace(/;/g, ',')
+          .split(',')
+          .map(n => !isNaN(n) && n);
 
         if (offset.length === 2) {
           background.offset(geoMetersToOffset(offset));
         }
       }
     })
-                      .catch(err => {
-                        /* eslint-disable no-console */
-                        console.error(err);
-                        /* eslint-enable no-console */
-                      });
+      .catch(err => {
+        /* eslint-disable no-console */
+        console.error(err);
+        /* eslint-enable no-console */
+      });
   };
 
 
