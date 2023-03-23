@@ -24,26 +24,26 @@ export function geoRawMercator() {
     return point && [point[0] * 180 / Math.PI, point[1] * 180 / Math.PI];
   };
 
-  projection.scale = (_) => {
+  projection.scale = function(_) {
     if (!arguments.length) return k;
     k = +_;
     return projection;
   };
 
-  projection.translate = (_) => {
+  projection.translate = function(_) {
     if (!arguments.length) return [x, y];
     x = +_[0];
     y = +_[1];
     return projection;
   };
 
-  projection.clipExtent = (_) => {
+  projection.clipExtent = function(_) {
     if (!arguments.length) return clipExtent;
     clipExtent = _;
     return projection;
   };
 
-  projection.transform = (obj) => {
+  projection.transform = function(obj) {
     if (!arguments.length) return d3_zoomIdentity.translate(x, y).scale(k);
     x = +obj.x;
     y = +obj.y;
@@ -57,7 +57,6 @@ export function geoRawMercator() {
       this.stream.point(vec[0], vec[1]);
     },
   }).stream;
-
 
   return projection;
 }

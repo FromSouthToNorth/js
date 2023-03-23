@@ -106,11 +106,11 @@ export function uiInit(context) {
       .attr('class', 'main-content active');
 
     // Top toolbar
-    content
-      .append('div')
-      .attr('class', 'top-toolbar-wrap')
-      .append('div')
-      .attr('class', 'top-toolbar fillD');
+    // content
+    //   .append('div')
+    //   .attr('class', 'top-toolbar-wrap')
+    //   .append('div')
+    //   .attr('class', 'top-toolbar fillD');
     // .call(uiTopToolbar(context));
 
     content
@@ -134,7 +134,7 @@ export function uiInit(context) {
 
     overMap
     .call(uiMapInMap(context))
-    .call(uiNotice(context));
+    // .call(uiNotice(context));
 
     // Map controls
     const controlsWrap = overMap
@@ -145,7 +145,17 @@ export function uiInit(context) {
       .append('div')
       .attr('class', 'map-controls');
 
+
+    // Setup map dimensions and move map to initial center/zoom.
+    // This should happen after .main-content and toolbars exist.
+    ui.onResize();
     map.redrawEnable(true);
+
+    ui.hash = behaviorHash(context);
+    ui.hash();
+    if (!ui.hash.hadLocation) {
+      map.centerZoom([0, 0], 2);
+    }
   }
 
   let ui = {};
