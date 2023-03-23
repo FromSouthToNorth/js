@@ -1,5 +1,5 @@
 import {
-  select as d3_select
+  select as d3_select,
 } from 'd3-selection';
 
 import { t } from '../core/localizer';
@@ -16,48 +16,53 @@ export function uiPhotoviewer(context) {
   let _pointerPrefix = 'PointerEvent' in window ? 'pointer' : 'mouse';
 
   function photoviewer(selection) {
-    selection
-    .append('button')
-    .attr('class', 'thumb-hide')
-    .attr('title', t('icons.close'))
-    .on('click', function () {
-      if (services.streetside) { services.streetside.hideViewer(context); }
-      if (services.mapillary) { services.mapillary.hideViewer(context); }
-      if (services.kartaview) { services.kartaview.hideViewer(context); }
-    })
-    .append('div')
-    .call(svgIcon('#iD-icon-close'));
+    selection.append('button').
+        attr('class', 'thumb-hide').
+        attr('title', t('icons.close')).
+        on('click', function() {
+          if (services.streetside) {
+            services.streetside.hideViewer(context);
+          }
+          if (services.mapillary) {
+            services.mapillary.hideViewer(context);
+          }
+          if (services.kartaview) {
+            services.kartaview.hideViewer(context);
+          }
+        }).
+        append('div').
+        call(svgIcon('#iD-icon-close'));
 
     function preventDefault(d3_event) {
       d3_event.preventDefault();
     }
 
-    selection
-    .append('button')
-    .attr('class', 'resize-handle-xy')
-    .on('touchstart touchdown touchend', preventDefault)
-    .on(
-      _pointerPrefix + 'down',
-      buildResizeListener(selection, 'resize', dispatch, { resizeOnX: true, resizeOnY: true })
-    );
+    selection.append('button').
+        attr('class', 'resize-handle-xy').
+        on('touchstart touchdown touchend', preventDefault).
+        on(
+            _pointerPrefix + 'down',
+            buildResizeListener(selection, 'resize', dispatch,
+                { resizeOnX: true, resizeOnY: true }),
+        );
 
-    selection
-    .append('button')
-    .attr('class', 'resize-handle-x')
-    .on('touchstart touchdown touchend', preventDefault)
-    .on(
-      _pointerPrefix + 'down',
-      buildResizeListener(selection, 'resize', dispatch, { resizeOnX: true })
-    );
+    selection.append('button').
+        attr('class', 'resize-handle-x').
+        on('touchstart touchdown touchend', preventDefault).
+        on(
+            _pointerPrefix + 'down',
+            buildResizeListener(selection, 'resize', dispatch,
+                { resizeOnX: true }),
+        );
 
-    selection
-    .append('button')
-    .attr('class', 'resize-handle-y')
-    .on('touchstart touchdown touchend', preventDefault)
-    .on(
-      _pointerPrefix + 'down',
-      buildResizeListener(selection, 'resize', dispatch, { resizeOnY: true })
-    );
+    selection.append('button').
+        attr('class', 'resize-handle-y').
+        on('touchstart touchdown touchend', preventDefault).
+        on(
+            _pointerPrefix + 'down',
+            buildResizeListener(selection, 'resize', dispatch,
+                { resizeOnY: true }),
+        );
 
     function buildResizeListener(target, eventName, dispatch, options) {
 
@@ -81,13 +86,15 @@ export function uiPhotoviewer(context) {
 
         if (resizeOnX) {
           let maxWidth = mapSize[0];
-          let newWidth = clamp((startWidth + d3_event.clientX - startX), minWidth, maxWidth);
+          let newWidth = clamp((startWidth + d3_event.clientX - startX),
+              minWidth, maxWidth);
           target.style('width', newWidth + 'px');
         }
 
         if (resizeOnY) {
           let maxHeight = mapSize[1] - 90;  // preserve space at top/bottom of map
-          let newHeight = clamp((startHeight + startY - d3_event.clientY), minHeight, maxHeight);
+          let newHeight = clamp((startHeight + startY - d3_event.clientY),
+              minHeight, maxHeight);
           target.style('height', newHeight + 'px');
         }
 
@@ -105,8 +112,7 @@ export function uiPhotoviewer(context) {
         d3_event.stopPropagation();
 
         // remove all the listeners we added
-        d3_select(window)
-        .on('.' + eventName, null);
+        d3_select(window).on('.' + eventName, null);
       }
 
       return function initResize(d3_event) {
@@ -121,13 +127,12 @@ export function uiPhotoviewer(context) {
         startWidth = targetRect.width;
         startHeight = targetRect.height;
 
-        d3_select(window)
-        .on(_pointerPrefix + 'move.' + eventName, startResize, false)
-        .on(_pointerPrefix + 'up.' + eventName, stopResize, false);
+        d3_select(window).
+            on(_pointerPrefix + 'move.' + eventName, startResize, false).
+            on(_pointerPrefix + 'up.' + eventName, stopResize, false);
 
         if (_pointerPrefix === 'pointer') {
-          d3_select(window)
-          .on('pointercancel.' + eventName, stopResize, false);
+          d3_select(window).on('pointercancel.' + eventName, stopResize, false);
         }
       };
     }
@@ -140,15 +145,15 @@ export function uiPhotoviewer(context) {
     // shrink photo viewer if it is too big
     // (-90 preserves space at top and bottom of map used by menus)
     let photoDimensions = utilGetDimensions(photoviewer, true);
-    if (photoDimensions[0] > mapDimensions[0] || photoDimensions[1] > (mapDimensions[1] - 90)) {
+    if (photoDimensions[0] > mapDimensions[0] || photoDimensions[1] >
+        (mapDimensions[1] - 90)) {
       let setPhotoDimensions = [
         Math.min(photoDimensions[0], mapDimensions[0]),
         Math.min(photoDimensions[1], mapDimensions[1] - 90),
       ];
 
-      photoviewer
-      .style('width', setPhotoDimensions[0] + 'px')
-      .style('height', setPhotoDimensions[1] + 'px');
+      photoviewer.style('width', setPhotoDimensions[0] + 'px').
+          style('height', setPhotoDimensions[1] + 'px');
 
       dispatch.call('resize', photoviewer, setPhotoDimensions);
     }

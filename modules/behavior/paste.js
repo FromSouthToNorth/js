@@ -32,7 +32,7 @@ export function behaviorPaste(context) {
 
     let copies = action.copies();
     let originals = new Set();
-    Object.values(copies).forEach(function (entity) {
+    Object.values(copies).forEach(function(entity) {
       originals.add(entity.id);
     });
 
@@ -44,7 +44,7 @@ export function behaviorPaste(context) {
 
       // Exclude child nodes from newIDs if their parent way was also copied.
       let parents = context.graph().parentWays(newEntity);
-      let parentCopied = parents.some(function (parent) {
+      let parentCopied = parents.some(function(parent) {
         return originals.has(parent.id);
       });
 
@@ -54,24 +54,22 @@ export function behaviorPaste(context) {
     }
 
     // Put pasted objects where mouse pointer is..
-    let copyPoint = (context.copyLonLat() && projection(context.copyLonLat())) || projection(extent.center());
+    let copyPoint = (context.copyLonLat() &&
+        projection(context.copyLonLat())) || projection(extent.center());
     let delta = geoVecSubtract(mouse, copyPoint);
 
     context.perform(actionMove(newIDs, delta, projection));
     context.enter(modeMove(context, newIDs, baseGraph));
   }
 
-
   function behavior() {
     context.keybinding().on(uiCmd('⌘V'), doPaste);
     return behavior;
   }
 
-
-  behavior.off = function () {
+  behavior.off = function() {
     context.keybinding().off(uiCmd('⌘V'));
   };
-
 
   return behavior;
 

@@ -6,15 +6,14 @@ import { localizer } from '../core/localizer';
 const apibase = 'https://www.wikidata.org/w/api.php?';
 let _wikidataCache = {};
 
-
 export default {
 
-  init: function() {},
+  init: function() {
+  },
 
   reset: function() {
     _wikidataCache = {};
   },
-
 
   // Search for Wikidata items matching the query
   itemsForSearchQuery: function(query, callback) {
@@ -36,21 +35,18 @@ export default {
       // the language for the label and description in the result
       uselang: lang,
       limit: 10,
-      origin: '*'
+      origin: '*',
     });
 
-    d3_json(url)
-    .then(function(result) {
+    d3_json(url).then(function(result) {
       if (result && result.error) {
         throw new Error(result.error);
       }
       if (callback) callback(null, result.search || {});
-    })
-    .catch(function(err) {
+    }).catch(function(err) {
       if (callback) callback(err.message, {});
     });
   },
-
 
   // Given a Wikipedia language and article title,
   // return an array of corresponding Wikidata entities.
@@ -68,21 +64,18 @@ export default {
       sites: lang.replace(/-/g, '_') + 'wiki',
       titles: title,
       languages: 'en', // shrink response by filtering to one language
-      origin: '*'
+      origin: '*',
     });
 
-    d3_json(url)
-    .then(function(result) {
+    d3_json(url).then(function(result) {
       if (result && result.error) {
         throw new Error(result.error);
       }
       if (callback) callback(null, result.entities || {});
-    })
-    .catch(function(err) {
+    }).catch(function(err) {
       if (callback) callback(err.message, {});
     });
   },
-
 
   languagesToQuery: function() {
     return localizer.localeCodes().map(function(code) {
@@ -93,7 +86,6 @@ export default {
       return code !== 'en-us';
     });
   },
-
 
   entityByQID: function(qid, callback) {
     if (!qid) {
@@ -112,24 +104,23 @@ export default {
       formatversion: 2,
       ids: qid,
       props: 'labels|descriptions|claims|sitelinks',
-      sitefilter: langs.map(function(d) { return d + 'wiki'; }).join('|'),
+      sitefilter: langs.map(function(d) {
+        return d + 'wiki';
+      }).join('|'),
       languages: langs.join('|'),
       languagefallback: 1,
-      origin: '*'
+      origin: '*',
     });
 
-    d3_json(url)
-    .then(function(result) {
+    d3_json(url).then(function(result) {
       if (result && result.error) {
         throw new Error(result.error);
       }
       if (callback) callback(null, result.entities[qid] || {});
-    })
-    .catch(function(err) {
+    }).catch(function(err) {
       if (callback) callback(err.message, {});
     });
   },
-
 
   // Pass `params` object of the form:
   // {
@@ -157,25 +148,28 @@ export default {
       var description;
       for (i in langs) {
         let code = langs[i];
-        if (entity.descriptions[code] && entity.descriptions[code].language === code) {
+        if (entity.descriptions[code] && entity.descriptions[code].language ===
+            code) {
           description = entity.descriptions[code];
           break;
         }
       }
-      if (!description && Object.values(entity.descriptions).length) description = Object.values(entity.descriptions)[0];
+      if (!description && Object.values(
+          entity.descriptions).length) description = Object.values(
+          entity.descriptions)[0];
 
       // prepare result
       var result = {
         title: entity.id,
         description: description ? description.value : '',
         descriptionLocaleCode: description ? description.language : '',
-        editURL: 'https://www.wikidata.org/wiki/' + entity.id
+        editURL: 'https://www.wikidata.org/wiki/' + entity.id,
       };
 
       // add image
       if (entity.claims) {
         var imageroot = 'https://commons.wikimedia.org/w/index.php';
-        var props = ['P154','P18'];  // logo image, image
+        var props = ['P154', 'P18'];  // logo image, image
         var prop, image;
         for (i = 0; i < props.length; i++) {
           prop = entity.claims[props[i]];
@@ -184,7 +178,7 @@ export default {
             if (image) {
               result.imageURL = imageroot + '?' + utilQsString({
                 title: 'Special:Redirect/file/' + image,
-                width: 400
+                width: 400,
               });
               break;
             }
@@ -208,7 +202,8 @@ export default {
             result.wiki = {
               title: title,
               text: tKey,
-              url: 'https://' + langs[i] + '.wikipedia.org/wiki/' + title.replace(/ /g, '_')
+              url: 'https://' + langs[i] + '.wikipedia.org/wiki/' +
+                  title.replace(/ /g, '_'),
             };
             break;
           }
@@ -217,6 +212,6 @@ export default {
 
       callback(null, result);
     });
-  }
+  },
 
 };

@@ -11,23 +11,21 @@ export function behaviorLasso(context) {
   // use pointer events on supported platforms; fallback to mouse events
   let _pointerPrefix = 'PointerEvent' in window ? 'pointer' : 'mouse';
 
-  let behavior = function (selection) {
+  let behavior = function(selection) {
     let lasso;
-
 
     function pointerdown(d3_event) {
       let button = 0;  // left
       if (d3_event.button === button && d3_event.shiftKey === true) {
         lasso = null;
 
-        d3_select(window)
-          .on(_pointerPrefix + 'move.lasso', pointermove)
-          .on(_pointerPrefix + 'up.lasso', pointerup);
+        d3_select(window).
+            on(_pointerPrefix + 'move.lasso', pointermove).
+            on(_pointerPrefix + 'up.lasso', pointerup);
 
         d3_event.stopPropagation();
       }
     }
-
 
     function pointermove() {
       if (!lasso) {
@@ -38,7 +36,6 @@ export function behaviorLasso(context) {
       lasso.p(context.map().mouse());
     }
 
-
     function normalize(a, b) {
       return [
         [Math.min(a[0], b[0]), Math.min(a[1], b[1])],
@@ -46,14 +43,14 @@ export function behaviorLasso(context) {
       ];
     }
 
-
     function lassoed() {
       if (!lasso) return [];
 
       let graph = context.graph();
       let limitToNodes;
 
-      if (context.map().editableDataEnabled(true /* skipZoomCheck */) && context.map().isInWideSelection()) {
+      if (context.map().editableDataEnabled(true /* skipZoomCheck */) &&
+          context.map().isInWideSelection()) {
         // only select from the visible nodes
         limitToNodes = new Set(utilGetAllNodes(context.selectedIDs(), graph));
       }
@@ -64,15 +61,19 @@ export function behaviorLasso(context) {
       let bounds = lasso.extent().map(context.projection.invert);
       let extent = geoExtent(normalize(bounds[0], bounds[1]));
 
-      let intersects = context.history().intersects(extent).filter(function (entity) {
-        return entity.type === 'node' &&
-          (!limitToNodes || limitToNodes.has(entity)) &&
-          geoPointInPolygon(context.projection(entity.loc), lasso.coordinates) &&
-          !context.features().isHidden(entity, graph, entity.geometry(graph));
-      });
+      let intersects = context.history().
+          intersects(extent).
+          filter(function(entity) {
+            return entity.type === 'node' &&
+                (!limitToNodes || limitToNodes.has(entity)) &&
+                geoPointInPolygon(context.projection(entity.loc),
+                    lasso.coordinates) &&
+                !context.features().
+                    isHidden(entity, graph, entity.geometry(graph));
+          });
 
       // sort the lassoed nodes as best we can
-      intersects.sort(function (node1, node2) {
+      intersects.sort(function(node1, node2) {
         let parents1 = graph.parentWays(node1);
         let parents2 = graph.parentWays(node2);
         if (parents1.length && parents2.length) {
@@ -83,12 +84,12 @@ export function behaviorLasso(context) {
             let sharedParentNodes = sharedParents[0].nodes;
             // vertices are members of the same way; sort them in their listed order
             return sharedParentNodes.indexOf(node1.id) -
-              sharedParentNodes.indexOf(node2.id);
+                sharedParentNodes.indexOf(node2.id);
           }
           else {
             // vertices do not share a way; group them by their respective parent ways
             return Number(parents1[0].id.slice(1)) -
-              Number(parents2[0].id.slice(1));
+                Number(parents2[0].id.slice(1));
           }
 
         }
@@ -100,16 +101,15 @@ export function behaviorLasso(context) {
         return node1.loc[0] - node2.loc[0];
       });
 
-      return intersects.map(function (entity) {
+      return intersects.map(function(entity) {
         return entity.id;
       });
     }
 
-
     function pointerup() {
-      d3_select(window)
-        .on(_pointerPrefix + 'move.lasso', null)
-        .on(_pointerPrefix + 'up.lasso', null);
+      d3_select(window).
+          on(_pointerPrefix + 'move.lasso', null).
+          on(_pointerPrefix + 'up.lasso', null);
 
       if (!lasso) return;
 
@@ -121,15 +121,12 @@ export function behaviorLasso(context) {
       }
     }
 
-    selection
-      .on(_pointerPrefix + 'down.lasso', pointerdown);
+    selection.on(_pointerPrefix + 'down.lasso', pointerdown);
   };
 
-
-  behavior.off = function (selection) {
+  behavior.off = function(selection) {
     selection.on(_pointerPrefix + 'down.lasso', null);
   };
-
 
   return behavior;
 }

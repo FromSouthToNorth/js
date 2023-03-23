@@ -41,12 +41,14 @@ export function utilTiler() {
     ];
 
     const cols = d3_range(
-      clamp(Math.floor(-origin[0]) - _margin, tileMin, tileMax + 1),
-      clamp(Math.ceil(_size[0] / k - origin[0]) + _margin, tileMin, tileMax + 1),
+        clamp(Math.floor(-origin[0]) - _margin, tileMin, tileMax + 1),
+        clamp(Math.ceil(_size[0] / k - origin[0]) + _margin, tileMin,
+            tileMax + 1),
     );
     const rows = d3_range(
-      clamp(Math.floor(-origin[1]) - _margin, tileMin, tileMax + 1),
-      clamp(Math.ceil(_size[1] / k - origin[1]) + _margin, tileMin, tileMax + 1),
+        clamp(Math.floor(-origin[1]) - _margin, tileMin, tileMax + 1),
+        clamp(Math.ceil(_size[1] / k - origin[1]) + _margin, tileMin,
+            tileMax + 1),
     );
 
     const tiles = [];
@@ -56,7 +58,7 @@ export function utilTiler() {
         const x = cols[j];
 
         if (i >= _margin && i <= rows.length - _margin &&
-          j >= _margin && j <= cols.length - _margin) {
+            j >= _margin && j <= cols.length - _margin) {
           tiles.unshift([x, y, z0]);  // tiles in view at beginning
         }
         else {
@@ -74,22 +76,20 @@ export function utilTiler() {
   /**
    * getTiles() returns an array of tiles that cover the map view
    */
-  tiler.getTiles = function (projection) {
+  tiler.getTiles = function(projection) {
     const origin = [
       projection.scale() * Math.PI - projection.translate()[0],
       projection.scale() * Math.PI - projection.translate()[1],
     ];
 
-    this
-    .size(projection.clipExtent()[1])
-    .scale(projection.scale() * 2 * Math.PI)
-    .translate(projection.translate());
+    this.size(projection.clipExtent()[1]).
+        scale(projection.scale() * 2 * Math.PI).
+        translate(projection.translate());
 
     const tiles = tiler();
     const ts = tiles.scale;
 
-    return tiles
-    .map(function (tile) {
+    return tiles.map(function(tile) {
       if (_skipNullIsland && nearNullIsland(tile)) {
         return false;
       }
@@ -99,8 +99,8 @@ export function utilTiler() {
         id: tile.toString(),
         xyz: tile,
         extent: geoExtent(
-          projection.invert([x, y + ts]),
-          projection.invert([x + ts, y]),
+            projection.invert([x, y + ts]),
+            projection.invert([x + ts, y]),
         ),
       };
     }).filter(Boolean);
@@ -109,8 +109,8 @@ export function utilTiler() {
   /**
    * getGeoJSON() returns a FeatureCollection for debugging tiles
    */
-  tiler.getGeoJSON = function (projection) {
-    const features = tiler.getTiles(projection).map(function (tile) {
+  tiler.getGeoJSON = function(projection) {
+    const features = tiler.getTiles(projection).map(function(tile) {
       return {
         type: 'Feature',
         properties: {
@@ -130,56 +130,48 @@ export function utilTiler() {
     };
   };
 
-
-  tiler.tileSize = function (val) {
+  tiler.tileSize = function(val) {
     if (!arguments.length) return _tileSize;
     _tileSize = val;
     return tiler;
   };
 
-
-  tiler.zoomExtent = function (val) {
+  tiler.zoomExtent = function(val) {
     if (!arguments.length) return _zoomExtent;
     _zoomExtent = val;
     return tiler;
   };
 
-
-  tiler.size = function (val) {
+  tiler.size = function(val) {
     if (!arguments.length) return _size;
     _size = val;
     return tiler;
   };
 
-
-  tiler.scale = function (val) {
+  tiler.scale = function(val) {
     if (!arguments.length) return _scale;
     _scale = val;
     return tiler;
   };
 
-
-  tiler.translate = function (val) {
+  tiler.translate = function(val) {
     if (!arguments.length) return _translate;
     _translate = val;
     return tiler;
   };
 
-
   // number to extend the rows/columns beyond those covering the viewport
-  tiler.margin = function (val) {
+  tiler.margin = function(val) {
     if (!arguments.length) return _margin;
     _margin = +val;
     return tiler;
   };
 
-
-  tiler.skipNullIsland = function (val) {
+  tiler.skipNullIsland = function(val) {
     if (!arguments.length) return _skipNullIsland;
     _skipNullIsland = val;
     return tiler;
   };
-
 
   return tiler;
 }

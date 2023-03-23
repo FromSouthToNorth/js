@@ -5,7 +5,12 @@ import { select as d3_select } from 'd3-selection';
 import { geoSphericalDistance } from '../geo';
 import { modeBrowse } from '../modes/browse';
 import { modeSelect } from '../modes/select';
-import { utilDisplayLabel, utilObjectOmit, utilQsString, utilStringQs } from '../util';
+import {
+  utilDisplayLabel,
+  utilObjectOmit,
+  utilQsString,
+  utilStringQs,
+} from '../util';
 import { utilArrayIdentical } from '../util/array';
 import { t } from '../core/localizer';
 import { prefs } from '../core/preferences';
@@ -23,12 +28,12 @@ export function behaviorHash(context) {
     let zoom = map.zoom();
     let precision = Math.max(0, Math.ceil(Math.log(zoom) / Math.LN2));
     let oldParams = utilObjectOmit(utilStringQs(window.location.hash),
-      ['comment', 'source', 'hashtags', 'walkthrough'],
+        ['comment', 'source', 'hashtags', 'walkthrough'],
     );
     let newParams = {};
 
     delete oldParams.id;
-    let selected = context.selectedIDs().filter(function (id) {
+    let selected = context.selectedIDs().filter(function(id) {
       return context.hasEntity(id);
     });
     if (selected.length) {
@@ -36,8 +41,8 @@ export function behaviorHash(context) {
     }
 
     newParams.map = zoom.toFixed(2) +
-      '/' + center[1].toFixed(precision) +
-      '/' + center[0].toFixed(precision);
+        '/' + center[1].toFixed(precision) +
+        '/' + center[0].toFixed(precision);
 
     return Object.assign(oldParams, newParams);
   }
@@ -53,11 +58,12 @@ export function behaviorHash(context) {
     let changeCount;
     let titleID;
 
-    let selected = context.selectedIDs().filter(function (id) {
+    let selected = context.selectedIDs().filter(function(id) {
       return context.hasEntity(id);
     });
     if (selected.length) {
-      let firstLabel = utilDisplayLabel(context.entity(selected[0]), context.graph());
+      let firstLabel = utilDisplayLabel(context.entity(selected[0]),
+          context.graph());
       if (selected.length > 1) {
         contextual = t('title.labeled_and_more', {
           labeled: firstLabel,
@@ -106,7 +112,8 @@ export function behaviorHash(context) {
 
       // Update the URL hash without affecting the browser navigation stack,
       // though unavoidably creating a browser history entry
-      window.history.replaceState(null, computedTitle(false /* includeChangeCount */), latestHash);
+      window.history.replaceState(null,
+          computedTitle(false /* includeChangeCount */), latestHash);
 
       // set the title we want displayed for the browser tab/window
       updateTitle(true /* includeChangeCount */);
@@ -120,7 +127,7 @@ export function behaviorHash(context) {
   }
 
   let _throttledUpdate = _throttle(updateHashIfNeeded, 500);
-  let _throttledUpdateTitle = _throttle(function () {
+  let _throttledUpdateTitle = _throttle(function() {
     updateTitle(true /* includeChangeCount */);
   }, 500);
 
@@ -145,15 +152,19 @@ export function behaviorHash(context) {
 
       let mode = context.mode();
 
-      context.map()
-             .centerZoom([mapArgs[2], Math.min(_latitudeLimit, Math.max(-_latitudeLimit, mapArgs[1]))], mapArgs[0]);
+      context.map().
+          centerZoom([
+                mapArgs[2],
+                Math.min(_latitudeLimit, Math.max(-_latitudeLimit, mapArgs[1]))],
+              mapArgs[0]);
 
       if (q.id && mode) {
-        let ids = q.id.split(',').filter(function (id) {
+        let ids = q.id.split(',').filter(function(id) {
           return context.hasEntity(id);
         });
         if (ids.length &&
-          (mode.id === 'browse' || (mode.id === 'select' && !utilArrayIdentical(mode.selectedIDs(), ids)))) {
+            (mode.id === 'browse' || (mode.id === 'select' &&
+                !utilArrayIdentical(mode.selectedIDs(), ids)))) {
           context.enter(modeSelect(context, ids));
           return;
         }
@@ -173,17 +184,13 @@ export function behaviorHash(context) {
   }
 
   function behavior() {
-    context.map()
-           .on('move.behaviorHash', _throttledUpdate);
+    context.map().on('move.behaviorHash', _throttledUpdate);
 
-    context.history()
-           .on('change.behaviorHash', _throttledUpdateTitle);
+    context.history().on('change.behaviorHash', _throttledUpdateTitle);
 
-    context
-    .on('enter.behaviorHash', _throttledUpdate);
+    context.on('enter.behaviorHash', _throttledUpdate);
 
-    d3_select(window)
-    .on('hashchange.behaviorHash', hashchange);
+    d3_select(window).on('hashchange.behaviorHash', hashchange);
 
     let q = utilStringQs(window.location.hash);
 
@@ -204,8 +211,11 @@ export function behaviorHash(context) {
     else if (!q.id && prefs('map-location')) {
       // center map at last visited map location
       const mapArgs = prefs('map-location').split('/').map(Number);
-      context.map()
-             .centerZoom([mapArgs[2], Math.min(_latitudeLimit, Math.max(-_latitudeLimit, mapArgs[1]))], mapArgs[0]);
+      context.map().
+          centerZoom([
+                mapArgs[2],
+                Math.min(_latitudeLimit, Math.max(-_latitudeLimit, mapArgs[1]))],
+              mapArgs[0]);
 
       updateHashIfNeeded();
 
@@ -217,18 +227,15 @@ export function behaviorHash(context) {
     updateTitle(false);
   }
 
-  behavior.off = function () {
+  behavior.off = function() {
     _throttledUpdate.cancel();
     _throttledUpdateTitle.cancel();
 
-    context.map()
-           .on('move.behaviorHash', null);
+    context.map().on('move.behaviorHash', null);
 
-    context
-    .on('enter.behaviorHash', null);
+    context.on('enter.behaviorHash', null);
 
-    d3_select(window)
-    .on('hashchange.behaviorHash', null);
+    d3_select(window).on('hashchange.behaviorHash', null);
 
     window.location.hash = '';
   };

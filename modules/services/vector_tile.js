@@ -10,28 +10,28 @@ import vt from '@mapbox/vector-tile';
 
 import { utilHashcode, utilRebind, utilTiler } from '../util';
 
-
 const tiler = utilTiler().tileSize(512).margin(1);
 const dispatch = d3_dispatch('loadedData');
 let _vtCache;
-
 
 function abortRequest(controller) {
   controller.abort();
 }
 
-
 function vtToGeoJSON(data, tile, mergeCache) {
   let vectorTile = new vt.VectorTile(new Protobuf(data));
   let layers = Object.keys(vectorTile.layers);
-  if (!Array.isArray(layers)) { layers = [layers]; }
+  if (!Array.isArray(layers)) {
+    layers = [layers];
+  }
 
   let features = [];
   layers.forEach(function(layerID) {
     let layer = vectorTile.layers[layerID];
     if (layer) {
       for (let i = 0; i < layer.length; i++) {
-        let feature = layer.feature(i).toGeoJSON(tile.xyz[0], tile.xyz[1], tile.xyz[2]);
+        let feature = layer.feature(i).
+            toGeoJSON(tile.xyz[0], tile.xyz[1], tile.xyz[2]);
         let geometry = feature.geometry;
 
         // Treat all Polygons as MultiPolygons
@@ -67,8 +67,8 @@ function vtToGeoJSON(data, tile, mergeCache) {
           if (merged && merged.length) {
             let other = merged[0];
             let coords = polygonClipping.union(
-              feature.geometry.coordinates,
-              other.geometry.coordinates
+                feature.geometry.coordinates,
+                other.geometry.coordinates,
             );
 
             if (!coords || !coords.length) {
@@ -80,7 +80,8 @@ function vtToGeoJSON(data, tile, mergeCache) {
               merged[j].geometry.coordinates = coords;   // same coords
               merged[j].__featurehash__ = featurehash;   // same hash, so deduplication works
             }
-          } else {
+          }
+          else {
             mergeCache[propertyhash] = [feature];
           }
         }
@@ -91,35 +92,30 @@ function vtToGeoJSON(data, tile, mergeCache) {
   return features;
 }
 
-
 function loadTile(source, tile) {
   if (source.loaded[tile.id] || source.inflight[tile.id]) return;
 
-  let url = source.template
-  .replace('{x}', tile.xyz[0])
-  .replace('{y}', tile.xyz[1])
-  // TMS-flipped y coordinate
-  .replace(/\{[t-]y\}/, Math.pow(2, tile.xyz[2]) - tile.xyz[1] - 1)
-  .replace(/\{z(oom)?\}/, tile.xyz[2])
-  .replace(/\{switch:([^}]+)\}/, function(s, r) {
-    let subdomains = r.split(',');
-    return subdomains[(tile.xyz[0] + tile.xyz[1]) % subdomains.length];
-  });
-
+  let url = source.template.replace('{x}', tile.xyz[0]).
+      replace('{y}', tile.xyz[1])
+      // TMS-flipped y coordinate
+      .replace(/\{[t-]y\}/, Math.pow(2, tile.xyz[2]) - tile.xyz[1] - 1).
+      replace(/\{z(oom)?\}/, tile.xyz[2]).
+      replace(/\{switch:([^}]+)\}/, function(s, r) {
+        let subdomains = r.split(',');
+        return subdomains[(tile.xyz[0] + tile.xyz[1]) % subdomains.length];
+      });
 
   let controller = new AbortController();
   source.inflight[tile.id] = controller;
 
-  fetch(url, { signal: controller.signal })
-  .then(function(response) {
+  fetch(url, { signal: controller.signal }).then(function(response) {
     if (!response.ok) {
       throw new Error(response.status + ' ' + response.statusText);
     }
     source.loaded[tile.id] = [];
     delete source.inflight[tile.id];
     return response.arrayBuffer();
-  })
-  .then(function(data) {
+  }).then(function(data) {
     if (!data) {
       throw new Error('No Data');
     }
@@ -131,13 +127,11 @@ function loadTile(source, tile) {
 
     source.loaded[tile.id] = vtToGeoJSON(data, tile, source.canMerge[z]);
     dispatch.call('loadedData');
-  })
-  .catch(function() {
+  }).catch(function() {
     source.loaded[tile.id] = [];
     delete source.inflight[tile.id];
   });
 }
-
 
 export default {
 
@@ -148,7 +142,6 @@ export default {
 
     this.event = utilRebind(this, dispatch, 'on');
   },
-
 
   reset: function() {
     for (let sourceID in _vtCache) {
@@ -161,12 +154,15 @@ export default {
     _vtCache = {};
   },
 
-
   addSource: function(sourceID, template) {
-    _vtCache[sourceID] = { template: template, inflight: {}, loaded: {}, canMerge: {} };
+    _vtCache[sourceID] = {
+      template: template,
+      inflight: {},
+      loaded: {},
+      canMerge: {},
+    };
     return _vtCache[sourceID];
   },
-
 
   data: function(sourceID, projection) {
     let source = _vtCache[sourceID];
@@ -195,7 +191,6 @@ export default {
     return results;
   },
 
-
   loadTiles: function(sourceID, template, projection) {
     let source = _vtCache[sourceID];
     if (!source) {
@@ -206,7 +201,9 @@ export default {
 
     // abort inflight requests that are no longer needed
     Object.keys(source.inflight).forEach(function(k) {
-      let wanted = tiles.find(function(tile) { return k === tile.id; });
+      let wanted = tiles.find(function(tile) {
+        return k === tile.id;
+      });
       if (!wanted) {
         abortRequest(source.inflight[k]);
         delete source.inflight[k];
@@ -218,9 +215,8 @@ export default {
     });
   },
 
-
   cache: function() {
     return _vtCache;
-  }
+  },
 
 };

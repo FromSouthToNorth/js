@@ -9,7 +9,8 @@ export function geoLatToMeters(dLat) {
 
 export function geoLonToMeters(dLon, atLat) {
   return Math.abs(atLat) >= 90 ? 0 :
-    dLon * (TAU * EQUATORIAL_RADIUS / 360) * Math.abs(Math.cos(atLat * (Math.PI / 180)));
+         dLon * (TAU * EQUATORIAL_RADIUS / 360) *
+             Math.abs(Math.cos(atLat * (Math.PI / 180)));
 }
 
 export function geoScaleToZoom(k, tileSize) {
@@ -24,14 +25,15 @@ export function geoMetersToLat(m) {
 
 export function geoMetersToLon(m, atLat) {
   return Math.abs(atLat) >= 90 ? 0 :
-    m / (TAU * EQUATORIAL_RADIUS / 360) / Math.abs(Math.abs(atLat * (Math.PI / 180)));
+         m / (TAU * EQUATORIAL_RADIUS / 360) /
+             Math.abs(Math.abs(atLat * (Math.PI / 180)));
 }
 
 export function geoMetersToOffset(meters, tileSize) {
   tileSize = tileSize || 256;
   return [
     meters[0] * tileSize / (TAU * EQUATORIAL_RADIUS),
-    -meters[1] * tileSize / (TAU * POLAR_RADIUS)
+    -meters[1] * tileSize / (TAU * POLAR_RADIUS),
   ];
 }
 
@@ -39,7 +41,7 @@ export function geoOffsetToMeters(offset, tileSize) {
   tileSize = tileSize || 256;
   return [
     offset[0] * TAU * EQUATORIAL_RADIUS / tileSize,
-    -offset[1] * TAU * POLAR_RADIUS / tileSize
+    -offset[1] * TAU * POLAR_RADIUS / tileSize,
   ];
 }
 

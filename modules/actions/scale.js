@@ -1,11 +1,11 @@
 import { utilGetAllNodes } from '../util';
 
 export function actionScale(ids, pivotLoc, scaleFactor, projection) {
-  return function (graph) {
-    return graph.update(function (graph) {
+  return function(graph) {
+    return graph.update(function(graph) {
       let point, radial;
 
-      utilGetAllNodes(ids, graph).forEach(function (node) {
+      utilGetAllNodes(ids, graph).forEach(function(node) {
 
         point = projection(node.loc);
         radial = [

@@ -34,10 +34,22 @@ export function presetIndex() {
   const MAXRECENTS = 30;
 
   // seed the preset lists with geometry fallbacks
-  const POINT = presetPreset('point', { name: 'Point', tags: {}, geometry: ['point', 'vertex'], matchScore: 0.1 });
-  const LINE = presetPreset('line', { name: 'Line', tags: {}, geometry: ['line'], matchScore: 0.1 });
-  const AREA = presetPreset('area', { name: 'Area', tags: { area: 'yes' }, geometry: ['area'], matchScore: 0.1 });
-  const RELATION = presetPreset('relation', { name: 'Relation', tags: {}, geometry: ['relation'], matchScore: 0.1 });
+  const POINT = presetPreset('point', {
+    name: 'Point',
+    tags: {},
+    geometry: ['point', 'vertex'],
+    matchScore: 0.1,
+  });
+  const LINE = presetPreset('line',
+      { name: 'Line', tags: {}, geometry: ['line'], matchScore: 0.1 });
+  const AREA = presetPreset('area', {
+    name: 'Area',
+    tags: { area: 'yes' },
+    geometry: ['area'],
+    matchScore: 0.1,
+  });
+  const RELATION = presetPreset('relation',
+      { name: 'Relation', tags: {}, geometry: ['relation'], matchScore: 0.1 });
 
   let _this = presetCollection([POINT, LINE, AREA, RELATION]);
   let _presets = { point: POINT, line: LINE, area: AREA, relation: RELATION };
@@ -58,9 +70,14 @@ export function presetIndex() {
   let _favorites;
 
   // Index of presets by (geometry, tag key).
-  let _geometryIndex = { point: {}, vertex: {}, line: {}, area: {}, relation: {} };
+  let _geometryIndex = {
+    point: {},
+    vertex: {},
+    line: {},
+    area: {},
+    relation: {},
+  };
   let _loadPromise;
-
 
   _this.ensureLoaded = () => {
     if (_loadPromise) return _loadPromise;
@@ -70,21 +87,19 @@ export function presetIndex() {
       fileFetcher.get('preset_defaults'),
       fileFetcher.get('preset_presets'),
       fileFetcher.get('preset_fields'),
-    ])
-                                 .then(vals => {
-                                   _this.merge({
-                                     categories: vals[0],
-                                     defaults: vals[1],
-                                     presets: vals[2],
-                                     fields: vals[3],
-                                   });
-                                   osmSetAreaKeys(_this.areaKeys());
-                                   osmSetLineTags(_this.lineTags());
-                                   osmSetPointTags(_this.pointTags());
-                                   osmSetVertexTags(_this.vertexTags());
-                                 });
+    ]).then(vals => {
+      _this.merge({
+        categories: vals[0],
+        defaults: vals[1],
+        presets: vals[2],
+        fields: vals[3],
+      });
+      osmSetAreaKeys(_this.areaKeys());
+      osmSetLineTags(_this.lineTags());
+      osmSetPointTags(_this.pointTags());
+      osmSetVertexTags(_this.vertexTags());
+    });
   };
-
 
   // `merge` accepts an object containing new preset data (all properties optional):
   // {
@@ -120,7 +135,8 @@ export function presetIndex() {
         let p = d.presets[presetID];
 
         if (p) {   // add or replace
-          const isAddable = !_addablePresetIDs || _addablePresetIDs.has(presetID);
+          const isAddable = !_addablePresetIDs ||
+              _addablePresetIDs.has(presetID);
           p = presetPreset(presetID, p, isAddable, _fields, _presets);
           if (p.locationSet) newLocationSets.push(p);
           _presets[presetID] = p;
@@ -153,7 +169,8 @@ export function presetIndex() {
     }
 
     // Rebuild _this.collection after changing presets and categories
-    _this.collection = Object.values(_presets).concat(Object.values(_categories));
+    _this.collection = Object.values(_presets).
+        concat(Object.values(_categories));
 
     // Merge Defaults
     if (d.defaults) {
@@ -161,7 +178,7 @@ export function presetIndex() {
         const def = d.defaults[geometry];
         if (Array.isArray(def)) {   // add or replace
           _defaults[geometry] = presetCollection(
-            def.map(id => _presets[id] || _categories[id]).filter(Boolean),
+              def.map(id => _presets[id] || _categories[id]).filter(Boolean),
           );
         }
         else {   // remove
@@ -177,7 +194,13 @@ export function presetIndex() {
     Object.values(_presets).forEach(preset => preset.resetFields());
 
     // Rebuild geometry index
-    _geometryIndex = { point: {}, vertex: {}, line: {}, area: {}, relation: {} };
+    _geometryIndex = {
+      point: {},
+      vertex: {},
+      line: {},
+      area: {},
+      relation: {},
+    };
     _this.collection.forEach(preset => {
       (preset.geometry || []).forEach(geometry => {
         let g = _geometryIndex[geometry];
@@ -202,7 +225,6 @@ export function presetIndex() {
     return _this;
   };
 
-
   _this.match = (entity, resolver) => {
     return resolver.transient(entity, 'presetMatch', () => {
       let geometry = entity.geometry(resolver);
@@ -214,7 +236,6 @@ export function presetIndex() {
       return _this.matchTags(entity.tags, geometry, entityExtent.center());
     });
   };
-
 
   _this.matchTags = (tags, geometry, loc) => {
     const keyIndex = _geometryIndex[geometry];
@@ -251,13 +272,15 @@ export function presetIndex() {
       }
     }
 
-    if (bestMatch && bestMatch.locationSetID && bestMatch.locationSetID !== '+[Q2]' && Array.isArray(loc)) {
+    if (bestMatch && bestMatch.locationSetID && bestMatch.locationSetID !==
+        '+[Q2]' && Array.isArray(loc)) {
       const validHere = locationManager.locationSetsAt(loc);
       if (!validHere[bestMatch.locationSetID]) {
         matchCandidates.sort((a, b) => (a.score < b.score) ? 1 : -1);
         for (let i = 0; i < matchCandidates.length; i++) {
           const candidateScore = matchCandidates[i];
-          if (!candidateScore.candidate.locationSetID || validHere[candidateScore.candidate.locationSetID]) {
+          if (!candidateScore.candidate.locationSetID ||
+              validHere[candidateScore.candidate.locationSetID]) {
             bestMatch = candidateScore.candidate;
             bestScore = candidateScore.score;
             break;
@@ -295,7 +318,6 @@ export function presetIndex() {
     });
   };
 
-
   // Because of the open nature of tagging, iD will never have a complete
   // list of tags used in OSM, so we want it to have logic like "assume
   // that a closed way with an amenity tag is an area, unless the amenity
@@ -321,7 +343,8 @@ export function presetIndex() {
     let areaKeys = {};
 
     // ignore name-suggestion-index and deprecated presets
-    const presets = _this.collection.filter(p => !p.suggestion && !p.replacement);
+    const presets = _this.collection.filter(
+        p => !p.suggestion && !p.replacement);
 
     // keeplist
     presets.forEach(p => {
@@ -342,8 +365,8 @@ export function presetIndex() {
         // examine all addTags to get a better sense of what can be tagged on lines - #6800
         const value = p.addTags[key];
         if (key in areaKeys &&                    // probably an area...
-          p.geometry.indexOf('line') !== -1 &&    // but sometimes a line
-          value !== '*') {
+            p.geometry.indexOf('line') !== -1 &&    // but sometimes a line
+            value !== '*') {
           areaKeys[key][value] = true;
         }
       }
@@ -352,11 +375,11 @@ export function presetIndex() {
     return areaKeys;
   };
 
-
   _this.lineTags = () => {
     return _this.collection.filter((lineTags, d) => {
       // ignore name-suggestion-index, deprecated, and generic presets
-      if (d.suggestion || d.replacement || d.searchable === false) return lineTags;
+      if (d.suggestion || d.replacement || d.searchable ===
+          false) return lineTags;
 
       // only care about the primary tag
       const keys = d.tags && Object.keys(d.tags);
@@ -372,11 +395,11 @@ export function presetIndex() {
     }, {});
   };
 
-
   _this.pointTags = () => {
     return _this.collection.reduce((pointTags, d) => {
       // ignore name-suggestion-index, deprecated, and generic presets
-      if (d.suggestion || d.replacement || d.searchable === false) return pointTags;
+      if (d.suggestion || d.replacement || d.searchable ===
+          false) return pointTags;
 
       // only care about the primary tag
       const keys = d.tags && Object.keys(d.tags);
@@ -392,11 +415,11 @@ export function presetIndex() {
     }, {});
   };
 
-
   _this.vertexTags = () => {
     return _this.collection.reduce((vertexTags, d) => {
       // ignore name-suggestion-index, deprecated, and generic presets
-      if (d.suggestion || d.replacement || d.searchable === false) return vertexTags;
+      if (d.suggestion || d.replacement || d.searchable ===
+          false) return vertexTags;
 
       // only care about the primary tag
       const keys = d.tags && Object.keys(d.tags);
@@ -412,11 +435,9 @@ export function presetIndex() {
     }, {});
   };
 
-
   _this.field = (id) => _fields[id];
 
   _this.universal = () => _universal;
-
 
   _this.defaults = (geometry, n, startWithRecents, loc, extraPresets) => {
     let recents = [];
@@ -426,30 +447,33 @@ export function presetIndex() {
 
     let defaults;
     if (_addablePresetIDs) {
-      defaults = Array.from(_addablePresetIDs).map(function (id) {
+      defaults = Array.from(_addablePresetIDs).map(function(id) {
         var preset = _this.item(id);
         if (preset && preset.matchGeometry(geometry)) return preset;
         return null;
       }).filter(Boolean);
     }
     else {
-      defaults = _defaults[geometry].collection.concat(_this.fallback(geometry));
+      defaults = _defaults[geometry].collection.concat(
+          _this.fallback(geometry));
     }
 
     let result = presetCollection(
-      utilArrayUniq(recents.concat(defaults).concat(extraPresets || [])).slice(0, n - 1),
+        utilArrayUniq(recents.concat(defaults).concat(extraPresets || [])).
+            slice(0, n - 1),
     );
 
     if (Array.isArray(loc)) {
       const validHere = locationManager.locationSetsAt(loc);
-      result.collection = result.collection.filter(a => !a.locationSetID || validHere[a.locationSetID]);
+      result.collection = result.collection.filter(
+          a => !a.locationSetID || validHere[a.locationSetID]);
     }
 
     return result;
   };
 
   // pass a Set of addable preset ids
-  _this.addablePresetIDs = function (val) {
+  _this.addablePresetIDs = function(val) {
     if (!arguments.length) return _addablePresetIDs;
 
     // accept and convert arrays
@@ -471,15 +495,13 @@ export function presetIndex() {
     return _this;
   };
 
-
   _this.recent = () => {
     return presetCollection(
-      utilArrayUniq(_this.getRecents()
-                         .map(d => d.preset)
-                         .filter(d => d.searchable !== false)),
+        utilArrayUniq(_this.getRecents().
+            map(d => d.preset).
+            filter(d => d.searchable !== false)),
     );
   };
-
 
   function RibbonItem(preset, source) {
     let item = {};
@@ -494,7 +516,6 @@ export function presetIndex() {
     return item;
   }
 
-
   function ribbonItemForMinified(d, source) {
     if (d && d.pID) {
       const preset = _this.item(d.pID);
@@ -504,11 +525,10 @@ export function presetIndex() {
     return null;
   }
 
-
   _this.getGenericRibbonItems = () => {
-    return ['point', 'line', 'area'].map(id => RibbonItem(_this.item(id), 'generic'));
+    return ['point', 'line', 'area'].map(
+        id => RibbonItem(_this.item(id), 'generic'));
   };
-
 
   _this.getAddable = () => {
     if (!_addablePresetIDs) return [];
@@ -520,7 +540,6 @@ export function presetIndex() {
     }).filter(Boolean);
   };
 
-
   function setRecents(items) {
     _recents = items;
     const minifiedItems = items.map(d => d.minified());
@@ -528,20 +547,18 @@ export function presetIndex() {
     dispatch.call('recentsChange');
   }
 
-
   _this.getRecents = () => {
     if (!_recents) {
       // fetch from local storage
-      _recents = (JSON.parse(prefs('preset_recents')) || [])
-      .reduce((acc, d) => {
-        let item = ribbonItemForMinified(d, 'recent');
-        if (item && item.preset.addable()) acc.push(item);
-        return acc;
-      }, []);
+      _recents = (JSON.parse(prefs('preset_recents')) || []).reduce(
+          (acc, d) => {
+            let item = ribbonItemForMinified(d, 'recent');
+            if (item && item.preset.addable()) acc.push(item);
+            return acc;
+          }, []);
     }
     return _recents;
   };
-
 
   _this.addRecent = (preset, besidePreset, after) => {
     const recents = _this.getRecents();
@@ -555,7 +572,6 @@ export function presetIndex() {
     setRecents(recents);
   };
 
-
   _this.removeRecent = (preset) => {
     const item = _this.recentMatching(preset);
     if (item) {
@@ -564,7 +580,6 @@ export function presetIndex() {
       setRecents(items);
     }
   };
-
 
   _this.recentMatching = (preset) => {
     const items = _this.getRecents();
@@ -576,17 +591,15 @@ export function presetIndex() {
     return null;
   };
 
-
   _this.moveItem = (items, fromIndex, toIndex) => {
     if (fromIndex === toIndex ||
-      fromIndex < 0 || toIndex < 0 ||
-      fromIndex >= items.length || toIndex >= items.length
+        fromIndex < 0 || toIndex < 0 ||
+        fromIndex >= items.length || toIndex >= items.length
     ) return null;
 
     items.splice(toIndex, 0, items.splice(fromIndex, 1)[0]);
     return items;
   };
-
 
   _this.moveRecent = (item, beforeItem) => {
     const recents = _this.getRecents();
@@ -595,7 +608,6 @@ export function presetIndex() {
     const items = _this.moveItem(recents, fromIndex, toIndex);
     if (items) setRecents(items);
   };
-
 
   _this.setMostRecent = (preset) => {
     if (preset.searchable === false) return;
@@ -658,7 +670,6 @@ export function presetIndex() {
     setFavorites(favs);
   };
 
-
   _this.removeFavorite = (preset) => {
     const item = _this.favoriteMatching(preset);
     if (item) {
@@ -667,7 +678,6 @@ export function presetIndex() {
       setFavorites(items);
     }
   };
-
 
   _this.getFavorites = () => {
     if (!_favorites) {
@@ -689,7 +699,6 @@ export function presetIndex() {
     return _favorites;
   };
 
-
   _this.favoriteMatching = (preset) => {
     const favs = _this.getFavorites();
     for (let index in favs) {
@@ -699,7 +708,6 @@ export function presetIndex() {
     }
     return null;
   };
-
 
   return utilRebind(_this, dispatch, 'on');
 }

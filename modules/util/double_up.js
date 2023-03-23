@@ -17,8 +17,8 @@ export function utilDoubleUp() {
   function pointerIsValidFor(loc) {
     // second pointerup must occur within a small timeframe after the first pointerdown
     return new Date().getTime() - _pointer.startTime <= _maxTimespan &&
-      // all pointer events must occur within a small distance of the first pointerdown
-      geoVecLength(_pointer.startLoc, loc) <= _maxDistance;
+        // all pointer events must occur within a small distance of the first pointerdown
+        geoVecLength(_pointer.startLoc, loc) <= _maxDistance;
   }
 
   function pointerdown(d3_event) {
@@ -72,24 +72,22 @@ export function utilDoubleUp() {
     if ('PointerEvent' in window) {
       // dblclick isn't well supported on touch devices so manually use
       // pointer events if they're available
-      selection
-      .on('pointerdown.doubleUp', pointerdown)
-      .on('pointerup.doubleUp', pointerup);
+      selection.on('pointerdown.doubleUp', pointerdown).
+          on('pointerup.doubleUp', pointerup);
     }
     else {
       // fallback to dblclick
-      selection
-      .on('dblclick.doubleUp', function (d3_event) {
-        dispatch.call('doubleUp', this, d3_event, utilFastMouse(this)(d3_event));
+      selection.on('dblclick.doubleUp', function(d3_event) {
+        dispatch.call('doubleUp', this, d3_event,
+            utilFastMouse(this)(d3_event));
       });
     }
   }
 
-  doubleUp.off = function (selection) {
-    selection
-    .on('pointerdown.doubleUp', null)
-    .on('pointerup.doubleUp', null)
-    .on('dblclick.doubleUp', null);
+  doubleUp.off = function(selection) {
+    selection.on('pointerdown.doubleUp', null).
+        on('pointerup.doubleUp', null).
+        on('dblclick.doubleUp', null);
   };
 
   return utilRebind(doubleUp, dispatch, 'on');

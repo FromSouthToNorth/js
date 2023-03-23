@@ -55,7 +55,7 @@ let _noteCache = {
   closed: {},
   rtree: new RBush(),
 };
-let _userCache = {toLoad: {}, user: {}};
+let _userCache = { toLoad: {}, user: {} };
 let _cachedApiStatus;
 let _changeset = {};
 
@@ -270,15 +270,15 @@ let jsonparsers = {
 };
 
 function parseJSON(payload, callback, options) {
-  options = Object.assign({skipSeen: true}, options);
+  options = Object.assign({ skipSeen: true }, options);
   if (!payload) {
-    return callback({message: 'No JSON', status: -1});
+    return callback({ message: 'No JSON', status: -1 });
   }
 
   let json = payload;
   if (typeof json !== 'object') json = JSON.parse(payload);
 
-  if (!json.elements) return callback({message: 'No JSON', status: -1});
+  if (!json.elements) return callback({ message: 'No JSON', status: -1 });
 
   let children = json.elements;
 
@@ -311,16 +311,16 @@ function parseJSON(payload, callback, options) {
 }
 
 function parseUserJSON(payload, callback, options) {
-  options = Object.assign({skipSeen: true}, options);
+  options = Object.assign({ skipSeen: true }, options);
   if (!payload) {
-    return callback({message: 'No JSON', status: -1});
+    return callback({ message: 'No JSON', status: -1 });
   }
 
   let json = payload;
   if (typeof json !== 'object') json = JSON.parse(payload);
 
   if (!json.users && !json.user) return callback(
-      {message: 'No JSON', status: -1});
+      { message: 'No JSON', status: -1 });
 
   let objs = json.users || [json];
 
@@ -472,9 +472,9 @@ let parsers = {
 };
 
 function parseXML(xml, callback, options) {
-  options = Object.assign({skipSeen: true}, options);
+  options = Object.assign({ skipSeen: true }, options);
   if (!xml || !xml.childNodes) {
-    return callback({message: 'No XML', status: -1});
+    return callback({ message: 'No XML', status: -1 });
   }
 
   let root = xml.childNodes[0];
@@ -544,7 +544,7 @@ function wrapcb(thisArg, callback, cid) {
     }
     else if (thisArg.getConnectionId() !== cid) {
       return callback.call(thisArg,
-          {message: 'Connection Switched', status: -1});
+          { message: 'Connection Switched', status: -1 });
 
     }
     else {
@@ -591,7 +591,7 @@ export default {
       closed: {},
       rtree: new RBush(),
     };
-    _userCache = {toLoad: {}, user: {}};
+    _userCache = { toLoad: {}, user: {} };
     _cachedApiStatus = undefined;
     _changeset = {};
 
@@ -642,13 +642,13 @@ export default {
   // Generic method to load data from the OSM API
   // Can handle either auth or unauth calls.
   loadFromAPI: function(path, callback, options) {
-    options = Object.assign({skipSeen: true}, options);
+    options = Object.assign({ skipSeen: true }, options);
     let that = this;
     let cid = _connectionID;
 
     function done(err, payload) {
       if (that.getConnectionId() !== cid) {
-        if (callback) callback({message: 'Connection Switched', status: -1});
+        if (callback) callback({ message: 'Connection Switched', status: -1 });
         return;
       }
 
@@ -697,7 +697,7 @@ export default {
     }
 
     if (this.authenticated()) {
-      return oauth.xhr({method: 'GET', path: path}, done);
+      return oauth.xhr({ method: 'GET', path: path }, done);
     }
     else {
       let url = urlRoot + path;
@@ -710,7 +710,7 @@ export default {
         fn = d3_xml;
       }
 
-      fn(url, {signal: controller.signal}).then(function(data) {
+      fn(url, { signal: controller.signal }).then(function(data) {
         done(null, data);
       }).catch(function(err) {
         if (err.name === 'AbortError') return;
@@ -719,7 +719,7 @@ export default {
         // https://github.com/d3/d3-fetch/issues/27
         let match = err.message.match(/^\d{3}/);
         if (match) {
-          done({status: +match[0], statusText: err.message});
+          done({ status: +match[0], statusText: err.message });
         }
         else {
           done(err.message);
@@ -736,13 +736,13 @@ export default {
   loadEntity: function(id, callback) {
     let type = osmEntity.id.type(id);
     let osmID = osmEntity.id.toOSM(id);
-    let options = {skipSeen: false};
+    let options = { skipSeen: false };
 
     this.loadFromAPI(
         '/api/0.6/' + type + '/' + osmID + (type !== 'node' ? '/full' : '') +
         '.json',
         function(err, entities) {
-          if (callback) callback(err, {data: entities});
+          if (callback) callback(err, { data: entities });
         },
         options,
     );
@@ -753,12 +753,12 @@ export default {
   loadEntityVersion: function(id, version, callback) {
     let type = osmEntity.id.type(id);
     let osmID = osmEntity.id.toOSM(id);
-    let options = {skipSeen: false};
+    let options = { skipSeen: false };
 
     this.loadFromAPI(
         '/api/0.6/' + type + '/' + osmID + '/' + version + '.json',
         function(err, entities) {
-          if (callback) callback(err, {data: entities});
+          if (callback) callback(err, { data: entities });
         },
         options,
     );
@@ -769,12 +769,12 @@ export default {
   loadEntityRelations: function(id, callback) {
     let type = osmEntity.id.type(id);
     let osmID = osmEntity.id.toOSM(id);
-    let options = {skipSeen: false};
+    let options = { skipSeen: false };
 
     this.loadFromAPI(
         '/api/0.6/' + type + '/' + osmID + '/relations.json',
         function(err, entities) {
-          if (callback) callback(err, {data: entities});
+          if (callback) callback(err, { data: entities });
         },
         options,
     );
@@ -793,13 +793,13 @@ export default {
       let osmIDs = groups[k].map(function(id) {
         return osmEntity.id.toOSM(id);
       });
-      let options = {skipSeen: false};
+      let options = { skipSeen: false };
 
       utilArrayChunk(osmIDs, 150).forEach(function(arr) {
         that.loadFromAPI(
             '/api/0.6/' + type + '.json?' + type + '=' + arr.join(),
             function(err, entities) {
-              if (callback) callback(err, {data: entities});
+              if (callback) callback(err, { data: entities });
             },
             options,
         );
@@ -815,7 +815,7 @@ export default {
     let cid = _connectionID;
 
     if (_changeset.inflight) {
-      return callback({message: 'Changeset already inflight', status: -2},
+      return callback({ message: 'Changeset already inflight', status: -2 },
           changeset);
 
     }
@@ -827,7 +827,7 @@ export default {
       let options = {
         method: 'PUT',
         path: '/api/0.6/changeset/create',
-        headers: {'Content-Type': 'text/xml'},
+        headers: { 'Content-Type': 'text/xml' },
         content: JXON.stringify(changeset.asJXON()),
       };
       _changeset.inflight = oauth.xhr(
@@ -843,13 +843,13 @@ export default {
       }
 
       _changeset.open = changesetID;
-      changeset = changeset.update({id: changesetID});
+      changeset = changeset.update({ id: changesetID });
 
       // Upload the changeset..
       let options = {
         method: 'POST',
         path: '/api/0.6/changeset/' + changesetID + '/upload',
-        headers: {'Content-Type': 'text/xml'},
+        headers: { 'Content-Type': 'text/xml' },
         content: JXON.stringify(changeset.osmChangeJXON(changes)),
       };
       _changeset.inflight = oauth.xhr(
@@ -876,7 +876,7 @@ export default {
         oauth.xhr({
           method: 'PUT',
           path: '/api/0.6/changeset/' + changeset.id + '/close',
-          headers: {'Content-Type': 'text/xml'},
+          headers: { 'Content-Type': 'text/xml' },
         }, function() {
           return true;
         });
@@ -908,7 +908,7 @@ export default {
 
     utilArrayChunk(toLoad, 150).forEach(function(arr) {
       oauth.xhr(
-          {method: 'GET', path: '/api/0.6/users.json?users=' + arr.join()},
+          { method: 'GET', path: '/api/0.6/users.json?users=' + arr.join() },
           wrapcb(this, done, _connectionID),
       );
     }.bind(this));
@@ -916,7 +916,7 @@ export default {
     function done(err, payload) {
       if (err) return callback(err);
 
-      let options = {skipSeen: true};
+      let options = { skipSeen: true };
       return parseUserJSON(payload, function(err, results) {
         if (err) return callback(err);
         return callback(undefined, results);
@@ -933,14 +933,14 @@ export default {
     }
 
     oauth.xhr(
-        {method: 'GET', path: '/api/0.6/user/' + uid + '.json'},
+        { method: 'GET', path: '/api/0.6/user/' + uid + '.json' },
         wrapcb(this, done, _connectionID),
     );
 
     function done(err, payload) {
       if (err) return callback(err);
 
-      let options = {skipSeen: true};
+      let options = { skipSeen: true };
       return parseUserJSON(payload, function(err, results) {
         if (err) return callback(err);
         return callback(undefined, results[0]);
@@ -956,14 +956,14 @@ export default {
     }
 
     oauth.xhr(
-        {method: 'GET', path: '/api/0.6/user/details.json'},
+        { method: 'GET', path: '/api/0.6/user/details.json' },
         wrapcb(this, done, _connectionID),
     );
 
     function done(err, payload) {
       if (err) return callback(err);
 
-      let options = {skipSeen: false};
+      let options = { skipSeen: false };
       return parseUserJSON(payload, function(err, results) {
         if (err) return callback(err);
         _userDetails = results[0];
@@ -989,7 +989,7 @@ export default {
       }
 
       oauth.xhr(
-          {method: 'GET', path: '/api/0.6/changesets?user=' + user.id},
+          { method: 'GET', path: '/api/0.6/changesets?user=' + user.id },
           wrapcb(this, done, _connectionID),
       );
     }
@@ -1002,7 +1002,7 @@ export default {
       _userChangesets = Array.prototype.map.call(
           xml.getElementsByTagName('changeset'),
           function(changeset) {
-            return {tags: getTags(changeset)};
+            return { tags: getTags(changeset) };
           },
       ).filter(function(changeset) {
         let comment = changeset.tags.comment;
@@ -1120,7 +1120,7 @@ export default {
     }
 
     let path = '/api/0.6/map.json?bbox=';
-    let options = {skipSeen: true};
+    let options = { skipSeen: true };
 
     _tileCache.inflight[tile.id] = this.loadFromAPI(
         path + tile.extent.toParam(),
@@ -1138,7 +1138,7 @@ export default {
         _tileCache.rtree.insert(bbox);
       }
       if (callback) {
-        callback(err, Object.assign({data: parsed}, tile));
+        callback(err, Object.assign({ data: parsed }, tile));
       }
       if (!hasInflightRequests(_tileCache)) {
         dispatch.call('loaded');     // stop the spinner
@@ -1147,7 +1147,7 @@ export default {
   },
 
   isDataLoaded: function(loc) {
-    let bbox = {minX: loc[0], minY: loc[1], maxX: loc[0], maxY: loc[1]};
+    let bbox = { minX: loc[0], minY: loc[1], maxX: loc[0], maxY: loc[1] };
     return _tileCache.rtree.collides(bbox);
   },
 
@@ -1161,7 +1161,7 @@ export default {
     let k = geoZoomToScale(_tileZoom + 1);
     let offset = geoRawMercator().scale(k)(loc);
     let projection = geoRawMercator().
-    transform({k: k, x: -offset[0], y: -offset[1]});
+        transform({ k: k, x: -offset[0], y: -offset[1] });
     let tiles = tiler.zoomExtent([_tileZoom, _tileZoom]).getTiles(projection);
 
     tiles.forEach(function(tile) {
@@ -1176,7 +1176,7 @@ export default {
   // Load notes from the API in tiles
   // GET /api/0.6/notes?bbox=
   loadNotes: function(projection, noteOptions) {
-    noteOptions = Object.assign({limit: 10000, closed: 7}, noteOptions);
+    noteOptions = Object.assign({ limit: 10000, closed: 7 }, noteOptions);
     if (_off) return;
 
     let that = this;
@@ -1199,7 +1199,7 @@ export default {
     tiles.forEach(function(tile) {
       if (_noteCache.loaded[tile.id] || _noteCache.inflight[tile.id]) return;
 
-      let options = {skipSeen: false};
+      let options = { skipSeen: false };
       _noteCache.inflight[tile.id] = that.loadFromAPI(
           path + tile.extent.toParam(),
           function(err) {
@@ -1219,10 +1219,10 @@ export default {
   // POST /api/0.6/notes?params
   postNoteCreate: function(note, callback) {
     if (!this.authenticated()) {
-      return callback({message: 'Not Authenticated', status: -3}, note);
+      return callback({ message: 'Not Authenticated', status: -3 }, note);
     }
     if (_noteCache.inflightPost[note.id]) {
-      return callback({message: 'Note update already inflight', status: -2},
+      return callback({ message: 'Note update already inflight', status: -2 },
           note);
     }
 
@@ -1234,10 +1234,10 @@ export default {
     }
 
     let path = '/api/0.6/notes?' +
-        utilQsString({lon: note.loc[0], lat: note.loc[1], text: comment});
+        utilQsString({ lon: note.loc[0], lat: note.loc[1], text: comment });
 
     _noteCache.inflightPost[note.id] = oauth.xhr(
-        {method: 'POST', path: path},
+        { method: 'POST', path: path },
         wrapcb(this, done, _connectionID),
     );
 
@@ -1250,7 +1250,7 @@ export default {
       // we get the updated note back, remove from caches and reparse..
       this.removeNote(note);
 
-      let options = {skipSeen: false};
+      let options = { skipSeen: false };
       return parseXML(xml, function(err, results) {
         if (err) {
           return callback(err);
@@ -1268,10 +1268,10 @@ export default {
   // POST /api/0.6/notes/#id/reopen?text=comment
   postNoteUpdate: function(note, newStatus, callback) {
     if (!this.authenticated()) {
-      return callback({message: 'Not Authenticated', status: -3}, note);
+      return callback({ message: 'Not Authenticated', status: -3 }, note);
     }
     if (_noteCache.inflightPost[note.id]) {
-      return callback({message: 'Note update already inflight', status: -2},
+      return callback({ message: 'Note update already inflight', status: -2 },
           note);
     }
 
@@ -1289,11 +1289,11 @@ export default {
 
     let path = '/api/0.6/notes/' + note.id + '/' + action;
     if (note.newComment) {
-      path += '?' + utilQsString({text: note.newComment});
+      path += '?' + utilQsString({ text: note.newComment });
     }
 
     _noteCache.inflightPost[note.id] = oauth.xhr(
-        {method: 'POST', path: path},
+        { method: 'POST', path: path },
         wrapcb(this, done, _connectionID),
     );
 
@@ -1314,7 +1314,7 @@ export default {
         delete _noteCache.closed[note.id];
       }
 
-      let options = {skipSeen: false};
+      let options = { skipSeen: false };
       return parseXML(xml, function(err, results) {
         if (err) {
           return callback(err);
@@ -1437,7 +1437,7 @@ export default {
         return;
       }
       if (that.getConnectionId() !== cid) {
-        if (callback) callback({message: 'Connection Switched', status: -1});
+        if (callback) callback({ message: 'Connection Switched', status: -1 });
         return;
       }
       _rateLimitError = undefined;

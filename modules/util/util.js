@@ -68,9 +68,9 @@ export function utilGetAllNodes(ids, graph) {
       entity.nodes.forEach(collectNodes);
     }
     else {
-      entity.members
-            .map(function (member) { return member.id; })
-            .forEach(collectNodes);   // recurse
+      entity.members.map(function(member) {
+        return member.id;
+      }).forEach(collectNodes);   // recurse
     }
   }
 }
@@ -79,12 +79,13 @@ export function utilQsString(obj, noencode) {
   // encode everything except special characters used in certain hash parameters:
   // "/" in map states, ":", ",", {" and "}" in background
   function softEncode(s) {
-    return encodeURIComponent(s).replace(/(%2F|%3A|%2C|%7B|%7D)/g, decodeURIComponent);
+    return encodeURIComponent(s).
+        replace(/(%2F|%3A|%2C|%7B|%7D)/g, decodeURIComponent);
   }
 
   return Object.keys(obj).sort().map((key) => {
     return encodeURIComponent(key) + '=' + (
-      noencode ? softEncode(obj[key]) : encodeURIComponent(obj[key]));
+        noencode ? softEncode(obj[key]) : encodeURIComponent(obj[key]));
   }).join('&');
 }
 
@@ -103,9 +104,9 @@ export function utilEntityAndDeepMemberIDs(ids, graph) {
     let entity = graph.hasEntity(id);
     if (!entity || entity.type !== 'relation') return;
 
-    entity.members
-          .map(function (member) { return member.id; })
-          .forEach(collectDeepDescendants);   // recurse
+    entity.members.map(function(member) {
+      return member.id;
+    }).forEach(collectDeepDescendants);   // recurse
   }
 }
 
@@ -129,12 +130,11 @@ export function utilDeepMemberSelector(ids, graph, skipMultipolgonMembers) {
     let entity = graph.hasEntity(id);
     if (!entity || entity.type !== 'relation') return;
     if (skipMultipolgonMembers && entity.isMultipolygon()) return;
-    entity.members
-          .map(function (member) { return member.id; })
-          .forEach(collectDeepDescendants);   // recurse
+    entity.members.map(function(member) {
+      return member.id;
+    }).forEach(collectDeepDescendants);   // recurse
   }
 }
-
 
 /**
  * 一个 d3.mouse-like
@@ -144,12 +144,12 @@ export function utilDeepMemberSelector(ids, graph, skipMultipolgonMembers) {
  */
 export function utilFastMouse(container) {
   const rect = container.getBoundingClientRect(),
-    rectLeft = rect.left,
-    rectTop = rect.top,
-    clientLeft = +container.clientLeft,
-    clientTop = +container.clientTop;
+      rectLeft = rect.left,
+      rectTop = rect.top,
+      clientLeft = +container.clientLeft,
+      clientTop = +container.clientTop;
 
-  return function (e) {
+  return function(e) {
     return [
       e.clientX - rectLeft - clientLeft,
       e.clientY - rectTop - clientTop,
@@ -161,7 +161,7 @@ export function utilFunctor(value) {
   if (typeof value === 'function') {
     return value;
   }
-  return function () {
+  return function() {
     return value;
   };
 }
@@ -178,7 +178,8 @@ export function utilPrefixCSSProperty(property) {
 
   while (++i < n) {
     if (prefixes[i] + property in s) {
-      return '-' + prefixes[i].toLowerCase() + property.replace(/([A-Z])/g, '-$1').toLowerCase();
+      return '-' + prefixes[i].toLowerCase() +
+          property.replace(/([A-Z])/g, '-$1').toLowerCase();
     }
   }
 
@@ -188,9 +189,12 @@ export function utilPrefixCSSProperty(property) {
 let transformProperty;
 
 export function utilSetTransform(el, x, y, scale) {
-  const prop = transformProperty = transformProperty || utilPrefixCSSProperty('Transform');
-  const translate = utilDetect().opera ? 'translate(' + x + 'px,' + y + 'px)'
-    : 'translate3d(' + x + 'px,' + y + 'px,0)';
+  const prop = transformProperty = transformProperty ||
+      utilPrefixCSSProperty('Transform');
+  const translate = utilDetect().opera ?
+                    'translate(' + x + 'px,' + y + 'px)'
+                                       :
+                    'translate3d(' + x + 'px,' + y + 'px,0)';
   return el.style(prop, translate + (scale ? ' scale(' + scale + ')' : ''));
 }
 
@@ -199,7 +203,6 @@ export function utilSetTransform(el, x, y, scale) {
 export function utilUnicodeCharsTruncated(str, limit) {
   return Array.from(str).slice(0, limit).join('');
 }
-
 
 // returns a normalized and truncated string to `maxChars` utf-8 characters
 export function utilCleanOsmString(val, maxChars) {
@@ -284,7 +287,6 @@ export function utilDisplayType(id) {
   }[id.charAt(0)];
 }
 
-
 // `utilDisplayLabel`
 // Returns a string suitable for display
 // By default returns something like name/ref, fallback to preset type, fallback to OSM type
@@ -296,9 +298,10 @@ export function utilDisplayLabel(entity, graphOrGeometry, verbose) {
   let result;
   let displayName = utilDisplayName(entity);
   let preset = typeof graphOrGeometry === 'string' ?
-    presetManager.matchTags(entity.tags, graphOrGeometry) :
-    presetManager.match(entity, graphOrGeometry);
-  let presetName = preset && (preset.suggestion ? preset.subtitle() : preset.name());
+               presetManager.matchTags(entity.tags, graphOrGeometry) :
+               presetManager.match(entity, graphOrGeometry);
+  let presetName = preset &&
+      (preset.suggestion ? preset.subtitle() : preset.name());
 
   if (verbose) {
     result = [presetName, displayName].filter(Boolean).join(' ');
@@ -334,8 +337,8 @@ export function utilEditDistance(a, b) {
       }
       else {
         matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, // substitution
-          Math.min(matrix[i][j - 1] + 1, // insertion
-            matrix[i - 1][j] + 1)); // deletion
+            Math.min(matrix[i][j - 1] + 1, // insertion
+                matrix[i - 1][j] + 1)); // deletion
       }
     }
   }
@@ -356,7 +359,6 @@ export function utilHashcode(str) {
   }
   return hash;
 }
-
 
 // Returns version of `str` with all runs of special characters replaced by `_`;
 // suitable for HTML ids, classes, selectors, etc.

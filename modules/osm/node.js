@@ -3,28 +3,29 @@ import { geoAngle, geoExtent } from '../geo';
 import { utilArrayUniq } from '../util';
 
 export const cardinal = {
-  north: 0,               n: 0,
-  northnortheast: 22,     nne: 22,
-  northeast: 45,          ne: 45,
-  eastnortheast: 67,      ene: 67,
-  east: 90,               e: 90,
-  eastsoutheast: 112,     ese: 112,
-  southeast: 135,         se: 135,
-  southsoutheast: 157,    sse: 157,
-  south: 180,             s: 180,
-  southsouthwest: 202,    ssw: 202,
-  southwest: 225,         sw: 225,
-  westsouthwest: 247,     wsw: 247,
-  west: 270,              w: 270,
-  westnorthwest: 292,     wnw: 292,
-  northwest: 315,         nw: 315,
-  northnorthwest: 337,    nnw: 337
+  north: 0, n: 0,
+  northnortheast: 22, nne: 22,
+  northeast: 45, ne: 45,
+  eastnortheast: 67, ene: 67,
+  east: 90, e: 90,
+  eastsoutheast: 112, ese: 112,
+  southeast: 135, se: 135,
+  southsoutheast: 157, sse: 157,
+  south: 180, s: 180,
+  southsouthwest: 202, ssw: 202,
+  southwest: 225, sw: 225,
+  westsouthwest: 247, wsw: 247,
+  west: 270, w: 270,
+  westnorthwest: 292, wnw: 292,
+  northwest: 315, nw: 315,
+  northnorthwest: 337, nnw: 337,
 };
 
 export function osmNode() {
   if (!(this instanceof osmNode)) {
     return (new osmNode()).initialize(arguments);
-  } else if (arguments.length) {
+  }
+  else if (arguments.length) {
     this.initialize(arguments);
   }
 }
@@ -41,27 +42,23 @@ Object.assign(osmNode.prototype, {
     return new geoExtent(this.loc);
   },
 
-
   geometry: function(graph) {
     return graph.transient(this, 'geometry', function() {
       return graph.isPoi(this) ? 'point' : 'vertex';
     });
   },
 
-
   move: function(loc) {
-    return this.update({loc: loc});
+    return this.update({ loc: loc });
   },
-
 
   isDegenerate: function() {
     return !(
-      Array.isArray(this.loc) && this.loc.length === 2 &&
-      this.loc[0] >= -180 && this.loc[0] <= 180 &&
-      this.loc[1] >= -90 && this.loc[1] <= 90
+        Array.isArray(this.loc) && this.loc.length === 2 &&
+        this.loc[0] >= -180 && this.loc[0] <= 180 &&
+        this.loc[1] >= -90 && this.loc[1] <= 90
     );
   },
-
 
   // Inspect tags and geometry to determine which direction(s) this node/vertex points
   directions: function(resolver, projection) {
@@ -69,10 +66,12 @@ Object.assign(osmNode.prototype, {
     let i;
 
     // which tag to use?
-    if (this.isHighwayIntersection(resolver) && (this.tags.stop || '').toLowerCase() === 'all') {
+    if (this.isHighwayIntersection(resolver) &&
+        (this.tags.stop || '').toLowerCase() === 'all') {
       // all-way stop tag on a highway intersection
       val = 'all';
-    } else {
+    }
+    else {
       // generic direction tag
       val = (this.tags.direction || '').toLowerCase();
 
@@ -88,7 +87,6 @@ Object.assign(osmNode.prototype, {
     }
 
     if (val === '') return [];
-
 
     let values = val.split(';');
     let results = [];
@@ -107,9 +105,11 @@ Object.assign(osmNode.prototype, {
 
       // string direction - inspect parent ways
       let lookBackward =
-        (this.tags['traffic_sign:backward'] || v === 'backward' || v === 'both' || v === 'all');
+          (this.tags['traffic_sign:backward'] || v === 'backward' || v ===
+              'both' || v === 'all');
       let lookForward =
-        (this.tags['traffic_sign:forward'] || v === 'forward' || v === 'both' || v === 'all');
+          (this.tags['traffic_sign:forward'] || v === 'forward' || v ===
+              'both' || v === 'all');
 
       if (!lookForward && !lookBackward) return;
 
@@ -131,7 +131,8 @@ Object.assign(osmNode.prototype, {
       Object.keys(nodeIds).forEach(function(nodeId) {
         // +90 because geoAngle returns angle from X axis, not Y (north)
         results.push(
-          (geoAngle(this, resolver.entity(nodeId), projection) * (180 / Math.PI)) + 90
+            (geoAngle(this, resolver.entity(nodeId), projection) *
+                (180 / Math.PI)) + 90,
         );
       }, this);
 
@@ -140,9 +141,9 @@ Object.assign(osmNode.prototype, {
     return utilArrayUniq(results);
   },
 
-  isCrossing: function(){
+  isCrossing: function() {
     return this.tags.highway === 'crossing' ||
-      this.tags.railway && this.tags.railway.indexOf('crossing') !== -1;
+        this.tags.railway && this.tags.railway.indexOf('crossing') !== -1;
   },
 
   isEndpoint: function(resolver) {
@@ -154,7 +155,6 @@ Object.assign(osmNode.prototype, {
     });
   },
 
-
   isConnected: function(resolver) {
     return resolver.transient(this, 'isConnected', function() {
       let parents = resolver.parentWays(this);
@@ -163,12 +163,15 @@ Object.assign(osmNode.prototype, {
         // vertex is connected to multiple parent ways
         for (let i in parents) {
           if (parents[i].geometry(resolver) === 'line' &&
-            parents[i].hasInterestingTags()) return true;
+              parents[i].hasInterestingTags()) return true;
         }
-      } else if (parents.length === 1) {
+      }
+      else if (parents.length === 1) {
         let way = parents[0];
         let nodes = way.nodes.slice();
-        if (way.isClosed()) { nodes.pop(); }  // ignore connecting node if closed
+        if (way.isClosed()) {
+          nodes.pop();
+        }  // ignore connecting node if closed
 
         // return true if vertex appears multiple times (way is self intersecting)
         return nodes.indexOf(this.id) !== nodes.lastIndexOf(this.id);
@@ -178,24 +181,21 @@ Object.assign(osmNode.prototype, {
     });
   },
 
-
   parentIntersectionWays: function(resolver) {
     return resolver.transient(this, 'parentIntersectionWays', function() {
       return resolver.parentWays(this).filter(function(parent) {
         return (parent.tags.highway ||
-            parent.tags.waterway ||
-            parent.tags.railway ||
-            parent.tags.aeroway) &&
-          parent.geometry(resolver) === 'line';
+                parent.tags.waterway ||
+                parent.tags.railway ||
+                parent.tags.aeroway) &&
+            parent.geometry(resolver) === 'line';
       });
     });
   },
 
-
   isIntersection: function(resolver) {
     return this.parentIntersectionWays(resolver).length > 1;
   },
-
 
   isHighwayIntersection: function(resolver) {
     return resolver.transient(this, 'isHighwayIntersection', function() {
@@ -205,16 +205,14 @@ Object.assign(osmNode.prototype, {
     });
   },
 
-
   isOnAddressLine: function(resolver) {
     return resolver.transient(this, 'isOnAddressLine', function() {
       return resolver.parentWays(this).filter(function(parent) {
         return parent.tags.hasOwnProperty('addr:interpolation') &&
-          parent.geometry(resolver) === 'line';
+            parent.geometry(resolver) === 'line';
       }).length > 0;
     });
   },
-
 
   asJXON: function(changeset_id) {
     let r = {
@@ -225,18 +223,17 @@ Object.assign(osmNode.prototype, {
         '@version': (this.version || 0),
         tag: Object.keys(this.tags).map(function(k) {
           return { keyAttributes: { k: k, v: this.tags[k] } };
-        }, this)
-      }
+        }, this),
+      },
     };
     if (changeset_id) r.node['@changeset'] = changeset_id;
     return r;
   },
 
-
   asGeoJSON: function() {
     return {
       type: 'Point',
-      coordinates: this.loc
+      coordinates: this.loc,
     };
-  }
+  },
 });

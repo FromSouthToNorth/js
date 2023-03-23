@@ -1,15 +1,16 @@
 import { debug } from '../index';
 import { utilArrayDifference } from '../util';
 
-
 export function coreGraph(other, mutable) {
   if (!(this instanceof coreGraph)) return new coreGraph(other, mutable);
 
   if (other instanceof coreGraph) {
     let base = other.base();
     this.entities = Object.assign(Object.create(base.entities), other.entities);
-    this._parentWays = Object.assign(Object.create(base.parentWays), other._parentWays);
-    this._parentRels = Object.assign(Object.create(base.parentRels), other._parentRels);
+    this._parentWays = Object.assign(Object.create(base.parentWays),
+        other._parentWays);
+    this._parentRels = Object.assign(Object.create(base.parentRels),
+        other._parentRels);
 
   }
   else {
@@ -24,15 +25,13 @@ export function coreGraph(other, mutable) {
   this.frozen = !mutable;
 }
 
-
 coreGraph.prototype = {
 
-  hasEntity: function (id) {
+  hasEntity: function(id) {
     return this.entities[id];
   },
 
-
-  entity: function (id) {
+  entity: function(id) {
     let entity = this.entities[id];
 
     //https://github.com/openstreetmap/iD/issues/3973#issuecomment-307052376
@@ -46,13 +45,11 @@ coreGraph.prototype = {
     return entity;
   },
 
-
-  geometry: function (id) {
+  geometry: function(id) {
     return this.entity(id).geometry(this);
   },
 
-
-  transient: function (entity, key, fn) {
+  transient: function(entity, key, fn) {
     let id = entity.id;
     let transients = this.transients[id] || (this.transients[id] = {});
 
@@ -65,50 +62,45 @@ coreGraph.prototype = {
     return transients[key];
   },
 
-
-  parentWays: function (entity) {
+  parentWays: function(entity) {
     let parents = this._parentWays[entity.id];
     let result = [];
     if (parents) {
-      parents.forEach(function (id) {
+      parents.forEach(function(id) {
         result.push(this.entity(id));
       }, this);
     }
     return result;
   },
 
-
-  isPoi: function (entity) {
+  isPoi: function(entity) {
     let parents = this._parentWays[entity.id];
     return !parents || parents.size === 0;
   },
 
-
-  isShared: function (entity) {
+  isShared: function(entity) {
     let parents = this._parentWays[entity.id];
     return parents && parents.size > 1;
   },
 
-
-  parentRelations: function (entity) {
+  parentRelations: function(entity) {
     let parents = this._parentRels[entity.id];
     let result = [];
     if (parents) {
-      parents.forEach(function (id) {
+      parents.forEach(function(id) {
         result.push(this.entity(id));
       }, this);
     }
     return result;
   },
 
-  parentMultipolygons: function (entity) {
-    return this.parentRelations(entity).filter(function (relation) {
+  parentMultipolygons: function(entity) {
+    return this.parentRelations(entity).filter(function(relation) {
       return relation.isMultipolygon();
     });
   },
 
-
-  childNodes: function (entity) {
+  childNodes: function(entity) {
     if (this._childNodes[entity.id]) return this._childNodes[entity.id];
     if (!entity.nodes) return [];
 
@@ -123,8 +115,7 @@ coreGraph.prototype = {
     return this._childNodes[entity.id];
   },
 
-
-  base: function () {
+  base: function() {
     return {
       'entities': Object.getPrototypeOf(this.entities),
       'parentWays': Object.getPrototypeOf(this._parentWays),
@@ -132,12 +123,11 @@ coreGraph.prototype = {
     };
   },
 
-
   // Unlike other graph methods, rebase mutates in place. This is because it
   // is used only during the history operation that merges newly downloaded
   // data into each state. To external consumers, it should appear as if the
   // graph always contained the newly downloaded data.
-  rebase: function (entities, stack, force) {
+  rebase: function(entities, stack, force) {
     let base = this.base();
     let i, j, k, id;
 
@@ -148,7 +138,8 @@ coreGraph.prototype = {
 
       // Merging data into the base graph
       base.entities[entity.id] = entity;
-      this._updateCalculated(undefined, entity, base.parentWays, base.parentRels);
+      this._updateCalculated(undefined, entity, base.parentWays,
+          base.parentRels);
 
       // Restore provisionally-deleted nodes that are discovered to have an extant parent
       if (entity.type === 'way') {
@@ -169,13 +160,12 @@ coreGraph.prototype = {
     }
   },
 
-
-  _updateRebased: function () {
+  _updateRebased: function() {
     let base = this.base();
 
-    Object.keys(this._parentWays).forEach(function (child) {
+    Object.keys(this._parentWays).forEach(function(child) {
       if (base.parentWays[child]) {
-        base.parentWays[child].forEach(function (id) {
+        base.parentWays[child].forEach(function(id) {
           if (!this.entities.hasOwnProperty(id)) {
             this._parentWays[child].add(id);
           }
@@ -183,9 +173,9 @@ coreGraph.prototype = {
       }
     }, this);
 
-    Object.keys(this._parentRels).forEach(function (child) {
+    Object.keys(this._parentRels).forEach(function(child) {
       if (base.parentRels[child]) {
-        base.parentRels[child].forEach(function (id) {
+        base.parentRels[child].forEach(function(id) {
           if (!this.entities.hasOwnProperty(id)) {
             this._parentRels[child].add(id);
           }
@@ -199,9 +189,8 @@ coreGraph.prototype = {
     // ways are always downloaded with their child nodes.
   },
 
-
   // Updates calculated properties (parentWays, parentRels) for the specified change
-  _updateCalculated: function (oldentity, entity, parentWays, parentRels) {
+  _updateCalculated: function(oldentity, entity, parentWays, parentRels) {
     parentWays = parentWays || this._parentWays;
     parentRels = parentRels || this._parentRels;
 
@@ -236,8 +225,12 @@ coreGraph.prototype = {
     else if (type === 'relation') {   // Update parentRels
 
       // diff only on the IDs since the same entity can be a member multiple times with different roles
-      let oldentityMemberIDs = oldentity ? oldentity.members.map(function (m) { return m.id; }) : [];
-      let entityMemberIDs = entity ? entity.members.map(function (m) { return m.id; }) : [];
+      let oldentityMemberIDs = oldentity ? oldentity.members.map(function(m) {
+        return m.id;
+      }) : [];
+      let entityMemberIDs = entity ? entity.members.map(function(m) {
+        return m.id;
+      }) : [];
 
       if (oldentity && entity) {
         removed = utilArrayDifference(oldentityMemberIDs, entityMemberIDs);
@@ -264,38 +257,34 @@ coreGraph.prototype = {
     }
   },
 
-
-  replace: function (entity) {
+  replace: function(entity) {
     if (this.entities[entity.id] === entity) return this;
 
-    return this.update(function () {
+    return this.update(function() {
       this._updateCalculated(this.entities[entity.id], entity);
       this.entities[entity.id] = entity;
     });
   },
 
-
-  remove: function (entity) {
-    return this.update(function () {
+  remove: function(entity) {
+    return this.update(function() {
       this._updateCalculated(entity, undefined);
       this.entities[entity.id] = undefined;
     });
   },
 
-
-  revert: function (id) {
+  revert: function(id) {
     let baseEntity = this.base().entities[id];
     let headEntity = this.entities[id];
     if (headEntity === baseEntity) return this;
 
-    return this.update(function () {
+    return this.update(function() {
       this._updateCalculated(headEntity, baseEntity);
       delete this.entities[id];
     });
   },
 
-
-  update: function () {
+  update: function() {
     let graph = this.frozen ? coreGraph(this, true) : this;
     for (let i = 0; i < arguments.length; i++) {
       arguments[i].call(graph, graph);
@@ -306,9 +295,8 @@ coreGraph.prototype = {
     return graph;
   },
 
-
   // Obliterates any existing entities
-  load: function (entities) {
+  load: function(entities) {
     let base = this.base();
     this.entities = Object.create(base.entities);
 

@@ -20,45 +20,40 @@ import { utilKeybinding, utilRebind } from '../util';
  * @returns {*}
  */
 export function behaviorHover(context) {
-  var dispatch = d3_dispatch('hover');
-  var _selection = d3_select(null);
-  var _newNodeId = null;
-  var _initialNodeID = null;
-  var _altDisables;
-  var _ignoreVertex;
-  var _targets = [];
+  let dispatch = d3_dispatch('hover');
+  let _selection = d3_select(null);
+  let _newNodeId = null;
+  let _initialNodeID = null;
+  let _altDisables;
+  let _ignoreVertex;
+  let _targets = [];
 
   // use pointer events on supported platforms; fallback to mouse events
-  var _pointerPrefix = 'PointerEvent' in window ? 'pointer' : 'mouse';
-
+  let _pointerPrefix = 'PointerEvent' in window ? 'pointer' : 'mouse';
 
   function keydown(d3_event) {
     if (_altDisables && d3_event.keyCode === utilKeybinding.modifierCodes.alt) {
-      _selection.selectAll('.hover')
-                .classed('hover-suppressed', true)
-                .classed('hover', false);
+      _selection.selectAll('.hover').
+          classed('hover-suppressed', true).
+          classed('hover', false);
 
-      _selection
-      .classed('hover-disabled', true);
+      _selection.classed('hover-disabled', true);
 
       dispatch.call('hover', this, null);
     }
   }
 
-
   function keyup(d3_event) {
     if (_altDisables && d3_event.keyCode === utilKeybinding.modifierCodes.alt) {
-      _selection.selectAll('.hover-suppressed')
-                .classed('hover-suppressed', false)
-                .classed('hover', true);
+      _selection.selectAll('.hover-suppressed').
+          classed('hover-suppressed', false).
+          classed('hover', true);
 
-      _selection
-      .classed('hover-disabled', false);
+      _selection.classed('hover-disabled', false);
 
       dispatch.call('hover', this, _targets);
     }
   }
-
 
   function behavior(selection) {
     _selection = selection;
@@ -73,22 +68,21 @@ export function behaviorHover(context) {
       _newNodeId = null;
     }
 
-    _selection
-    .on(_pointerPrefix + 'over.hover', pointerover)
-    .on(_pointerPrefix + 'out.hover', pointerout)
-    // treat pointerdown as pointerover for touch devices
-    .on(_pointerPrefix + 'down.hover', pointerover);
+    _selection.on(_pointerPrefix + 'over.hover', pointerover).
+        on(_pointerPrefix + 'out.hover', pointerout)
+        // treat pointerdown as pointerover for touch devices
+        .on(_pointerPrefix + 'down.hover', pointerover);
 
-    d3_select(window)
-    .on(_pointerPrefix + 'up.hover pointercancel.hover', pointerout, true)
-    .on('keydown.hover', keydown)
-    .on('keyup.hover', keyup);
-
+    d3_select(window).
+        on(_pointerPrefix + 'up.hover pointercancel.hover', pointerout, true).
+        on('keydown.hover', keydown).
+        on('keyup.hover', keyup);
 
     function eventTarget(d3_event) {
-      var datum = d3_event.target && d3_event.target.__data__;
+      let datum = d3_event.target && d3_event.target.__data__;
       if (typeof datum !== 'object') return null;
-      if (!(datum instanceof osmEntity) && datum.properties && (datum.properties.entity instanceof osmEntity)) {
+      if (!(datum instanceof osmEntity) && datum.properties &&
+          (datum.properties.entity instanceof osmEntity)) {
         return datum.properties.entity;
       }
       return datum;
@@ -97,10 +91,10 @@ export function behaviorHover(context) {
     function pointerover(d3_event) {
       // ignore mouse hovers with buttons pressed unless dragging
       if (context.mode().id.indexOf('drag') === -1 &&
-        (!d3_event.pointerType || d3_event.pointerType === 'mouse') &&
-        d3_event.buttons) return;
+          (!d3_event.pointerType || d3_event.pointerType === 'mouse') &&
+          d3_event.buttons) return;
 
-      var target = eventTarget(d3_event);
+      let target = eventTarget(d3_event);
       if (target && _targets.indexOf(target) === -1) {
         _targets.push(target);
         updateHover(d3_event, _targets);
@@ -109,8 +103,8 @@ export function behaviorHover(context) {
 
     function pointerout(d3_event) {
 
-      var target = eventTarget(d3_event);
-      var index = _targets.indexOf(target);
+      let target = eventTarget(d3_event);
+      let index = _targets.indexOf(target);
       if (index !== -1) {
         _targets.splice(index);
         updateHover(d3_event, _targets);
@@ -118,48 +112,50 @@ export function behaviorHover(context) {
     }
 
     function allowsVertex(d) {
-      return d.geometry(context.graph()) === 'vertex' || presetManager.allowsVertex(d, context.graph());
+      return d.geometry(context.graph()) === 'vertex' ||
+          presetManager.allowsVertex(d, context.graph());
     }
 
     function modeAllowsHover(target) {
-      var mode = context.mode();
+      let mode = context.mode();
       if (mode.id === 'add-point') {
         return mode.preset.matchGeometry('vertex') ||
-          (target.type !== 'way' && target.geometry(context.graph()) !== 'vertex');
+            (target.type !== 'way' && target.geometry(context.graph()) !==
+                'vertex');
       }
       return true;
     }
 
     function updateHover(d3_event, targets) {
 
-      _selection.selectAll('.hover')
-                .classed('hover', false);
-      _selection.selectAll('.hover-suppressed')
-                .classed('hover-suppressed', false);
+      _selection.selectAll('.hover').classed('hover', false);
+      _selection.selectAll('.hover-suppressed').
+          classed('hover-suppressed', false);
 
-      var mode = context.mode();
+      let mode = context.mode();
 
       if (!_newNodeId && (mode.id === 'draw-line' || mode.id === 'draw-area')) {
-        var node = targets.find(function (target) {
+        let node = targets.find(function(target) {
           return target instanceof osmEntity && target.type === 'node';
         });
         _newNodeId = node && node.id;
       }
 
-      targets = targets.filter(function (datum) {
+      targets = targets.filter(function(datum) {
         if (datum instanceof osmEntity) {
           // If drawing a way, don't hover on a node that was just placed. #3974
           return datum.id !== _newNodeId &&
-            (datum.type !== 'node' || !_ignoreVertex || allowsVertex(datum)) &&
-            modeAllowsHover(datum);
+              (datum.type !== 'node' || !_ignoreVertex ||
+                  allowsVertex(datum)) &&
+              modeAllowsHover(datum);
         }
         return true;
       });
 
-      var selector = '';
+      let selector = '';
 
-      for (var i in targets) {
-        var datum = targets[i];
+      for (let i in targets) {
+        let datum = targets[i];
 
         // What are we hovering over?
         if (datum.__featurehash__) {
@@ -178,60 +174,54 @@ export function behaviorHover(context) {
         else if (datum instanceof osmEntity) {
           selector += ', .' + datum.id;
           if (datum.type === 'relation') {
-            for (var j in datum.members) {
+            for (let j in datum.members) {
               selector += ', .' + datum.members[j].id;
             }
           }
         }
       }
 
-      var suppressed = _altDisables && d3_event && d3_event.altKey;
+      let suppressed = _altDisables && d3_event && d3_event.altKey;
 
       if (selector.trim().length) {
         // remove the first comma
         selector = selector.slice(1);
-        _selection.selectAll(selector)
-                  .classed(suppressed ? 'hover-suppressed' : 'hover', true);
+        _selection.selectAll(selector).
+            classed(suppressed ? 'hover-suppressed' : 'hover', true);
       }
 
       dispatch.call('hover', this, !suppressed && targets);
     }
   }
 
+  behavior.off = function(selection) {
+    selection.selectAll('.hover').classed('hover', false);
+    selection.selectAll('.hover-suppressed').classed('hover-suppressed', false);
+    selection.classed('hover-disabled', false);
 
-  behavior.off = function (selection) {
-    selection.selectAll('.hover')
-             .classed('hover', false);
-    selection.selectAll('.hover-suppressed')
-             .classed('hover-suppressed', false);
-    selection
-    .classed('hover-disabled', false);
+    selection.on(_pointerPrefix + 'over.hover', null).
+        on(_pointerPrefix + 'out.hover', null).
+        on(_pointerPrefix + 'down.hover', null);
 
-    selection
-    .on(_pointerPrefix + 'over.hover', null)
-    .on(_pointerPrefix + 'out.hover', null)
-    .on(_pointerPrefix + 'down.hover', null);
-
-    d3_select(window)
-    .on(_pointerPrefix + 'up.hover pointercancel.hover', null, true)
-    .on('keydown.hover', null)
-    .on('keyup.hover', null);
+    d3_select(window).
+        on(_pointerPrefix + 'up.hover pointercancel.hover', null, true).
+        on('keydown.hover', null).
+        on('keyup.hover', null);
   };
 
-
-  behavior.altDisables = function (val) {
+  behavior.altDisables = function(val) {
     if (!arguments.length) return _altDisables;
     _altDisables = val;
     return behavior;
   };
 
-  behavior.ignoreVertex = function (val) {
+  behavior.ignoreVertex = function(val) {
     if (!arguments.length) return _ignoreVertex;
     _ignoreVertex = val;
     return behavior;
   };
 
-  behavior.initialNodeID = function (nodeId) {
+  behavior.initialNodeID = function(nodeId) {
     _initialNodeID = nodeId;
     return behavior;
   };

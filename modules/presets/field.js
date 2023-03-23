@@ -14,16 +14,22 @@ export function presetField(fieldID, field, allFields) {
   // for use in classes, element ids, css selectors
   _this.safeid = utilSafeClassName(fieldID);
 
-  _this.matchGeometry = (geom) => !_this.geometry || _this.geometry.indexOf(geom) !== -1;
+  _this.matchGeometry = (geom) => !_this.geometry ||
+      _this.geometry.indexOf(geom) !== -1;
 
   _this.matchAllGeometry = (geometries) => {
-    return !_this.geometry || geometries.every(geom => _this.geometry.indexOf(geom) !== -1);
+    return !_this.geometry ||
+        geometries.every(geom => _this.geometry.indexOf(geom) !== -1);
   };
 
-  _this.t = (scope, options) => t(`_tagging.presets.fields.${fieldID}.${scope}`, options);
-  _this.t.html = (scope, options) => t.html(`_tagging.presets.fields.${fieldID}.${scope}`, options);
-  _this.t.append = (scope, options) => t.append(`_tagging.presets.fields.${fieldID}.${scope}`, options);
-  _this.hasTextForStringId = (scope) => localizer.hasTextForStringId(`_tagging.presets.fields.${fieldID}.${scope}`);
+  _this.t = (scope, options) => t(`_tagging.presets.fields.${fieldID}.${scope}`,
+      options);
+  _this.t.html = (scope, options) => t.html(
+      `_tagging.presets.fields.${fieldID}.${scope}`, options);
+  _this.t.append = (scope, options) => t.append(
+      `_tagging.presets.fields.${fieldID}.${scope}`, options);
+  _this.hasTextForStringId = (scope) => localizer.hasTextForStringId(
+      `_tagging.presets.fields.${fieldID}.${scope}`);
 
   _this.resolveReference = which => {
     const referenceRegex = /^\{(.*)\}$/;
@@ -38,19 +44,28 @@ export function presetField(fieldID, field, allFields) {
     return _this;
   };
 
-  _this.title = () => _this.overrideLabel || _this.resolveReference('label').t('label', { 'default': fieldID });
+  _this.title = () => _this.overrideLabel ||
+      _this.resolveReference('label').t('label', { 'default': fieldID });
   _this.label = () => _this.overrideLabel ?
-    selection => selection.text(_this.overrideLabel) :
-    _this.resolveReference('label').t.append('label', { 'default': fieldID });
+                      selection => selection.text(_this.overrideLabel) :
+                      _this.resolveReference('label').
+                          t.
+                          append('label', { 'default': fieldID });
 
-  _this.placeholder = () => _this.resolveReference('placeholder').t('placeholder', { 'default': '' });
+  _this.placeholder = () => _this.resolveReference('placeholder').
+      t('placeholder', { 'default': '' });
 
   _this.originalTerms = (_this.terms || []).join();
 
-  _this.terms = () => _this.resolveReference('label').t('terms', { 'default': _this.originalTerms })
-                           .toLowerCase().trim().split(/\s*,+\s*/);
+  _this.terms = () => _this.resolveReference('label').
+      t('terms', { 'default': _this.originalTerms }).
+      toLowerCase().
+      trim().
+      split(/\s*,+\s*/);
 
-  _this.increment = _this.type === 'number' ? (_this.increment || 1) : undefined;
+  _this.increment = _this.type === 'number' ?
+                    (_this.increment || 1) :
+                    undefined;
 
   return _this;
 }

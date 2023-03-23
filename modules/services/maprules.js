@@ -2,17 +2,16 @@ import { osmAreaKeys as areaKeys } from '../osm/tags';
 import { utilArrayIntersection } from '../util';
 import { validationIssue } from '../core/validation';
 
-
 const buildRuleChecks = function() {
   return {
-    equals: function (equals) {
+    equals: function(equals) {
       return function(tags) {
         return Object.keys(equals).every(function(k) {
           return equals[k] === tags[k];
         });
       };
     },
-    notEquals: function (notEquals) {
+    notEquals: function(notEquals) {
       return function(tags) {
         return Object.keys(notEquals).some(function(k) {
           return notEquals[k] !== tags[k];
@@ -78,7 +77,7 @@ const buildRuleChecks = function() {
       return function(tags) {
         return !regex.test(tags[tagKey]);
       };
-    }
+    },
   };
 };
 
@@ -86,21 +85,21 @@ const buildLineKeys = function() {
   return {
     highway: {
       rest_area: true,
-      services: true
+      services: true,
     },
     railway: {
       roundhouse: true,
       station: true,
       traverser: true,
       turntable: true,
-      wash: true
-    }
+      wash: true,
+    },
   };
 };
 
 export default {
   init: function() {
-    this._ruleChecks  = buildRuleChecks();
+    this._ruleChecks = buildRuleChecks();
     this._validationRules = [];
     this._areaKeys = areaKeys;
     this._lineKeys = buildLineKeys();
@@ -125,14 +124,16 @@ export default {
       });
     };
 
-    return Object.keys(selector).reduce(function (expectedTags, key) {
+    return Object.keys(selector).reduce(function(expectedTags, key) {
       let values;
       const isRegex = /regex/gi.test(key);
       const isEqual = /equals/gi.test(key);
 
       if (isRegex || isEqual) {
-        Object.keys(selector[key]).forEach(function (selectorKey) {
-          values = isEqual ? [selector[key][selectorKey]] : getRegexValues(selector[key][selectorKey]);
+        Object.keys(selector[key]).forEach(function(selectorKey) {
+          values = isEqual ?
+              [selector[key][selectorKey]] :
+                   getRegexValues(selector[key][selectorKey]);
 
           if (expectedTags.hasOwnProperty(selectorKey)) {
             values = values.concat(expectedTags[selectorKey]);
@@ -143,7 +144,9 @@ export default {
 
       }
       else if (/(greater|less)Than(Equal)?|presence/g.test(key)) {
-        var tagKey = /presence/.test(key) ? selector[key] : Object.keys(selector[key])[0];
+        var tagKey = /presence/.test(key) ?
+                     selector[key] :
+                     Object.keys(selector[key])[0];
 
         values = [selector[key][tagKey]];
 
@@ -164,10 +167,12 @@ export default {
     const _areaKeys = this._areaKeys;
 
     const keyValueDoesNotImplyArea = function(key) {
-      return utilArrayIntersection(tagMap[key], Object.keys(_areaKeys[key])).length > 0;
+      return utilArrayIntersection(tagMap[key],
+          Object.keys(_areaKeys[key])).length > 0;
     };
     const keyValueImpliesLine = function(key) {
-      return utilArrayIntersection(tagMap[key], Object.keys(_lineKeys[key])).length > 0;
+      return utilArrayIntersection(tagMap[key],
+          Object.keys(_lineKeys[key])).length > 0;
     };
 
     if (tagMap.hasOwnProperty('area')) {
@@ -203,20 +208,22 @@ export default {
         });
       },
       // borrowed from Way#isArea()
-      inferredGeometry: this.inferGeometry(this.buildTagMap(selector), this._areaKeys),
+      inferredGeometry: this.inferGeometry(this.buildTagMap(selector),
+          this._areaKeys),
       geometryMatches: function(entity, graph) {
         if (entity.type === 'node' || entity.type === 'relation') {
           return selector.geometry === entity.type;
-        } else if (entity.type === 'way') {
+        }
+        else if (entity.type === 'way') {
           return this.inferredGeometry === entity.geometry(graph);
         }
       },
       // when geometries match and tag matches are present, return a warning...
-      findIssues: function (entity, graph, issues) {
+      findIssues: function(entity, graph, issues) {
         if (this.geometryMatches(entity, graph) && this.matches(entity)) {
           var severity = Object.keys(selector).indexOf('error') > -1
-            ? 'error'
-            : 'warning';
+                         ? 'error'
+                         : 'warning';
           var message = selector[severity];
           issues.push(new validationIssue({
             type: 'maprules',
@@ -224,19 +231,25 @@ export default {
             message: function() {
               return message;
             },
-            entityIds: [entity.id]
+            entityIds: [entity.id],
           }));
         }
-      }
+      },
     };
     this._validationRules.push(rule);
   },
 
-  clearRules: function() { this._validationRules = []; },
+  clearRules: function() {
+    this._validationRules = [];
+  },
 
   // returns validationRules...
-  validationRules: function() { return this._validationRules; },
+  validationRules: function() {
+    return this._validationRules;
+  },
 
   // returns ruleChecks
-  ruleChecks: function() { return this._ruleChecks; }
+  ruleChecks: function() {
+    return this._ruleChecks;
+  },
 };

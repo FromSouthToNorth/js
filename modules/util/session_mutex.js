@@ -10,26 +10,30 @@ export function utilSessionMutex(name) {
   function renew() {
     let expires = new Date();
     expires.setSeconds(expires.getSeconds() + 5);
-    document.cookie = name + '=1; expires=' + expires.toUTCString() + '; sameSite=strict';
+    document.cookie = name + '=1; expires=' + expires.toUTCString() +
+        '; sameSite=strict';
   }
 
-  mutex.lock = function () {
+  mutex.lock = function() {
     if (intervalID) return true;
-    let cookie = document.cookie.replace(new RegExp('(?:(?:^|.*;)\\s*' + name + '\\s*\\=\\s*([^;]*).*$)|^.*$'), '$1');
+    let cookie = document.cookie.replace(
+        new RegExp('(?:(?:^|.*;)\\s*' + name + '\\s*\\=\\s*([^;]*).*$)|^.*$'),
+        '$1');
     if (cookie) return false;
     renew();
     intervalID = window.setInterval(renew, 4000);
     return true;
   };
 
-  mutex.unlock = function () {
+  mutex.unlock = function() {
     if (!intervalID) return;
-    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; sameSite=strict';
+    document.cookie = name +
+        '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; sameSite=strict';
     clearInterval(intervalID);
     intervalID = null;
   };
 
-  mutex.locked = function () {
+  mutex.locked = function() {
     return !!intervalID;
   };
 

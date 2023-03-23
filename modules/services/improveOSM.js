@@ -10,17 +10,15 @@ import { serviceOsm } from './index';
 import { t } from '../core/localizer';
 import { utilRebind, utilTiler, utilQsString } from '../util';
 
-
 const tiler = utilTiler();
 const dispatch = d3_dispatch('loaded');
 const _tileZoom = 14;
 const _impOsmUrls = {
   ow: 'https://grab.community.improve-osm.org/directionOfFlowService',
   mr: 'https://grab.community.improve-osm.org/missingGeoService',
-  tr: 'https://grab.community.improve-osm.org/turnRestrictionService'
+  tr: 'https://grab.community.improve-osm.org/turnRestrictionService',
 };
 let _impOsmData = { icons: {} };
-
 
 // This gets reassigned if reset
 let _cache;
@@ -44,7 +42,13 @@ function abortUnwantedRequests(cache, tiles) {
 }
 
 function encodeIssueRtree(d) {
-  return { minX: d.loc[0], minY: d.loc[1], maxX: d.loc[0], maxY: d.loc[1], data: d };
+  return {
+    minX: d.loc[0],
+    minY: d.loc[1],
+    maxX: d.loc[0],
+    maxY: d.loc[1],
+    data: d,
+  };
 }
 
 // Replace or remove QAItem from rtree
@@ -67,12 +71,13 @@ function linkEntity(d) {
 function pointAverage(points) {
   if (points.length) {
     const sum = points.reduce(
-      (acc, point) => geoVecAdd(acc, [point.lon, point.lat]),
-      [0,0]
+        (acc, point) => geoVecAdd(acc, [point.lon, point.lat]),
+        [0, 0],
     );
     return geoVecScale(sum, 1 / points.length);
-  } else {
-    return [0,0];
+  }
+  else {
+    return [0, 0];
   }
 }
 
@@ -98,7 +103,7 @@ function cardinalDirection(bearing) {
     225: 'southwest',
     270: 'west',
     315: 'northwest',
-    360: 'north'
+    360: 'north',
   };
 
   return t(`QA.improveOSM.directions.${compass[dir]}`);
@@ -110,8 +115,8 @@ function preventCoincident(loc, bumpUp) {
   do {
     // first time, move marker up. after that, move marker right.
     let delta = coincident ? [0.00001, 0] :
-      bumpUp ? [0, 0.00001] :
-        [0, 0];
+                bumpUp ? [0, 0.00001] :
+                    [0, 0];
     loc = geoVecAdd(loc, delta);
     let bbox = geoExtent(loc).bbox();
     coincident = _cache.rtree.search(bbox).length;
@@ -124,8 +129,7 @@ export default {
   title: 'improveOSM',
 
   init() {
-    fileFetcher.get('qa_data')
-    .then(d => _impOsmData = d.improveOSM);
+    fileFetcher.get('qa_data').then(d => _impOsmData = d.improveOSM);
 
     if (!_cache) {
       this.reset();
@@ -144,7 +148,7 @@ export default {
       inflightTile: {},
       inflightPost: {},
       closed: {},
-      rtree: new RBush()
+      rtree: new RBush(),
     };
   },
 
@@ -152,13 +156,11 @@ export default {
     const options = {
       client: 'iD',
       status: 'OPEN',
-      zoom: '19' // Use a high zoom so that clusters aren't returned
+      zoom: '19', // Use a high zoom so that clusters aren't returned
     };
 
     // determine the needed tiles to cover the view
-    const tiles = tiler
-    .zoomExtent([_tileZoom, _tileZoom])
-    .getTiles(projection);
+    const tiles = tiler.zoomExtent([_tileZoom, _tileZoom]).getTiles(projection);
 
     // abort inflight requests that are no longer needed
     abortUnwantedRequests(_cache, tiles);
@@ -167,7 +169,7 @@ export default {
     tiles.forEach(tile => {
       if (_cache.loadedTile[tile.id] || _cache.inflightTile[tile.id]) return;
 
-      const [ east, north, west, south ] = tile.extent.rectangle();
+      const [east, north, west, south] = tile.extent.rectangle();
       const params = Object.assign({}, options, { east, south, west, north });
 
       // 3 separate requests to store for each tile
@@ -177,16 +179,17 @@ export default {
         // We exclude WATER from missing geometry as it doesn't seem useful
         // We use most confident one-way and turn restrictions only, still have false positives
         const kParams = Object.assign({},
-          params,
-          (k === 'mr') ? { type: 'PARKING,ROAD,BOTH,PATH' } : { confidenceLevel: 'C1' }
+            params,
+            (k === 'mr') ?
+                { type: 'PARKING,ROAD,BOTH,PATH' } :
+                { confidenceLevel: 'C1' },
         );
         const url = `${_impOsmUrls[k]}/search?` + utilQsString(kParams);
         const controller = new AbortController();
 
         requests[k] = controller;
 
-        d3_json(url, { signal: controller.signal })
-        .then(data => {
+        d3_json(url, { signal: controller.signal }).then(data => {
           delete _cache.inflightTile[tile.id][k];
           if (!Object.keys(_cache.inflightTile[tile.id]).length) {
             delete _cache.inflightTile[tile.id];
@@ -206,7 +209,8 @@ export default {
               // Odd number of points, use position of very middle point
               if (mid % 1 === 0) {
                 loc = pointAverage([points[mid - 1], points[mid]]);
-              } else {
+              }
+              else {
                 mid = points[Math.floor(mid)];
                 loc = [mid.lon, mid.lat];
               }
@@ -219,10 +223,10 @@ export default {
                 identifier: { // used to post changes
                   wayId,
                   fromNodeId,
-                  toNodeId
+                  toNodeId,
                 },
                 objectId: wayId,
-                objectType: 'way'
+                objectType: 'way',
               });
 
               // Variables used in the description
@@ -231,7 +235,7 @@ export default {
                 num_trips: feature.numberOfTrips,
                 highway: linkErrorObject(t('QA.keepRight.error_parts.highway')),
                 from_node: linkEntity('n' + feature.fromNodeId),
-                to_node: linkEntity('n' + feature.toNodeId)
+                to_node: linkEntity('n' + feature.toNodeId),
               };
 
               _cache.data[d.id] = d;
@@ -253,17 +257,18 @@ export default {
 
               let d = new QAItem(loc, this, `${k}-${geoType}`, itemId, {
                 issueKey: k,
-                identifier: { x, y }
+                identifier: { x, y },
               });
 
               d.replacements = {
                 num_trips: numberOfTrips,
-                geometry_type: t(`QA.improveOSM.geometry_types.${geoType}`)
+                geometry_type: t(`QA.improveOSM.geometry_types.${geoType}`),
               };
 
               // -1 trips indicates data came from a 3rd party
               if (numberOfTrips === -1) {
-                d.desc = t('QA.improveOSM.error_types.mr.description_alt', d.replacements);
+                d.desc = t('QA.improveOSM.error_types.mr.description_alt',
+                    d.replacements);
               }
 
               _cache.data[d.id] = d;
@@ -291,11 +296,11 @@ export default {
                 issueKey: k,
                 identifier: id,
                 objectId: via_node,
-                objectType: 'node'
+                objectType: 'node',
               });
 
               // Travel direction along from_way clarifies the turn restriction
-              const [ p1, p2 ] = segments[0].points;
+              const [p1, p2] = segments[0].points;
               const dir_of_travel = cardinalDirection(relativeBearing(p1, p2));
 
               // Variables used in the description
@@ -306,7 +311,8 @@ export default {
                 from_way: linkEntity('w' + from_way),
                 to_way: linkEntity('w' + to_way),
                 travel_direction: dir_of_travel,
-                junction: linkErrorObject(t('QA.keepRight.error_parts.this_node'))
+                junction: linkErrorObject(
+                    t('QA.keepRight.error_parts.this_node')),
               };
 
               _cache.data[d.id] = d;
@@ -314,8 +320,7 @@ export default {
               dispatch.call('loaded');
             });
           }
-        })
-        .catch(() => {
+        }).catch(() => {
           delete _cache.inflightTile[tile.id][k];
           if (!Object.keys(_cache.inflightTile[tile.id]).length) {
             delete _cache.inflightTile[tile.id];
@@ -339,10 +344,12 @@ export default {
 
     if (key === 'ow') {
       qParams = item.identifier;
-    } else if (key === 'mr') {
+    }
+    else if (key === 'mr') {
       qParams.tileX = item.identifier.x;
       qParams.tileY = item.identifier.y;
-    } else if (key === 'tr') {
+    }
+    else if (key === 'tr') {
       qParams.targetId = item.identifier;
     }
 
@@ -359,23 +366,26 @@ export default {
 
   postUpdate(d, callback) {
     if (!serviceOsm.authenticated()) { // Username required in payload
-      return callback({ message: 'Not Authenticated', status: -3}, d);
+      return callback({ message: 'Not Authenticated', status: -3 }, d);
     }
     if (_cache.inflightPost[d.id]) {
-      return callback({ message: 'Error update already inflight', status: -2 }, d);
+      return callback({ message: 'Error update already inflight', status: -2 },
+          d);
     }
 
     // Payload can only be sent once username is established
     serviceOsm.userDetails(sendPayload.bind(this));
 
     function sendPayload(err, user) {
-      if (err) { return callback(err, d); }
+      if (err) {
+        return callback(err, d);
+      }
 
       const key = d.issueKey;
       const url = `${_impOsmUrls[key]}/comment`;
       const payload = {
         username: user.display_name,
-        targetIds: [ d.identifier ]
+        targetIds: [d.identifier],
       };
 
       if (d.newStatus) {
@@ -394,11 +404,10 @@ export default {
       const options = {
         method: 'POST',
         signal: controller.signal,
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       };
 
-      d3_json(url, options)
-      .then(() => {
+      d3_json(url, options).then(() => {
         delete _cache.inflightPost[d.id];
 
         // Just a comment, update error in cache
@@ -409,14 +418,15 @@ export default {
           comments.push({
             username: payload.username,
             text: payload.text,
-            timestamp: now.getTime() / 1000
+            timestamp: now.getTime() / 1000,
           });
 
           this.replaceItem(d.update({
             comments: comments,
-            newComment: undefined
+            newComment: undefined,
           }));
-        } else {
+        }
+        else {
           this.removeItem(d);
           if (d.newStatus === 'SOLVED') {
             // Keep track of the number of issues closed per type to tag the changeset
@@ -427,21 +437,20 @@ export default {
           }
         }
         if (callback) callback(null, d);
-      })
-      .catch(err => {
+      }).catch(err => {
         delete _cache.inflightPost[d.id];
         if (callback) callback(err.message);
       });
     }
   },
 
-
   // Get all cached QAItems covering the viewport
   getItems(projection) {
     const viewport = projection.clipExtent();
     const min = [viewport[0][0], viewport[1][1]];
     const max = [viewport[1][0], viewport[0][1]];
-    const bbox = geoExtent(projection.invert(min), projection.invert(max)).bbox();
+    const bbox = geoExtent(projection.invert(min), projection.invert(max)).
+        bbox();
 
     return _cache.rtree.search(bbox).map(d => d.data);
   },
@@ -477,5 +486,5 @@ export default {
   // Used to populate `closed:improveosm:*` changeset tags
   getClosedCounts() {
     return _cache.closed;
-  }
+  },
 };

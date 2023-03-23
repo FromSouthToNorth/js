@@ -46,20 +46,19 @@ export function validationIssue(attrs) {
     return this.id + ':' + Date.now().toString();  // include time of creation
   }
 
-
-  this.extent = function (resolver) {
+  this.extent = function(resolver) {
     if (this.loc) {
       return geoExtent(this.loc);
     }
     if (this.entityIds && this.entityIds.length) {
-      return this.entityIds.reduce(function (extent, entityId) {
+      return this.entityIds.reduce(function(extent, entityId) {
         return extent.extend(resolver.entity(entityId).extent(resolver));
       }, geoExtent());
     }
     return null;
   };
 
-  this.fixes = function (context) {
+  this.fixes = function(context) {
     var fixes = this.dynamicFixes ? this.dynamicFixes(context) : [];
     var issue = this;
 
@@ -68,13 +67,13 @@ export function validationIssue(attrs) {
       fixes.push(new validationIssueFix({
         title: t.append('issues.fix.ignore_issue.title'),
         icon: 'iD-icon-close',
-        onClick: function () {
+        onClick: function() {
           context.validator().ignoreIssue(this.issue.id);
         },
       }));
     }
 
-    fixes.forEach(function (fix) {
+    fixes.forEach(function(fix) {
       // the id doesn't matter as long as it's unique to this issue/fix
       fix.id = fix.title.stringId;
       // add a reference to the issue for use in actions
@@ -87,7 +86,6 @@ export function validationIssue(attrs) {
   };
 
 }
-
 
 export function validationIssueFix(attrs) {
   this.title = attrs.title;                   // Required

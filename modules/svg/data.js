@@ -17,9 +17,10 @@ let _initialized = false;
 let _enabled = false;
 let _geojson;
 
-
 export function svgData(projection, context, dispatch) {
-  let throttledRedraw = _throttle(function () { dispatch.call('change'); }, 1000);
+  let throttledRedraw = _throttle(function() {
+    dispatch.call('change');
+  }, 1000);
   let _showLabels = true;
   let detected = utilDetect();
   let layer = d3_select(null);
@@ -27,7 +28,6 @@ export function svgData(projection, context, dispatch) {
   let _fileList;
   let _template;
   let _src;
-
 
   function init() {
     if (_initialized) return;  // run once
@@ -41,67 +41,59 @@ export function svgData(projection, context, dispatch) {
       d3_event.dataTransfer.dropEffect = 'copy';
     }
 
-    context.container()
-    .attr('dropzone', 'copy')
-    .on('drop.svgData', function(d3_event) {
-      d3_event.stopPropagation();
-      d3_event.preventDefault();
-      if (!detected.filedrop) return;
-      drawData.fileList(d3_event.dataTransfer.files);
-    })
-    .on('dragenter.svgData', over)
-    .on('dragexit.svgData', over)
-    .on('dragover.svgData', over);
+    context.container().
+        attr('dropzone', 'copy').
+        on('drop.svgData', function(d3_event) {
+          d3_event.stopPropagation();
+          d3_event.preventDefault();
+          if (!detected.filedrop) return;
+          drawData.fileList(d3_event.dataTransfer.files);
+        }).
+        on('dragenter.svgData', over).
+        on('dragexit.svgData', over).
+        on('dragover.svgData', over);
 
     _initialized = true;
   }
-
 
   function getService() {
     if (services.vectorTile && !_vtService) {
       _vtService = services.vectorTile;
       _vtService.event.on('loadedData', throttledRedraw);
-    } else if (!services.vectorTile && _vtService) {
+    }
+    else if (!services.vectorTile && _vtService) {
       _vtService = null;
     }
 
     return _vtService;
   }
 
-
   function showLayer() {
     layerOn();
 
-    layer
-    .style('opacity', 0)
-    .transition()
-    .duration(250)
-    .style('opacity', 1)
-    .on('end', function () { dispatch.call('change'); });
+    layer.style('opacity', 0).
+        transition().
+        duration(250).
+        style('opacity', 1).
+        on('end', function() {
+          dispatch.call('change');
+        });
   }
-
 
   function hideLayer() {
     throttledRedraw.cancel();
 
-    layer
-    .transition()
-    .duration(250)
-    .style('opacity', 0)
-    .on('end', layerOff);
+    layer.transition().duration(250).style('opacity', 0).on('end', layerOff);
   }
-
 
   function layerOn() {
     layer.style('display', 'block');
   }
 
-
   function layerOff() {
     layer.selectAll('.viewfield-group').remove();
     layer.style('display', 'none');
   }
-
 
   // ensure that all geojson features in a collection have IDs
   function ensureIDs(gj) {
@@ -111,12 +103,12 @@ export function svgData(projection, context, dispatch) {
       for (let i = 0; i < gj.features.length; i++) {
         ensureFeatureID(gj.features[i]);
       }
-    } else {
+    }
+    else {
       ensureFeatureID(gj);
     }
     return gj;
   }
-
 
   // ensure that each single Feature object has a unique ID
   function ensureFeatureID(feature) {
@@ -125,43 +117,38 @@ export function svgData(projection, context, dispatch) {
     return feature;
   }
 
-
   // Prefer an array of Features instead of a FeatureCollection
   function getFeatures(gj) {
     if (!gj) return [];
 
     if (gj.type === 'FeatureCollection') {
       return gj.features;
-    } else {
+    }
+    else {
       return [gj];
     }
   }
-
 
   function featureKey(d) {
     return d.__featurehash__;
   }
 
-
   function isPolygon(d) {
     return d.geometry.type === 'Polygon' || d.geometry.type === 'MultiPolygon';
   }
 
-
   function clipPathID(d) {
     return 'ideditor-data-' + d.__featurehash__ + '-clippath';
   }
-
 
   function featureClasses(d) {
     return [
       'data' + d.__featurehash__,
       d.geometry.type,
       isPolygon(d) ? 'area' : '',
-      d.__layerID__ || ''
+      d.__layerID__ || '',
     ].filter(Boolean).join(' ');
   }
-
 
   function drawData(selection) {
     let vtService = getService();
@@ -169,20 +156,18 @@ export function svgData(projection, context, dispatch) {
     let getAreaPath = svgPath(projection, null, true).geojson;
     let hasData = drawData.hasData();
 
-    layer = selection.selectAll('.layer-mapdata')
-    .data(_enabled && hasData ? [0] : []);
+    layer = selection.selectAll('.layer-mapdata').
+        data(_enabled && hasData ? [0] : []);
 
-    layer.exit()
-    .remove();
+    layer.exit().remove();
 
-    layer = layer.enter()
-    .append('g')
-    .attr('class', 'layer-mapdata')
-    .merge(layer);
+    layer = layer.enter().
+        append('g').
+        attr('class', 'layer-mapdata').
+        merge(layer);
 
     let surface = context.surface();
     if (!surface || surface.empty()) return;  // not ready to draw yet, starting up
-
 
     // Gather data
     let geoData, polygonData;
@@ -190,115 +175,94 @@ export function svgData(projection, context, dispatch) {
       let sourceID = _template;
       vtService.loadTiles(sourceID, _template, projection);
       geoData = vtService.data(sourceID, projection);
-    } else {
+    }
+    else {
       geoData = getFeatures(_geojson);
     }
     geoData = geoData.filter(getPath);
     polygonData = geoData.filter(isPolygon);
 
-
     // Draw clip paths for polygons
-    let clipPaths = surface.selectAll('defs').selectAll('.clipPath-data')
-    .data(polygonData, featureKey);
+    let clipPaths = surface.selectAll('defs').
+        selectAll('.clipPath-data').
+        data(polygonData, featureKey);
 
-    clipPaths.exit()
-    .remove();
+    clipPaths.exit().remove();
 
-    let clipPathsEnter = clipPaths.enter()
-    .append('clipPath')
-    .attr('class', 'clipPath-data')
-    .attr('id', clipPathID);
+    let clipPathsEnter = clipPaths.enter().
+        append('clipPath').
+        attr('class', 'clipPath-data').
+        attr('id', clipPathID);
 
-    clipPathsEnter
-    .append('path');
+    clipPathsEnter.append('path');
 
-    clipPaths.merge(clipPathsEnter)
-    .selectAll('path')
-    .attr('d', getAreaPath);
-
+    clipPaths.merge(clipPathsEnter).selectAll('path').attr('d', getAreaPath);
 
     // Draw fill, shadow, stroke layers
-    let datagroups = layer
-    .selectAll('g.datagroup')
-    .data(['fill', 'shadow', 'stroke']);
+    let datagroups = layer.selectAll('g.datagroup').
+        data(['fill', 'shadow', 'stroke']);
 
-    datagroups = datagroups.enter()
-    .append('g')
-    .attr('class', function(d) { return 'datagroup datagroup-' + d; })
-    .merge(datagroups);
-
+    datagroups = datagroups.enter().append('g').attr('class', function(d) {
+      return 'datagroup datagroup-' + d;
+    }).merge(datagroups);
 
     // Draw paths
     let pathData = {
       fill: polygonData,
       shadow: geoData,
-      stroke: geoData
+      stroke: geoData,
     };
 
-    let paths = datagroups
-    .selectAll('path')
-    .data(function(layer) { return pathData[layer]; }, featureKey);
+    let paths = datagroups.selectAll('path').data(function(layer) {
+      return pathData[layer];
+    }, featureKey);
 
     // exit
-    paths.exit()
-    .remove();
+    paths.exit().remove();
 
     // enter/update
-    paths = paths.enter()
-    .append('path')
-    .attr('class', function(d) {
+    paths = paths.enter().append('path').attr('class', function(d) {
       let datagroup = this.parentNode.__data__;
       return 'pathdata ' + datagroup + ' ' + featureClasses(d);
-    })
-    .attr('clip-path', function(d) {
+    }).attr('clip-path', function(d) {
       let datagroup = this.parentNode.__data__;
       return datagroup === 'fill' ? ('url(#' + clipPathID(d) + ')') : null;
-    })
-    .merge(paths)
-    .attr('d', function(d) {
+    }).merge(paths).attr('d', function(d) {
       let datagroup = this.parentNode.__data__;
       return datagroup === 'fill' ? getAreaPath(d) : getPath(d);
     });
 
-
     // Draw labels
-    layer
-    .call(drawLabels, 'label-halo', geoData)
-    .call(drawLabels, 'label', geoData);
-
+    layer.call(drawLabels, 'label-halo', geoData).
+        call(drawLabels, 'label', geoData);
 
     function drawLabels(selection, textClass, data) {
       let labelPath = d3_geoPath(projection);
       let labelData = data.filter(function(d) {
-        return _showLabels && d.properties && (d.properties.desc || d.properties.name);
+        return _showLabels && d.properties &&
+            (d.properties.desc || d.properties.name);
       });
 
-      let labels = selection.selectAll('text.' + textClass)
-      .data(labelData, featureKey);
+      let labels = selection.selectAll('text.' + textClass).
+          data(labelData, featureKey);
 
       // exit
-      labels.exit()
-      .remove();
+      labels.exit().remove();
 
       // enter/update
-      labels = labels.enter()
-      .append('text')
-      .attr('class', function(d) { return textClass + ' ' + featureClasses(d); })
-      .merge(labels)
-      .text(function(d) {
+      labels = labels.enter().append('text').attr('class', function(d) {
+        return textClass + ' ' + featureClasses(d);
+      }).merge(labels).text(function(d) {
         return d.properties.desc || d.properties.name;
-      })
-      .attr('x', function(d) {
+      }).attr('x', function(d) {
         let centroid = labelPath.centroid(d);
         return centroid[0] + 11;
-      })
-      .attr('y', function(d) {
+      }).attr('y', function(d) {
         let centroid = labelPath.centroid(d);
         return centroid[1];
       });
     }
   }
-
 
   function getExtension(fileName) {
     if (!fileName) return;
@@ -308,26 +272,26 @@ export function svgData(projection, context, dispatch) {
     return match && match.length && match[0];
   }
 
-
   function xmlToDom(textdata) {
     return (new DOMParser()).parseFromString(textdata, 'text/xml');
   }
-
 
   function stringifyGeojsonProperties(feature) {
     const properties = feature.properties;
     for (const key in properties) {
       const property = properties[key];
-      if (typeof property === 'number' || typeof property === 'boolean' || Array.isArray(property)) {
+      if (typeof property === 'number' || typeof property === 'boolean' ||
+          Array.isArray(property)) {
         properties[key] = property.toString();
-      } else if (property === null) {
+      }
+      else if (property === null) {
         properties[key] = 'null';
-      } else if (typeof property === 'object') {
+      }
+      else if (typeof property === 'object') {
         properties[key] = JSON.stringify(property);
       }
     }
   }
-
 
   drawData.setFile = function(extension, data) {
     _template = null;
@@ -348,7 +312,8 @@ export function svgData(projection, context, dispatch) {
         gj = JSON.parse(data);
         if (gj.type === 'FeatureCollection') {
           gj.features.forEach(stringifyGeojsonProperties);
-        } else if (gj.type === 'Feature') {
+        }
+        else if (gj.type === 'Feature') {
           stringifyGeojsonProperties(gj);
         }
         break;
@@ -365,7 +330,6 @@ export function svgData(projection, context, dispatch) {
     return this;
   };
 
-
   drawData.showLabels = function(val) {
     if (!arguments.length) return _showLabels;
 
@@ -373,14 +337,14 @@ export function svgData(projection, context, dispatch) {
     return this;
   };
 
-
   drawData.enabled = function(val) {
     if (!arguments.length) return _enabled;
 
     _enabled = val;
     if (_enabled) {
       showLayer();
-    } else {
+    }
+    else {
       hideLayer();
     }
 
@@ -388,12 +352,10 @@ export function svgData(projection, context, dispatch) {
     return this;
   };
 
-
   drawData.hasData = function() {
     let gj = _geojson || {};
     return !!(_template || Object.keys(gj).length);
   };
-
 
   drawData.template = function(val, src) {
     if (!arguments.length) return _template;
@@ -432,7 +394,6 @@ export function svgData(projection, context, dispatch) {
     return this;
   };
 
-
   drawData.geojson = function(gj, src) {
     if (!arguments.length) return _geojson;
 
@@ -450,7 +411,6 @@ export function svgData(projection, context, dispatch) {
     dispatch.call('change');
     return this;
   };
-
 
   drawData.fileList = function(fileList) {
     if (!arguments.length) return _fileList;
@@ -475,7 +435,6 @@ export function svgData(projection, context, dispatch) {
     return this;
   };
 
-
   drawData.url = function(url, defaultExtension) {
     _template = null;
     _fileList = null;
@@ -487,26 +446,23 @@ export function svgData(projection, context, dispatch) {
     let extension = getExtension(testUrl) || defaultExtension;
     if (extension) {
       _template = null;
-      d3_text(url)
-      .then(function(data) {
+      d3_text(url).then(function(data) {
         drawData.setFile(extension, data);
-      })
-      .catch(function() {
+      }).catch(function() {
         /* ignore */
       });
 
-    } else {
+    }
+    else {
       drawData.template(url);
     }
 
     return this;
   };
 
-
   drawData.getSrc = function() {
     return _src || '';
   };
-
 
   drawData.fitZoom = function() {
     let features = getFeatures(_geojson);
@@ -541,13 +497,13 @@ export function svgData(projection, context, dispatch) {
     }, []);
 
     if (!geoPolygonIntersectsPolygon(viewport, coords, true)) {
-      let extent = geoExtent(d3_geoBounds({ type: 'LineString', coordinates: coords }));
+      let extent = geoExtent(
+          d3_geoBounds({ type: 'LineString', coordinates: coords }));
       map.centerZoom(extent.center(), map.trimmedExtentZoom(extent));
     }
 
     return this;
   };
-
 
   init();
   return drawData;

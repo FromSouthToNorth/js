@@ -47,7 +47,7 @@ function corePreferences(k, v) {
 }
 
 // adds an event listener which is triggered whenever
-corePreferences.onChange = function (k, handler) {
+corePreferences.onChange = function(k, handler) {
   _listeners[k] = _listeners[k] || [];
   _listeners[k].push(handler);
 };

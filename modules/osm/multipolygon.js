@@ -2,7 +2,6 @@ import { actionReverse } from '../actions';
 import { osmIsInterestingTag } from './tags';
 import { osmWay } from './way';
 
-
 // "Old" multipolyons, previously known as "simple" multipolygons, are as follows:
 //
 // 1. Relation tagged with `type=multipolygon` and no interesting tags.
@@ -13,8 +12,8 @@ import { osmWay } from './way';
 
 export function osmOldMultipolygonOuterMemberOfRelation(entity, graph) {
   if (entity.type !== 'relation' ||
-    !entity.isMultipolygon()
-    || Object.keys(entity.tags).filter(osmIsInterestingTag).length > 1) {
+      !entity.isMultipolygon()
+      || Object.keys(entity.tags).filter(osmIsInterestingTag).length > 1) {
     return false;
   }
 
@@ -28,7 +27,8 @@ export function osmOldMultipolygonOuterMemberOfRelation(entity, graph) {
 
       outerMember = graph.entity(member.id);
 
-      if (Object.keys(outerMember.tags).filter(osmIsInterestingTag).length === 0) {
+      if (Object.keys(outerMember.tags).filter(osmIsInterestingTag).length ===
+          0) {
         return false;
       }
     }
@@ -41,7 +41,7 @@ export function osmOldMultipolygonOuterMemberOfRelation(entity, graph) {
 // https://github.com/openstreetmap/iD/issues/613
 export function osmIsOldMultipolygonOuterMember(entity, graph) {
   if (entity.type !== 'way' ||
-    Object.keys(entity.tags).filter(osmIsInterestingTag).length === 0) {
+      Object.keys(entity.tags).filter(osmIsInterestingTag).length === 0) {
     return false;
   }
 
@@ -50,7 +50,7 @@ export function osmIsOldMultipolygonOuterMember(entity, graph) {
 
   let parent = parents[0];
   if (!parent.isMultipolygon() ||
-    Object.keys(parent.tags).filter(osmIsInterestingTag).length > 1) {
+      Object.keys(parent.tags).filter(osmIsInterestingTag).length > 1) {
     return false;
   }
 
@@ -70,7 +70,6 @@ export function osmIsOldMultipolygonOuterMember(entity, graph) {
   return parent;
 }
 
-
 export function osmOldMultipolygonOuterMember(entity, graph) {
   if (entity.type !== 'way') return false;
 
@@ -79,7 +78,7 @@ export function osmOldMultipolygonOuterMember(entity, graph) {
 
   let parent = parents[0];
   if (!parent.isMultipolygon() ||
-    Object.keys(parent.tags).filter(osmIsInterestingTag).length > 1) {
+      Object.keys(parent.tags).filter(osmIsInterestingTag).length > 1) {
     return false;
   }
 
@@ -96,13 +95,12 @@ export function osmOldMultipolygonOuterMember(entity, graph) {
 
   let outerEntity = graph.hasEntity(outerMember.id);
   if (!outerEntity ||
-    !Object.keys(outerEntity.tags).filter(osmIsInterestingTag).length) {
+      !Object.keys(outerEntity.tags).filter(osmIsInterestingTag).length) {
     return false;
   }
 
   return outerEntity;
 }
-
 
 // Join `toJoin` array into sequences of connecting ways.
 
@@ -141,7 +139,7 @@ export function osmJoinWays(toJoin, graph) {
   }
 
   // make a copy containing only the items to join
-  toJoin = toJoin.filter(function (member) {
+  toJoin = toJoin.filter(function(member) {
     return member.type === 'way' && graph.hasEntity(member.id);
   });
 
@@ -183,8 +181,9 @@ export function osmJoinWays(toJoin, graph) {
         // order does not matter - but for routes, it does. (see #4589)
         // If we started this sequence backwards (i.e. next member way attaches to
         // the start node and not the end node), reverse the initial way before continuing.
-        if (joinAsMembers && currWays.length === 1 && nodes[0] !== end && nodes[nodes.length - 1] !== end &&
-          (nodes[nodes.length - 1] === start || nodes[0] === start)
+        if (joinAsMembers && currWays.length === 1 && nodes[0] !== end &&
+            nodes[nodes.length - 1] !== end &&
+            (nodes[nodes.length - 1] === start || nodes[0] === start)
         ) {
           currWays[0] = reverse(currWays[0]);
           currNodes.reverse();

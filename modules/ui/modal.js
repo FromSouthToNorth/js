@@ -9,41 +9,25 @@ export function uiModal(selection, blocking) {
   let previous = selection.select('div.modal');
   let animate = previous.empty();
 
-  previous.transition()
-          .duration(200)
-          .style('opacity', 0)
-          .remove();
+  previous.transition().duration(200).style('opacity', 0).remove();
 
-  let shaded = selection
-  .append('div')
-  .attr('class', 'shaded')
-  .style('opacity', 0);
+  let shaded = selection.append('div').
+      attr('class', 'shaded').
+      style('opacity', 0);
 
   shaded.close = () => {
-    shaded
-    .transition()
-    .duration(200)
-    .style('opacity', 0)
-    .remove();
+    shaded.transition().duration(200).style('opacity', 0).remove();
 
-    modal
-    .transition()
-    .duration(200)
-    .style('top', '0px');
+    modal.transition().duration(200).style('top', '0px');
 
-    d3_select(document)
-    .call(keybinding.unbind);
+    d3_select(document).call(keybinding.unbind);
   };
 
+  let modal = shaded.append('div').attr('class', 'modal fillL');
 
-  let modal = shaded
-  .append('div')
-  .attr('class', 'modal fillL');
-
-  modal
-  .append('input')
-  .attr('class', 'keytrap keytrap-first')
-  .on('focus.keytrap', moveFocusToLast);
+  modal.append('input').
+      attr('class', 'keytrap keytrap-first').
+      on('focus.keytrap', moveFocusToLast);
 
   if (!blocking) {
     shaded.on('click.remove-modal', (d3_event) => {
@@ -52,29 +36,22 @@ export function uiModal(selection, blocking) {
       }
     });
 
-    modal
-    .append('button')
-    .attr('class', 'close')
-    .attr('title', t('icons.close'))
-    .on('click', shaded.close)
-    .call(svgIcon('#iD-icon-close'));
+    modal.append('button').
+        attr('class', 'close').
+        attr('title', t('icons.close')).
+        on('click', shaded.close).
+        call(svgIcon('#iD-icon-close'));
 
-    keybinding
-    .on('⌫', shaded.close)
-    .on('⎋', shaded.close);
+    keybinding.on('⌫', shaded.close).on('⎋', shaded.close);
 
-    d3_select(document)
-    .call(keybinding);
+    d3_select(document).call(keybinding);
   }
 
-  modal
-  .append('div')
-  .attr('class', 'content');
+  modal.append('div').attr('class', 'content');
 
-  modal
-  .append('input')
-  .attr('class', 'keytrap keytrap-last')
-  .on('focus.keytrap', moveFocusToFirst);
+  modal.append('input').
+      attr('class', 'keytrap keytrap-last').
+      on('focus.keytrap', moveFocusToFirst);
 
   if (animate) {
     shaded.transition().style('opacity', 1);
@@ -85,12 +62,10 @@ export function uiModal(selection, blocking) {
 
   return shaded;
 
-
   function moveFocusToFirst() {
     let node = modal
-    // there are additional rules about what's focusable, but this suits our purposes
-    .select('a, button, input:not(.keytrap), select, textarea')
-    .node();
+        // there are additional rules about what's focusable, but this suits our purposes
+        .select('a, button, input:not(.keytrap), select, textarea').node();
 
     if (node) {
       node.focus();
@@ -101,9 +76,8 @@ export function uiModal(selection, blocking) {
   }
 
   function moveFocusToLast() {
-    let nodes = modal
-    .selectAll('a, button, input:not(.keytrap), select, textarea')
-    .nodes();
+    let nodes = modal.selectAll(
+        'a, button, input:not(.keytrap), select, textarea').nodes();
 
     if (nodes.length) {
       nodes[nodes.length - 1].focus();

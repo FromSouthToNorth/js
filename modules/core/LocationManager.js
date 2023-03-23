@@ -36,7 +36,6 @@ export class LocationManager {
     this._rebuildIndex();
   }
 
-
   /**
    * _validateLocationSet
    * Pass an Object with a `locationSet` property.
@@ -115,7 +114,6 @@ export class LocationManager {
     }
   }
 
-
   /**
    * _resolveLocationSet
    * Does everything that `_validateLocationSet()` does, but then "resolves" the locationSet into GeoJSON.
@@ -135,8 +133,10 @@ export class LocationManager {
       const locationSetID = result.id;
       obj.locationSetID = locationSetID;
 
-      if (!result.feature.geometry.coordinates.length || !result.feature.properties.area) {
-        throw new Error(`locationSet ${locationSetID} resolves to an empty feature.`);
+      if (!result.feature.geometry.coordinates.length ||
+          !result.feature.properties.area) {
+        throw new Error(
+            `locationSet ${locationSetID} resolves to an empty feature.`);
       }
 
       let geojson = JSON.parse(JSON.stringify(result.feature));   // deep clone
@@ -151,7 +151,6 @@ export class LocationManager {
     }
   }
 
-
   /**
    * _rebuildIndex
    * Rebuilds the whichPolygon index with whatever features have been resolved into GeoJSON.
@@ -159,7 +158,6 @@ export class LocationManager {
   _rebuildIndex() {
     this._wp = whichPolygon({ features: [...this._resolved.values()] });
   }
-
 
   /**
    * mergeCustomGeoJSON
@@ -180,7 +178,8 @@ export class LocationManager {
    * @param  `fc`  FeatureCollection-like Object containing custom locations
    */
   mergeCustomGeoJSON(fc) {
-    if (!fc || fc.type !== 'FeatureCollection' || !Array.isArray(fc.features)) return;
+    if (!fc || fc.type !== 'FeatureCollection' ||
+        !Array.isArray(fc.features)) return;
 
     fc.features.forEach(feature => {
       feature.properties = feature.properties || {};
@@ -204,7 +203,6 @@ export class LocationManager {
       _loco._cache[id] = feature;   // insert directly into LocationConflations internal cache
     });
   }
-
 
   /**
    * mergeLocationSets
@@ -232,7 +230,6 @@ export class LocationManager {
     return Promise.resolve(objects);
   }
 
-
   /**
    * locationSetID
    * Returns a locationSetID for a given locationSet (fallback to `+[Q2]`, world)
@@ -252,7 +249,6 @@ export class LocationManager {
     return locationSetID;
   }
 
-
   /**
    * feature
    * Returns the resolved GeoJSON feature for a given locationSetID (fallback to 'world')
@@ -271,7 +267,6 @@ export class LocationManager {
     const feature = this._resolved.get(locationSetID);
     return feature || this._resolved.get('+[Q2]');
   }
-
 
   /**
    * locationSetsAt
@@ -331,13 +326,11 @@ export class LocationManager {
     return result;
   }
 
-
   // Direct access to the location-conflation resolver
   loco() {
     return _loco;
   }
 }
-
 
 const _sharedLocationManager = new LocationManager();
 export { _sharedLocationManager as locationManager };

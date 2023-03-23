@@ -14,7 +14,6 @@ import { modeSelect } from './select';
 import { utilKeybinding } from '../util';
 import { utilFastMouse } from '../util/util';
 
-
 // import { operationCircularize } from '../operations/circularize';
 // import { operationDelete } from '../operations/delete';
 // import { operationOrthogonalize } from '../operations/orthogonalize';

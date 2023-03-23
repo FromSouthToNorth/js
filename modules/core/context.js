@@ -16,11 +16,20 @@ import { coreUploader } from './uploader';
 import { geoRawMercator } from '../geo/index.js';
 import { modeSelect } from '../modes/select';
 import { presetManager } from '../presets';
-import { rendererBackground, rendererFeatures, rendererMap, rendererPhotos } from '../renderer';
+import {
+  rendererBackground,
+  rendererFeatures,
+  rendererMap,
+  rendererPhotos,
+} from '../renderer';
 import { services } from '../services';
 import { uiInit } from '../ui/init';
-import { utilKeybinding, utilRebind, utilStringQs, utilCleanOsmString } from '../util';
-
+import {
+  utilKeybinding,
+  utilRebind,
+  utilStringQs,
+  utilCleanOsmString,
+} from '../util';
 
 export function coreContext() {
   const dispatch = d3_dispatch('enter', 'exit', 'change');
@@ -31,7 +40,9 @@ export function coreContext() {
   context.privacyVersion = '20201202';
 
   // iD will alter the hash so cache the parameters intended to setup the session
-  context.initialHashParams = window.location.hash ? utilStringQs(window.location.hash) : {};
+  context.initialHashParams = window.location.hash ?
+                              utilStringQs(window.location.hash) :
+      {};
 
   /* Changeset */
   // An osmChangeset object. Not loaded until needed.
@@ -74,7 +85,6 @@ export function coreContext() {
     return context;
   };
 
-
   /* User interface and keybinding */
   let _ui;
   context.ui = () => _ui;
@@ -83,7 +93,6 @@ export function coreContext() {
   let _keybinding = utilKeybinding('context');
   context.keybinding = () => _keybinding;
   d3_select(document).call(_keybinding);
-
 
   /* Straight accessors. Avoid using these if you can. */
   // Instantiate the connection here because it doesn't require passing in
@@ -105,14 +114,12 @@ export function coreContext() {
     return context;
   };
 
-
   // A string or array or locale codes to prefer over the browser's settings
   context.locale = function(locale) {
     if (!arguments.length) return localizer.localeCode();
     localizer.preferredLocaleCodes(locale);
     return context;
   };
-
 
   function afterLoad(cid, callback) {
     return (err, result) => {
@@ -128,13 +135,15 @@ export function coreContext() {
         }
         return;
 
-      } else if (_connection && _connection.getConnectionId() !== cid) {
+      }
+      else if (_connection && _connection.getConnectionId() !== cid) {
         if (typeof callback === 'function') {
           callback({ message: 'Connection Switched', status: -1 });
         }
         return;
 
-      } else {
+      }
+      else {
         _history.merge(result.data, result.extent);
         if (typeof callback === 'function') {
           callback(err, result);
@@ -143,7 +152,6 @@ export function coreContext() {
       }
     };
   }
-
 
   context.loadTiles = (projection, callback) => {
     const handle = window.requestIdleCallback(() => {
@@ -220,10 +228,12 @@ export function coreContext() {
   context.maxCharsForTagValue = () => 255;
   context.maxCharsForRelationRole = () => 255;
 
-  context.cleanTagKey = (val) => utilCleanOsmString(val, context.maxCharsForTagKey());
-  context.cleanTagValue = (val) => utilCleanOsmString(val, context.maxCharsForTagValue());
-  context.cleanRelationRole = (val) => utilCleanOsmString(val, context.maxCharsForRelationRole());
-
+  context.cleanTagKey = (val) => utilCleanOsmString(val,
+      context.maxCharsForTagKey());
+  context.cleanTagValue = (val) => utilCleanOsmString(val,
+      context.maxCharsForTagValue());
+  context.cleanRelationRole = (val) => utilCleanOsmString(val,
+      context.maxCharsForRelationRole());
 
   /* History */
   let _inIntro = false;
@@ -249,7 +259,8 @@ export function coreContext() {
         return;
       }
 
-    } else {
+    }
+    else {
       canSave = context.selectedIDs().every(id => {
         const entity = context.hasEntity(id);
         return entity && !entity.isDegenerate();
@@ -276,11 +287,9 @@ export function coreContext() {
     };
   }
 
-
   /* Graph */
   context.hasEntity = (id) => _history.graph().hasEntity(id);
   context.entity = (id) => _history.graph().entity(id);
-
 
   /* Modes */
   let _mode;
@@ -296,7 +305,8 @@ export function coreContext() {
     dispatch.call('enter', this, _mode);
   };
 
-  context.selectedIDs = () => (_mode && _mode.selectedIDs && _mode.selectedIDs()) || [];
+  context.selectedIDs = () => (_mode && _mode.selectedIDs &&
+      _mode.selectedIDs()) || [];
   context.activeID = () => _mode && _mode.activeID && _mode.activeID();
 
   let _selectedNoteID;
@@ -314,11 +324,9 @@ export function coreContext() {
     return context;
   };
 
-
   /* Behaviors */
   context.install = (behavior) => context.surface().call(behavior);
   context.uninstall = (behavior) => context.surface().call(behavior.off);
-
 
   /* Copy/Paste */
   let _copyGraph;
@@ -339,11 +347,9 @@ export function coreContext() {
     return context;
   };
 
-
   /* Background */
   let _background;
   context.background = () => _background;
-
 
   /* Features */
   let _features;
@@ -354,11 +360,9 @@ export function coreContext() {
     return _features.hasHiddenConnections(entity, graph);
   };
 
-
   /* Photos */
   let _photos;
   context.photos = () => _photos;
-
 
   /* Map */
   let _map;
@@ -374,14 +378,13 @@ export function coreContext() {
     return _map.editableDataEnabled();
   };
 
-
   /* Debug */
   let _debugFlags = {
     tile: false,        // tile boundaries
     collision: false,   // label collision bounding boxes
     imagery: false,     // imagery bounding polygons
     target: false,      // touch targets
-    downloaded: false   // downloaded data from osm
+    downloaded: false,   // downloaded data from osm
   };
   context.debugFlags = () => _debugFlags;
   context.getDebug = (flag) => flag && _debugFlags[flag];
@@ -391,7 +394,6 @@ export function coreContext() {
     dispatch.call('change');
     return context;
   };
-
 
   /* Container */
   let _container = d3_select(null);
@@ -413,7 +415,6 @@ export function coreContext() {
     _embed = val;
     return context;
   };
-
 
   /* Assets */
   let _assetPath = '';
@@ -439,7 +440,6 @@ export function coreContext() {
   };
 
   context.imagePath = (val) => context.asset(`img/${val}`);
-
 
   /* reset (aka flush) */
   context.reset = context.flush = () => {
@@ -469,11 +469,9 @@ export function coreContext() {
     return context;
   };
 
-
   /* Projections */
   context.projection = geoRawMercator();
   context.curtainProjection = geoRawMercator();
-
 
   /* Init */
   context.init = () => {
@@ -516,7 +514,8 @@ export function coreContext() {
     function initializeDependents() {
 
       if (context.initialHashParams.presets) {
-        presetManager.addablePresetIDs(new Set(context.initialHashParams.presets.split(',')));
+        presetManager.addablePresetIDs(
+            new Set(context.initialHashParams.presets.split(',')));
       }
 
       if (context.initialHashParams.locale) {
@@ -539,18 +538,17 @@ export function coreContext() {
       _features.init();
 
       if (services.maprules && context.initialHashParams.maprules) {
-        d3_json(context.initialHashParams.maprules)
-        .then(mapcss => {
+        d3_json(context.initialHashParams.maprules).then(mapcss => {
           services.maprules.init();
-          mapcss.forEach(mapcssSelector => services.maprules.addRule(mapcssSelector));
-        })
-        .catch(() => { /* ignore */ });
+          mapcss.forEach(
+              mapcssSelector => services.maprules.addRule(mapcssSelector));
+        }).catch(() => { /* ignore */
+        });
       }
 
       // if the container isn't available, e.g. when testing, don't load the UI
       if (!context.container().empty()) {
-        _ui.ensureLoaded()
-        .then(() => {
+        _ui.ensureLoaded().then(() => {
           _background.init();
           _photos.init();
         });

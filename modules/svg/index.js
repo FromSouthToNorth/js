@@ -6,5 +6,10 @@ export { svgDebug } from './debug.js';
 export { svgData } from './data.js';
 export { svgOsm } from './osm.js';
 export {
-  svgPath, svgRelationMemberTags, svgPointTransform, svgSegmentWay, svgMarkerSegments, svgPassiveVertex,
+  svgPath,
+  svgRelationMemberTags,
+  svgPointTransform,
+  svgSegmentWay,
+  svgMarkerSegments,
+  svgPassiveVertex,
 } from './helpers.js';

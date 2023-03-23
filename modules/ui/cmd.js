@@ -1,10 +1,9 @@
 import { t } from '../core/localizer';
 import { utilDetect } from '../util/detect';
 
-
 // Translate a MacOS key command into the appropriate Windows/Linux equivalent.
 // For example, ⌘Z -> Ctrl+Z
-export let uiCmd = function (code) {
+export let uiCmd = function(code) {
   let detected = utilDetect();
 
   if (detected.os === 'mac') {
@@ -16,13 +15,13 @@ export let uiCmd = function (code) {
   }
 
   let result = '',
-    replacements = {
-      '⌘': 'Ctrl',
-      '⇧': 'Shift',
-      '⌥': 'Alt',
-      '⌫': 'Backspace',
-      '⌦': 'Delete',
-    };
+      replacements = {
+        '⌘': 'Ctrl',
+        '⇧': 'Shift',
+        '⌥': 'Alt',
+        '⌫': 'Backspace',
+        '⌦': 'Delete',
+      };
 
   for (let i = 0; i < code.length; i++) {
     if (code[i] in replacements) {
@@ -36,9 +35,8 @@ export let uiCmd = function (code) {
   return result;
 };
 
-
 // return a display-focused string for a given keyboard code
-uiCmd.display = function (code) {
+uiCmd.display = function(code) {
   if (code.length !== 1) return code;
 
   let detected = utilDetect();

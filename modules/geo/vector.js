@@ -1,7 +1,8 @@
 // vector equals
 export function geoVecEqual(a, b, epsilon) {
   if (epsilon) {
-    return (Math.abs(a[0] - b[0]) <= epsilon) && (Math.abs(a[1] - b[1]) <= epsilon);
+    return (Math.abs(a[0] - b[0]) <= epsilon) &&
+        (Math.abs(a[1] - b[1]) <= epsilon);
   }
   else {
     return (a[0] === b[0]) && (a[1] === b[1]);
@@ -20,7 +21,7 @@ export function geoVecSubtract(a, b) {
 
 // vector scaling
 export function geoVecScale(a, mag) {
-  return [ a[0] * mag, a[1] * mag ];
+  return [a[0] * mag, a[1] * mag];
 }
 
 export function geoVecLength(a, b) {
@@ -63,6 +64,6 @@ export function geoVecCross(a, b, origin) {
 export function geoVecInterp(a, b, t) {
   return [
     a[0] + (b[0] - a[0]) * t,
-    a[1] + (b[1] - a[1]) * t
+    a[1] + (b[1] - a[1]) * t,
   ];
 }

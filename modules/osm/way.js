@@ -3,9 +3,13 @@ import { geoArea as d3_geoArea } from 'd3-geo';
 import { geoExtent, geoVecCross } from '../geo';
 import { osmEntity } from './entity';
 import { osmLanes } from './lanes';
-import { osmTagSuggestingArea, osmOneWayTags, osmRightSideIsInsideTags, osmRemoveLifecyclePrefix } from './tags';
+import {
+  osmTagSuggestingArea,
+  osmOneWayTags,
+  osmRightSideIsInsideTags,
+  osmRemoveLifecyclePrefix,
+} from './tags';
 import { utilArrayUniq } from '../util';
-
 
 export function osmWay() {
   if (!(this instanceof osmWay)) {
@@ -16,23 +20,20 @@ export function osmWay() {
   }
 }
 
-
 osmEntity.way = osmWay;
 
 osmWay.prototype = Object.create(osmEntity.prototype);
-
 
 Object.assign(osmWay.prototype, {
   type: 'way',
   nodes: [],
 
-
-  copy: function (resolver, copies) {
+  copy: function(resolver, copies) {
     if (copies[this.id]) return copies[this.id];
 
     let copy = osmEntity.prototype.copy.call(this, resolver, copies);
 
-    let nodes = this.nodes.map(function (id) {
+    let nodes = this.nodes.map(function(id) {
       return resolver.entity(id).copy(resolver, copies).id;
     });
 
@@ -42,9 +43,8 @@ Object.assign(osmWay.prototype, {
     return copy;
   },
 
-
-  extent: function (resolver) {
-    return resolver.transient(this, 'extent', function () {
+  extent: function(resolver) {
+    return resolver.transient(this, 'extent', function() {
       let extent = geoExtent();
       for (let i = 0; i < this.nodes.length; i++) {
         let node = resolver.hasEntity(this.nodes[i]);
@@ -56,29 +56,24 @@ Object.assign(osmWay.prototype, {
     });
   },
 
-
-  first: function () {
+  first: function() {
     return this.nodes[0];
   },
 
-
-  last: function () {
+  last: function() {
     return this.nodes[this.nodes.length - 1];
   },
 
-
-  contains: function (node) {
+  contains: function(node) {
     return this.nodes.indexOf(node) >= 0;
   },
 
-
-  affix: function (node) {
+  affix: function(node) {
     if (this.nodes[0] === node) return 'prefix';
     if (this.nodes[this.nodes.length - 1] === node) return 'suffix';
   },
 
-
-  layer: function () {
+  layer: function() {
     // explicit layer tag, clamp between -10, 10..
     if (isFinite(this.tags.layer)) {
       return Math.max(-10, Math.min(+(this.tags.layer), 10));
@@ -102,17 +97,34 @@ Object.assign(osmWay.prototype, {
     return 0;
   },
 
-
   // the approximate width of the line based on its tags except its `width` tag
-  impliedLineWidthMeters: function () {
+  impliedLineWidthMeters: function() {
     let averageWidths = {
       highway: { // width is for single lane
-        motorway: 5, motorway_link: 5, trunk: 4.5, trunk_link: 4.5,
-        primary: 4, secondary: 4, tertiary: 4,
-        primary_link: 4, secondary_link: 4, tertiary_link: 4,
-        unclassified: 4, road: 4, living_street: 4, bus_guideway: 4, pedestrian: 4,
-        residential: 3.5, service: 3.5, track: 3, cycleway: 2.5,
-        bridleway: 2, corridor: 2, steps: 2, path: 1.5, footway: 1.5,
+        motorway: 5,
+        motorway_link: 5,
+        trunk: 4.5,
+        trunk_link: 4.5,
+        primary: 4,
+        secondary: 4,
+        tertiary: 4,
+        primary_link: 4,
+        secondary_link: 4,
+        tertiary_link: 4,
+        unclassified: 4,
+        road: 4,
+        living_street: 4,
+        bus_guideway: 4,
+        pedestrian: 4,
+        residential: 3.5,
+        service: 3.5,
+        track: 3,
+        cycleway: 2.5,
+        bridleway: 2,
+        corridor: 2,
+        steps: 2,
+        path: 1.5,
+        footway: 1.5,
       },
       railway: { // width includes ties and rail bed, not just track gauge
         rail: 2.5, light_rail: 2.5, tram: 2.5, subway: 2.5,
@@ -120,7 +132,13 @@ Object.assign(osmWay.prototype, {
         miniature: 1.5, narrow_gauge: 1.5,
       },
       waterway: {
-        river: 50, canal: 25, stream: 5, tidal_channel: 5, fish_pass: 2.5, drain: 2.5, ditch: 1.5,
+        river: 50,
+        canal: 25,
+        stream: 5,
+        tidal_channel: 5,
+        fish_pass: 2.5,
+        drain: 2.5,
+        ditch: 1.5,
       },
     };
     for (let key in averageWidths) {
@@ -138,8 +156,7 @@ Object.assign(osmWay.prototype, {
     return null;
   },
 
-
-  isOneWay: function () {
+  isOneWay: function() {
     // explicit oneway tag..
     let values = {
       'yes': true,
@@ -157,7 +174,7 @@ Object.assign(osmWay.prototype, {
     // implied oneway tag..
     for (let key in this.tags) {
       if (key in osmOneWayTags &&
-        (this.tags[key] in osmOneWayTags[key])) {
+          (this.tags[key] in osmOneWayTags[key])) {
         return true;
       }
     }
@@ -167,11 +184,12 @@ Object.assign(osmWay.prototype, {
   // Some identifier for tag that implies that this way is "sided",
   // i.e. the right side is the 'inside' (e.g. the right side of a
   // natural=cliff is lower).
-  sidednessIdentifier: function () {
+  sidednessIdentifier: function() {
     for (const realKey in this.tags) {
       const value = this.tags[realKey];
       const key = osmRemoveLifecyclePrefix(realKey);
-      if (key in osmRightSideIsInsideTags && (value in osmRightSideIsInsideTags[key])) {
+      if (key in osmRightSideIsInsideTags &&
+          (value in osmRightSideIsInsideTags[key])) {
         if (osmRightSideIsInsideTags[key][value] === true) {
           return key;
         }
@@ -188,7 +206,7 @@ Object.assign(osmWay.prototype, {
     return null;
   },
 
-  isSided: function () {
+  isSided: function() {
     if (this.tags.two_sided === 'yes') {
       return false;
     }
@@ -196,21 +214,21 @@ Object.assign(osmWay.prototype, {
     return this.sidednessIdentifier() !== null;
   },
 
-  lanes: function () {
+  lanes: function() {
     return osmLanes(this);
   },
 
-
-  isClosed: function () {
+  isClosed: function() {
     return this.nodes.length > 1 && this.first() === this.last();
   },
 
-
-  isConvex: function (resolver) {
+  isConvex: function(resolver) {
     if (!this.isClosed() || this.isDegenerate()) return null;
 
     let nodes = utilArrayUniq(resolver.childNodes(this));
-    let coords = nodes.map(function (n) { return n.loc; });
+    let coords = nodes.map(function(n) {
+      return n.loc;
+    });
     let curr = 0;
     let prev = 0;
 
@@ -233,23 +251,21 @@ Object.assign(osmWay.prototype, {
   },
 
   // returns an object with the tag that implies this is an area, if any
-  tagSuggestingArea: function () {
+  tagSuggestingArea: function() {
     return osmTagSuggestingArea(this.tags);
   },
 
-  isArea: function () {
+  isArea: function() {
     if (this.tags.area === 'yes') return true;
     if (!this.isClosed() || this.tags.area === 'no') return false;
     return this.tagSuggestingArea() !== null;
   },
 
-
-  isDegenerate: function () {
+  isDegenerate: function() {
     return (new Set(this.nodes).size < (this.isArea() ? 3 : 2));
   },
 
-
-  areAdjacent: function (n1, n2) {
+  areAdjacent: function(n1, n2) {
     for (let i = 0; i < this.nodes.length; i++) {
       if (this.nodes[i] === n1) {
         if (this.nodes[i - 1] === n2) return true;
@@ -259,16 +275,14 @@ Object.assign(osmWay.prototype, {
     return false;
   },
 
-
-  geometry: function (graph) {
-    return graph.transient(this, 'geometry', function () {
+  geometry: function(graph) {
+    return graph.transient(this, 'geometry', function() {
       return this.isArea() ? 'area' : 'line';
     });
   },
 
-
   // returns an array of objects representing the segments between the nodes in this way
-  segments: function (graph) {
+  segments: function(graph) {
 
     function segmentExtent(graph) {
       let n1 = graph.hasEntity(this.nodes[0]);
@@ -285,7 +299,7 @@ Object.assign(osmWay.prototype, {
       ]);
     }
 
-    return graph.transient(this, 'segments', function () {
+    return graph.transient(this, 'segments', function() {
       let segments = [];
       for (let i = 0; i < this.nodes.length - 1; i++) {
         segments.push({
@@ -300,9 +314,8 @@ Object.assign(osmWay.prototype, {
     });
   },
 
-
   // If this way is not closed, append the beginning node to the end of the nodelist to close it.
-  close: function () {
+  close: function() {
     if (this.isClosed() || !this.nodes.length) return this;
 
     let nodes = this.nodes.slice();
@@ -311,9 +324,8 @@ Object.assign(osmWay.prototype, {
     return this.update({ nodes: nodes });
   },
 
-
   // If this way is closed, remove any connector nodes from the end of the nodelist to unclose it.
-  unclose: function () {
+  unclose: function() {
     if (!this.isClosed()) return this;
 
     let nodes = this.nodes.slice();
@@ -330,13 +342,12 @@ Object.assign(osmWay.prototype, {
     return this.update({ nodes: nodes });
   },
 
-
   // Adds a node (id) in front of the node which is currently at position index.
   // If index is undefined, the node will be added to the end of the way for linear ways,
   //   or just before the final connecting node for circular ways.
   // Consecutive duplicates are eliminated including existing ones.
   // Circularity is always preserved when adding a node.
-  addNode: function (id, index) {
+  addNode: function(id, index) {
     let nodes = this.nodes.slice();
     let isClosed = this.isClosed();
     let max = isClosed ? nodes.length - 1 : nodes.length;
@@ -374,18 +385,18 @@ Object.assign(osmWay.prototype, {
     nodes = nodes.filter(noRepeatNodes);
 
     // If the way was closed before, append a connector node to keep it closed..
-    if (isClosed && (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
+    if (isClosed &&
+        (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
       nodes.push(nodes[0]);
     }
 
     return this.update({ nodes: nodes });
   },
 
-
   // Replaces the node which is currently at position index with the given node (id).
   // Consecutive duplicates are eliminated including existing ones.
   // Circularity is preserved when updating a node.
-  updateNode: function (id, index) {
+  updateNode: function(id, index) {
     let nodes = this.nodes.slice();
     let isClosed = this.isClosed();
     let max = nodes.length - 1;
@@ -419,18 +430,18 @@ Object.assign(osmWay.prototype, {
     nodes = nodes.filter(noRepeatNodes);
 
     // If the way was closed before, append a connector node to keep it closed..
-    if (isClosed && (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
+    if (isClosed &&
+        (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
       nodes.push(nodes[0]);
     }
 
     return this.update({ nodes: nodes });
   },
 
-
   // Replaces each occurrence of node id needle with replacement.
   // Consecutive duplicates are eliminated including existing ones.
   // Circularity is preserved.
-  replaceNode: function (needleID, replacementID) {
+  replaceNode: function(needleID, replacementID) {
     let nodes = this.nodes.slice();
     let isClosed = this.isClosed();
 
@@ -443,43 +454,43 @@ Object.assign(osmWay.prototype, {
     nodes = nodes.filter(noRepeatNodes);
 
     // If the way was closed before, append a connector node to keep it closed..
-    if (isClosed && (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
+    if (isClosed &&
+        (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
       nodes.push(nodes[0]);
     }
 
     return this.update({ nodes: nodes });
   },
-
 
   // Removes each occurrence of node id.
   // Consecutive duplicates are eliminated including existing ones.
   // Circularity is preserved.
-  removeNode: function (id) {
+  removeNode: function(id) {
     let nodes = this.nodes.slice();
     let isClosed = this.isClosed();
 
-    nodes = nodes
-    .filter(function (node) { return node !== id; })
-    .filter(noRepeatNodes);
+    nodes = nodes.filter(function(node) {
+      return node !== id;
+    }).filter(noRepeatNodes);
 
     // If the way was closed before, append a connector node to keep it closed..
-    if (isClosed && (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
+    if (isClosed &&
+        (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
       nodes.push(nodes[0]);
     }
 
     return this.update({ nodes: nodes });
   },
 
-
-  asJXON: function (changeset_id) {
+  asJXON: function(changeset_id) {
     let r = {
       way: {
         '@id': this.osmId(),
         '@version': this.version || 0,
-        nd: this.nodes.map(function (id) {
+        nd: this.nodes.map(function(id) {
           return { keyAttributes: { ref: osmEntity.id.toOSM(id) } };
         }, this),
-        tag: Object.keys(this.tags).map(function (k) {
+        tag: Object.keys(this.tags).map(function(k) {
           return { keyAttributes: { k: k, v: this.tags[k] } };
         }, this),
       },
@@ -490,11 +501,11 @@ Object.assign(osmWay.prototype, {
     return r;
   },
 
-
-  asGeoJSON: function (resolver) {
-    return resolver.transient(this, 'GeoJSON', function () {
-      let coordinates = resolver.childNodes(this)
-                                .map(function (n) { return n.loc; });
+  asGeoJSON: function(resolver) {
+    return resolver.transient(this, 'GeoJSON', function() {
+      let coordinates = resolver.childNodes(this).map(function(n) {
+        return n.loc;
+      });
 
       if (this.isArea() && this.isClosed()) {
         return {
@@ -511,14 +522,16 @@ Object.assign(osmWay.prototype, {
     });
   },
 
-
-  area: function (resolver) {
-    return resolver.transient(this, 'area', function () {
+  area: function(resolver) {
+    return resolver.transient(this, 'area', function() {
       let nodes = resolver.childNodes(this);
 
       let json = {
         type: 'Polygon',
-        coordinates: [nodes.map(function (n) { return n.loc; })],
+        coordinates: [
+          nodes.map(function(n) {
+            return n.loc;
+          })],
       };
 
       if (!this.isClosed() && nodes.length) {
@@ -538,7 +551,6 @@ Object.assign(osmWay.prototype, {
     });
   },
 });
-
 
 // Filter function to eliminate consecutive duplicates.
 function noRepeatNodes(node, i, arr) {

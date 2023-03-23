@@ -5,7 +5,23 @@ import aesjs from 'aes-js';
 // To generate a random key:  window.crypto.getRandomValues(new Uint8Array(16));
 
 // This default signing key is built into iD and can be used to mask/unmask sensitive values.
-const DEFAULT_128 = [250, 157, 60, 79, 142, 134, 229, 129, 138, 126, 210, 129, 29, 71, 160, 208];
+const DEFAULT_128 = [
+  250,
+  157,
+  60,
+  79,
+  142,
+  134,
+  229,
+  129,
+  138,
+  126,
+  210,
+  129,
+  29,
+  71,
+  160,
+  208];
 
 export function utilAesEncrypt(text, key) {
   key = key || DEFAULT_128;

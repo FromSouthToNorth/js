@@ -9,9 +9,8 @@ export function actionDeleteMultiple(ids) {
     relation: actionDeleteRelation,
   };
 
-
-  return function (graph) {
-    ids.forEach(function (id) {
+  return function(graph) {
+    ids.forEach(function(id) {
       if (graph.hasEntity(id)) { // It may have been deleted already.
         graph = actions[graph.entity(id).type](id)(graph);
       }

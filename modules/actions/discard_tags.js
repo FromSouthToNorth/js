@@ -1,4 +1,3 @@
-
 export function actionDiscardTags(difference, discardTags) {
   discardTags = discardTags || {};
 
@@ -16,7 +15,8 @@ export function actionDiscardTags(difference, discardTags) {
         const k = keys[i];
         if (discardTags[k] || !entity.tags[k]) {
           didDiscard = true;
-        } else {
+        }
+        else {
           tags[k] = entity.tags[k];
         }
       }

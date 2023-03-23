@@ -6,26 +6,26 @@ export function actionDeleteRelation(relationID, allowUntaggedMembers) {
 
   function canDeleteEntity(entity, graph) {
     return !graph.parentWays(entity).length &&
-      !graph.parentRelations(entity).length &&
-      (!entity.hasInterestingTags() && !allowUntaggedMembers);
+        !graph.parentRelations(entity).length &&
+        (!entity.hasInterestingTags() && !allowUntaggedMembers);
   }
 
-
-  return function (graph) {
+  return function(graph) {
     const relation = graph.entity(relationID);
 
-    graph.parentRelations(relation)
-         .forEach(function (parent) {
-           parent = parent.removeMembersWithID(relationID);
-           graph = graph.replace(parent);
+    graph.parentRelations(relation).forEach(function(parent) {
+      parent = parent.removeMembersWithID(relationID);
+      graph = graph.replace(parent);
 
-           if (parent.isDegenerate()) {
-             graph = actionDeleteRelation(parent.id)(graph);
-           }
-         });
+      if (parent.isDegenerate()) {
+        graph = actionDeleteRelation(parent.id)(graph);
+      }
+    });
 
-    var memberIDs = utilArrayUniq(relation.members.map(function (m) { return m.id; }));
-    memberIDs.forEach(function (memberID) {
+    var memberIDs = utilArrayUniq(relation.members.map(function(m) {
+      return m.id;
+    }));
+    memberIDs.forEach(function(memberID) {
       graph = graph.replace(relation.removeMembersWithID(memberID));
 
       var entity = graph.entity(memberID);

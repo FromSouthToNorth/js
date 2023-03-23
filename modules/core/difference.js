@@ -1,7 +1,11 @@
 import deepEqual from 'fast-deep-equal';
 
 import { geoVecEqual } from '../geo/index.js';
-import { utilArrayDifference, utilArrayUnion, utilArrayUniq } from '../util/index.js';
+import {
+  utilArrayDifference,
+  utilArrayUnion,
+  utilArrayUniq,
+} from '../util/index.js';
 
 /*
     iD.coreDifference represents the difference between two graphs.
@@ -60,7 +64,8 @@ export function coreDifference(base, head) {
     // HOT CODE: there can be many thousands of downloaded entities, so looping
     // through them all can become a performance bottleneck. Optimize by
     // resolving duplicates and using a basic `for` loop
-    let ids = utilArrayUniq(Object.keys(head.entities).concat(Object.keys(base.entities)));
+    let ids = utilArrayUniq(
+        Object.keys(head.entities).concat(Object.keys(base.entities)));
     for (let i = 0; i < ids.length; i++) {
       checkEntityID(ids[i]);
     }
@@ -68,11 +73,9 @@ export function coreDifference(base, head) {
 
   load();
 
-
   _diff.length = function length() {
     return Object.keys(_changes).length;
   };
-
 
   _diff.changes = function changes() {
     return _changes;
@@ -80,11 +83,10 @@ export function coreDifference(base, head) {
 
   _diff.didChange = _didChange;
 
-
   // pass true to include affected relation members
   _diff.extantIDs = function extantIDs(includeRelMembers) {
     let result = new Set();
-    Object.keys(_changes).forEach(function (id) {
+    Object.keys(_changes).forEach(function(id) {
       if (_changes[id].head) {
         result.add(id);
       }
@@ -94,9 +96,13 @@ export function coreDifference(base, head) {
       let entity = h || b;
 
       if (includeRelMembers && entity.type === 'relation') {
-        let mh = h ? h.members.map(function (m) { return m.id; }) : [];
-        let mb = b ? b.members.map(function (m) { return m.id; }) : [];
-        utilArrayUnion(mh, mb).forEach(function (memberID) {
+        let mh = h ? h.members.map(function(m) {
+          return m.id;
+        }) : [];
+        let mb = b ? b.members.map(function(m) {
+          return m.id;
+        }) : [];
+        utilArrayUnion(mh, mb).forEach(function(memberID) {
           if (head.hasEntity(memberID)) {
             result.add(memberID);
           }
@@ -107,10 +113,9 @@ export function coreDifference(base, head) {
     return Array.from(result);
   };
 
-
   _diff.modified = function modified() {
     let result = [];
-    Object.values(_changes).forEach(function (change) {
+    Object.values(_changes).forEach(function(change) {
       if (change.base && change.head) {
         result.push(change.head);
       }
@@ -118,10 +123,9 @@ export function coreDifference(base, head) {
     return result;
   };
 
-
   _diff.created = function created() {
     let result = [];
-    Object.values(_changes).forEach(function (change) {
+    Object.values(_changes).forEach(function(change) {
       if (!change.base && change.head) {
         result.push(change.head);
       }
@@ -129,17 +133,15 @@ export function coreDifference(base, head) {
     return result;
   };
 
-
   _diff.deleted = function deleted() {
     let result = [];
-    Object.values(_changes).forEach(function (change) {
+    Object.values(_changes).forEach(function(change) {
       if (change.base && !change.head) {
         result.push(change.base);
       }
     });
     return result;
   };
-
 
   _diff.summary = function summary() {
     let relevant = {};
@@ -180,7 +182,6 @@ export function coreDifference(base, head) {
 
     return Object.values(relevant);
 
-
     function addEntity(entity, graph, changeType) {
       relevant[entity.id] = {
         entity: entity,
@@ -200,7 +201,6 @@ export function coreDifference(base, head) {
     }
   };
 
-
   // returns complete set of entities that require a redraw
   //  (optionally within given `extent`)
   _diff.complete = function complete(extent) {
@@ -216,8 +216,8 @@ export function coreDifference(base, head) {
       let i;
 
       if (extent &&
-        (!h || !h.intersects(extent, head)) &&
-        (!b || !b.intersects(extent, base))) {
+          (!h || !h.intersects(extent, head)) &&
+          (!b || !b.intersects(extent, base))) {
         continue;
       }
 
@@ -240,8 +240,12 @@ export function coreDifference(base, head) {
       }
 
       if (entity.type === 'relation' && entity.isMultipolygon()) {
-        let mh = h ? h.members.map(function (m) { return m.id; }) : [];
-        let mb = b ? b.members.map(function (m) { return m.id; }) : [];
+        let mh = h ? h.members.map(function(m) {
+          return m.id;
+        }) : [];
+        let mb = b ? b.members.map(function(m) {
+          return m.id;
+        }) : [];
         let ids = utilArrayUnion(mh, mb);
         for (i = 0; i < ids.length; i++) {
           let member = head.hasEntity(ids[i]);
@@ -257,7 +261,6 @@ export function coreDifference(base, head) {
 
     return result;
 
-
     function addParents(parents, result) {
       for (let i = 0; i < parents.length; i++) {
         let parent = parents[i];
@@ -268,7 +271,6 @@ export function coreDifference(base, head) {
       }
     }
   };
-
 
   return _diff;
 }

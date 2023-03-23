@@ -1,6 +1,5 @@
 import { geoExtent } from '../geo';
 
-
 export function osmNote() {
   if (!(this instanceof osmNote)) {
     return (new osmNote()).initialize(arguments);
@@ -10,20 +9,17 @@ export function osmNote() {
   }
 }
 
-
-osmNote.id = function () {
+osmNote.id = function() {
   return osmNote.id.next--;
 };
 
-
 osmNote.id.next = -1;
-
 
 Object.assign(osmNote.prototype, {
 
   type: 'note',
 
-  initialize: function (sources) {
+  initialize: function(sources) {
     for (let i = 0; i < sources.length; ++i) {
       let source = sources[i];
       for (let prop in source) {
@@ -45,19 +41,19 @@ Object.assign(osmNote.prototype, {
     return this;
   },
 
-  extent: function () {
+  extent: function() {
     return new geoExtent(this.loc);
   },
 
-  update: function (attrs) {
+  update: function(attrs) {
     return osmNote(this, attrs); // {v: 1 + (this.v || 0)}
   },
 
-  isNew: function () {
+  isNew: function() {
     return this.id < 0;
   },
 
-  move: function (loc) {
+  move: function(loc) {
     return this.update({ loc: loc });
   },
 

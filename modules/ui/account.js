@@ -4,7 +4,6 @@ import { svgIcon } from '../svg/icon';
 export function uiAccount(context) {
   const osm = context.connection();
 
-
   function updateUserDetails(selection) {
     if (!osm) return;
 
@@ -16,7 +15,6 @@ export function uiAccount(context) {
     }
   }
 
-
   function render(selection, user) {
     let userInfo = selection.select('.userInfo');
     let loginLogout = selection.select('.loginLogout');
@@ -24,11 +22,15 @@ export function uiAccount(context) {
     if (user) {
       userInfo.html('').classed('hide', false);
 
-      let userLink = userInfo.append('a').attr('href', osm.userURL(user.display_name)).attr('target', '_blank');
+      let userLink = userInfo.append('a').
+          attr('href', osm.userURL(user.display_name)).
+          attr('target', '_blank');
 
       // Add user's image or placeholder
       if (user.image_url) {
-        userLink.append('img').attr('class', 'icon pre-text user-icon').attr('src', user.image_url);
+        userLink.append('img').
+            attr('class', 'icon pre-text user-icon').
+            attr('src', user.image_url);
       }
       else {
         userLink.call(svgIcon('#iD-icon-avatar', 'pre-text light'));
@@ -38,24 +40,29 @@ export function uiAccount(context) {
       userLink.append('span').attr('class', 'label').html(user.display_name);
 
       // show "Log Out"
-      loginLogout.classed('hide', false).select('a').text(t('logout')).on('click', e => {
-        e.preventDefault();
-        osm.logout();
-        tryLogout();
-      });
+      loginLogout.classed('hide', false).
+          select('a').
+          text(t('logout')).
+          on('click', e => {
+            e.preventDefault();
+            osm.logout();
+            tryLogout();
+          });
 
     }
     else {    // no user
       userInfo.html('').classed('hide', true);
 
       // show "Log In"
-      loginLogout.classed('hide', false).select('a').text(t('login')).on('click', e => {
-        e.preventDefault();
-        osm.authenticate();
-      });
+      loginLogout.classed('hide', false).
+          select('a').
+          text(t('login')).
+          on('click', e => {
+            e.preventDefault();
+            osm.authenticate();
+          });
     }
   }
-
 
   // OAuth2's idea of "logout" is just to get rid of the bearer token.
   // If we try to "login" again, it will just grab the token again.
@@ -77,13 +84,16 @@ export function uiAccount(context) {
     window.open(url, '_blank', settings);
   }
 
-
-  return function (selection) {
+  return function(selection) {
     if (!osm) return;
 
     selection.append('li').attr('class', 'userInfo').classed('hide', true);
 
-    selection.append('li').attr('class', 'loginLogout').classed('hide', true).append('a').attr('href', '#');
+    selection.append('li').
+        attr('class', 'loginLogout').
+        classed('hide', true).
+        append('a').
+        attr('href', '#');
 
     osm.on('change.account', () => updateUserDetails(selection));
     updateUserDetails(selection);

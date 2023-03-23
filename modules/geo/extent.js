@@ -7,7 +7,8 @@ export function geoExtent(min, max) {
   else if (min instanceof geoExtent) {
     return min;
   }
-  else if (min && min.length === 2 && min[0].length === 2 && min[1].length === 2) {
+  else if (min && min.length === 2 && min[0].length === 2 && min[1].length ===
+      2) {
     this[0] = min[0];
     this[1] = min[1];
   }
@@ -20,47 +21,52 @@ export function geoExtent(min, max) {
 geoExtent.prototype = new Array(2);
 
 Object.assign(geoExtent.prototype, {
-  equals: function (obj) {
+  equals: function(obj) {
     return this[0][0] === obj[0][0] &&
-      this[0][1] === obj[0][1] &&
-      this[1][0] === obj[1][0] &&
-      this[1][1] === obj[1][1];
+        this[0][1] === obj[0][1] &&
+        this[1][0] === obj[1][0] &&
+        this[1][1] === obj[1][1];
   },
 
-  extend: function (obj) {
+  extend: function(obj) {
     if (!(obj instanceof geoExtent)) {
       obj = new geoExtent(obj);
     }
     return geoExtent(
-      [Math.min(obj[0][0], this[0][0]), Math.min(obj[0][1], this[0][1])],
-      [Math.max(obj[1][0], this[1][0]), Math.min(obj[1][1], this[1][1])],
+        [Math.min(obj[0][0], this[0][0]), Math.min(obj[0][1], this[0][1])],
+        [Math.max(obj[1][0], this[1][0]), Math.min(obj[1][1], this[1][1])],
     );
   },
 
-  _extend: function (extent) {
+  _extend: function(extent) {
     this[0][0] = Math.min(extent[0][0], this[0][0]);
     this[0][1] = Math.min(extent[0][1], this[0][1]);
     this[1][0] = Math.max(extent[1][0], this[1][0]);
     this[1][1] = Math.max(extent[1][1], this[1][1]);
   },
 
-  area: function () {
+  area: function() {
     return Math.abs((this[1][0] - this[0][0]) * (this[1][1] - this[0][1]));
   },
 
-  center: function () {
+  center: function() {
     return [(this[0][0] + this[1][0]) / 2, (this[0][1] + this[1][1]) / 2];
   },
 
-  rectangle: function () {
+  rectangle: function() {
     return [this[0][0], this[0][1], this[1][0], this[1][1]];
   },
 
-  bbox: function () {
-    return { minX: this[0][0], minY: this[0][1], maxX: this[1][0], maxY: this[1][1] };
+  bbox: function() {
+    return {
+      minX: this[0][0],
+      minY: this[0][1],
+      maxX: this[1][0],
+      maxY: this[1][1],
+    };
   },
 
-  polygon: function () {
+  polygon: function() {
     return [
       [this[0][0], this[0][1]],
       [this[0][0], this[1][1]],
@@ -70,31 +76,31 @@ Object.assign(geoExtent.prototype, {
     ];
   },
 
-  contains: function (obj) {
+  contains: function(obj) {
     if (!(obj instanceof geoExtent)) obj = new geoExtent(obj);
     return obj[0][0] >= this[0][0] &&
-      obj[0][1] >= this[0][1] &&
-      obj[1][0] <= this[1][0] &&
-      obj[1][1] <= this[1][1];
+        obj[0][1] >= this[0][1] &&
+        obj[1][0] <= this[1][0] &&
+        obj[1][1] <= this[1][1];
   },
 
-  intersects: function (obj) {
+  intersects: function(obj) {
     if (!(obj instanceof geoExtent)) obj = new geoExtent(obj);
     return obj[0][0] <= this[1][0] &&
-      obj[0][1] <= this[1][1] &&
-      obj[1][0] >= this[0][0] &&
-      obj[1][1] >= this[0][1];
+        obj[0][1] <= this[1][1] &&
+        obj[1][0] >= this[0][0] &&
+        obj[1][1] >= this[0][1];
   },
 
-  intersection: function (obj) {
+  intersection: function(obj) {
     if (!this.intersects(obj)) return new geoExtent();
     return new geoExtent(
-      [Math.max(obj[0][0], this[0][0]), Math.max(obj[0][1], this[0][1])],
-      [Math.min(obj[1][0], this[1][0]), Math.min(obj[1][1], this[1][1])],
+        [Math.max(obj[0][0], this[0][0]), Math.max(obj[0][1], this[0][1])],
+        [Math.min(obj[1][0], this[1][0]), Math.min(obj[1][1], this[1][1])],
     );
   },
 
-  percentContainedIn: function (obj) {
+  percentContainedIn: function(obj) {
     if (!(obj instanceof geoExtent)) obj = new geoExtent(obj);
     const a1 = this.intersection(obj).area();
     const a2 = this.area();
@@ -113,16 +119,16 @@ Object.assign(geoExtent.prototype, {
     }
   },
 
-  padByMeters: function (meters) {
+  padByMeters: function(meters) {
     const dLat = geoMetersToLat(meters);
     const dLon = geoMetersToLon(meters, this.center()[1]);
     return geoExtent(
-      [this[0][0] - dLon, this[0][1] - dLat],
-      [this[1][0] + dLon, this[1][1] + dLat],
+        [this[0][0] - dLon, this[0][1] - dLat],
+        [this[1][0] + dLon, this[1][1] + dLat],
     );
   },
 
-  toParam: function () {
+  toParam: function() {
     return this.rectangle().join(',');
   },
 });

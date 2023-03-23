@@ -5,10 +5,11 @@ import { utilArrayUniq } from './array';
 export function utilKeybinding(namespace) {
   let _keybindings = {};
 
-
   function testBindings(d3_event, isCapturing) {
     let didMatch = false;
-    const bindings = Object.keys(_keybindings).map(function (id) { return _keybindings[id]; });
+    const bindings = Object.keys(_keybindings).map(function(id) {
+      return _keybindings[id];
+    });
     let i, binding;
 
     // Most key shortcuts will accept either lower or uppercase ('h' or 'H'),
@@ -43,7 +44,6 @@ export function utilKeybinding(namespace) {
       }
     }
 
-
     function matches(d3_event, binding, testShift) {
       const event = d3_event;
       let isMatch = false;
@@ -58,7 +58,7 @@ export function utilKeybinding(namespace) {
           isMatch = false;
         }
         else if (Array.isArray(binding.event.key)) {
-          if (binding.event.key.map(function (s) {
+          if (binding.event.key.map(function(s) {
             return s.toLowerCase();
           }).indexOf(event.key.toLowerCase()) === -1) {
             isMatch = false;
@@ -86,17 +86,16 @@ export function utilKeybinding(namespace) {
         if (event.altKey !== binding.event.modifiers.altKey) return false;
       }
       if (event.metaKey !== binding.event.modifiers.metaKey) return false;
-      if (testShift && event.shiftKey !== binding.event.modifiers.shiftKey) return false;
+      if (testShift && event.shiftKey !==
+          binding.event.modifiers.shiftKey) return false;
 
       return true;
     }
   }
 
-
   function capture(d3_event) {
     testBindings(d3_event, true);
   }
-
 
   function bubble(d3_event) {
     const tagName = d3.select(d3_event.target).node().tagName;
@@ -106,7 +105,6 @@ export function utilKeybinding(namespace) {
     testBindings(d3_event, false);
   }
 
-
   function keybinding(selection) {
     selection = selection || d3.select(document);
     selection.on('keydown.capture.' + namespace, capture, true);
@@ -115,7 +113,7 @@ export function utilKeybinding(namespace) {
   }
 
   // was: keybinding.off()
-  keybinding.unbind = function (selection) {
+  keybinding.unbind = function(selection) {
     _keybindings = [];
     selection = selection || d3.select(document);
     selection.on('keydown.capture.' + namespace, null);
@@ -123,15 +121,13 @@ export function utilKeybinding(namespace) {
     return keybinding;
   };
 
-
-  keybinding.clear = function () {
+  keybinding.clear = function() {
     _keybindings = {};
     return keybinding;
   };
 
-
   // Remove one or more keycode bindings.
-  keybinding.off = function (codes, capture) {
+  keybinding.off = function(codes, capture) {
     const arr = utilArrayUniq([].concat(codes));
 
     for (let i = 0; i < arr.length; i++) {
@@ -141,9 +137,8 @@ export function utilKeybinding(namespace) {
     return keybinding;
   };
 
-
   // Add one or more keycode bindings.
-  keybinding.on = function (codes, callback, capture) {
+  keybinding.on = function(codes, callback, capture) {
     if (typeof callback !== 'function') {
       return keybinding.off(codes, capture);
     }
@@ -174,7 +169,8 @@ export function utilKeybinding(namespace) {
 
       _keybindings[id] = binding;
 
-      const matches = arr[i].toLowerCase().match(/(?:(?:[^+⇧⌃⌥⌘])+|[⇧⌃⌥⌘]|\+\+|^\+$)/g);
+      const matches = arr[i].toLowerCase().
+          match(/(?:(?:[^+⇧⌃⌥⌘])+|[⇧⌃⌥⌘]|\+\+|^\+$)/g);
       for (let j = 0; j < matches.length; j++) {
         // Normalise matching errors
         if (matches[j] === '++') matches[j] = '+';
@@ -195,10 +191,8 @@ export function utilKeybinding(namespace) {
     return keybinding;
   };
 
-
   return keybinding;
 }
-
 
 /*
  * See https://github.com/keithamus/jwerty
@@ -227,46 +221,82 @@ utilKeybinding.minusKeys = ['_', '-', 'ffminus', 'dash', '–', '—'];
 
 utilKeybinding.keys = {
   // Backspace key, on Mac: ⌫ (Backspace)
-  '⌫': 'Backspace', backspace: 'Backspace',
+  '⌫': 'Backspace',
+  backspace: 'Backspace',
   // Tab Key, on Mac: ⇥ (Tab), on Windows ⇥⇥
-  '⇥': 'Tab', '⇆': 'Tab', tab: 'Tab',
+  '⇥': 'Tab',
+  '⇆': 'Tab',
+  tab: 'Tab',
   // Return key, ↩
-  '↩': 'Enter', '↵': 'Enter', '⏎': 'Enter', 'return': 'Enter', enter: 'Enter', '⌅': 'Enter',
+  '↩': 'Enter',
+  '↵': 'Enter',
+  '⏎': 'Enter',
+  'return': 'Enter',
+  enter: 'Enter',
+  '⌅': 'Enter',
   // Pause/Break key
-  'pause': 'Pause', 'pause-break': 'Pause',
+  'pause': 'Pause',
+  'pause-break': 'Pause',
   // Caps Lock key, ⇪
-  '⇪': 'CapsLock', caps: 'CapsLock', 'caps-lock': 'CapsLock',
+  '⇪': 'CapsLock',
+  caps: 'CapsLock',
+  'caps-lock': 'CapsLock',
   // Escape key, on Mac: ⎋, on Windows: Esc
-  '⎋': ['Escape', 'Esc'], escape: ['Escape', 'Esc'], esc: ['Escape', 'Esc'],
+  '⎋': ['Escape', 'Esc'],
+  escape: ['Escape', 'Esc'],
+  esc: ['Escape', 'Esc'],
   // Space key
   space: [' ', 'Spacebar'],
   // Page-Up key, or pgup, on Mac: ↖
-  '↖': 'PageUp', pgup: 'PageUp', 'page-up': 'PageUp',
+  '↖': 'PageUp',
+  pgup: 'PageUp',
+  'page-up': 'PageUp',
   // Page-Down key, or pgdown, on Mac: ↘
-  '↘': 'PageDown', pgdown: 'PageDown', 'page-down': 'PageDown',
+  '↘': 'PageDown',
+  pgdown: 'PageDown',
+  'page-down': 'PageDown',
   // END key, on Mac: ⇟
-  '⇟': 'End', end: 'End',
+  '⇟': 'End',
+  end: 'End',
   // HOME key, on Mac: ⇞
-  '⇞': 'Home', home: 'Home',
+  '⇞': 'Home',
+  home: 'Home',
   // Insert key, or ins
-  ins: 'Insert', insert: 'Insert',
+  ins: 'Insert',
+  insert: 'Insert',
   // Delete key, on Mac: ⌦ (Delete)
-  '⌦': ['Delete', 'Del'], del: ['Delete', 'Del'], 'delete': ['Delete', 'Del'],
+  '⌦': ['Delete', 'Del'],
+  del: ['Delete', 'Del'],
+  'delete': ['Delete', 'Del'],
   // Left Arrow Key, or ←
-  '←': ['ArrowLeft', 'Left'], left: ['ArrowLeft', 'Left'], 'arrow-left': ['ArrowLeft', 'Left'],
+  '←': ['ArrowLeft', 'Left'],
+  left: ['ArrowLeft', 'Left'],
+  'arrow-left': ['ArrowLeft', 'Left'],
   // Up Arrow Key, or ↑
-  '↑': ['ArrowUp', 'Up'], up: ['ArrowUp', 'Up'], 'arrow-up': ['ArrowUp', 'Up'],
+  '↑': ['ArrowUp', 'Up'],
+  up: ['ArrowUp', 'Up'],
+  'arrow-up': ['ArrowUp', 'Up'],
   // Right Arrow Key, or →
-  '→': ['ArrowRight', 'Right'], right: ['ArrowRight', 'Right'], 'arrow-right': ['ArrowRight', 'Right'],
+  '→': ['ArrowRight', 'Right'],
+  right: ['ArrowRight', 'Right'],
+  'arrow-right': ['ArrowRight', 'Right'],
   // Up Arrow Key, or ↓
-  '↓': ['ArrowDown', 'Down'], down: ['ArrowDown', 'Down'], 'arrow-down': ['ArrowDown', 'Down'],
+  '↓': ['ArrowDown', 'Down'],
+  down: ['ArrowDown', 'Down'],
+  'arrow-down': ['ArrowDown', 'Down'],
   // odities, stuff for backward compatibility (browsers and code):
   // Num-Multiply, or *
-  '*': ['*', 'Multiply'], star: ['*', 'Multiply'], asterisk: ['*', 'Multiply'], multiply: ['*', 'Multiply'],
+  '*': ['*', 'Multiply'],
+  star: ['*', 'Multiply'],
+  asterisk: ['*', 'Multiply'],
+  multiply: ['*', 'Multiply'],
   // Num-Plus or +
-  '+': ['+', 'Add'], 'plus': ['+', 'Add'],
+  '+': ['+', 'Add'],
+  'plus': ['+', 'Add'],
   // Num-Subtract, or -
-  '-': ['-', 'Subtract'], subtract: ['-', 'Subtract'], 'dash': ['-', 'Subtract'],
+  '-': ['-', 'Subtract'],
+  subtract: ['-', 'Subtract'],
+  'dash': ['-', 'Subtract'],
   // Semicolon
   semicolon: ';',
   // = or equals
@@ -274,11 +304,14 @@ utilKeybinding.keys = {
   // Comma, or ,
   comma: ',',
   // Period, or ., or full-stop
-  period: '.', 'full-stop': '.',
+  period: '.',
+  'full-stop': '.',
   // Slash, or /, or forward-slash
-  slash: '/', 'forward-slash': '/',
+  slash: '/',
+  'forward-slash': '/',
   // Tick, or `, or back-quote
-  tick: '`', 'back-quote': '`',
+  tick: '`',
+  'back-quote': '`',
   // Open bracket, or [
   'open-bracket': '[',
   // Back slash, or \
@@ -286,7 +319,8 @@ utilKeybinding.keys = {
   // Close backet, or ]
   'close-bracket': ']',
   // Apostrophe, or Quote, or '
-  quote: '\'', apostrophe: '\'',
+  quote: '\'',
+  apostrophe: '\'',
   // NUMPAD 0-9
   'num-0': '0',
   'num-1': '1',

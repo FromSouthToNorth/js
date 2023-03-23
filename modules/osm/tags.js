@@ -1,24 +1,31 @@
 export function osmIsInterestingTag(key) {
   return key !== 'attribution' &&
-    key !== 'created_by' &&
-    key !== 'source' &&
-    key !== 'odbl' &&
-    key.indexOf('source:') !== 0 &&
-    key.indexOf('source_ref') !== 0 && // purposely exclude colon
-    key.indexOf('tiger:') !== 0;
+      key !== 'created_by' &&
+      key !== 'source' &&
+      key !== 'odbl' &&
+      key.indexOf('source:') !== 0 &&
+      key.indexOf('source_ref') !== 0 && // purposely exclude colon
+      key.indexOf('tiger:') !== 0;
 }
 
 export const osmLifecyclePrefixes = {
   // nonexistent, might be built
-  proposed: true, planned: true,
+  proposed: true,
+  planned: true,
   // under maintentance or between groundbreaking and opening
   construction: true,
   // existent but not functional
   disused: true,
   // dilapidated to nonexistent
-  abandoned: true, was: true,
+  abandoned: true,
+  was: true,
   // nonexistent, still may appear in imagery
-  dismantled: true, razed: true, demolished: true, destroyed: true, removed: true, obliterated: true,
+  dismantled: true,
+  razed: true,
+  demolished: true,
+  destroyed: true,
+  removed: true,
+  obliterated: true,
   // existent occasionally, e.g. stormwater drainage basin
   intermittent: true,
 };
@@ -81,7 +88,8 @@ export function osmTagSuggestingArea(tags) {
       returnTags[realKey] = tags[realKey];
       return returnTags;
     }
-    if (key in osmAreaKeysExceptions && tags[key] in osmAreaKeysExceptions[key]) {
+    if (key in osmAreaKeysExceptions && tags[key] in
+        osmAreaKeysExceptions[key]) {
       returnTags[realKey] = tags[realKey];
       return returnTags;
     }
@@ -115,11 +123,11 @@ export function osmNodeGeometriesForTags(nodeTags) {
   let geometries = {};
   for (let key in nodeTags) {
     if (osmPointTags[key] &&
-      (osmPointTags[key]['*'] || osmPointTags[key][nodeTags[key]])) {
+        (osmPointTags[key]['*'] || osmPointTags[key][nodeTags[key]])) {
       geometries.point = true;
     }
     if (osmVertexTags[key] &&
-      (osmVertexTags[key]['*'] || osmVertexTags[key][nodeTags[key]])) {
+        (osmVertexTags[key]['*'] || osmVertexTags[key][nodeTags[key]])) {
       geometries.vertex = true;
     }
     // break early if both are already supported
@@ -226,14 +234,40 @@ export let osmRightSideIsInsideTags = {
 // "highway" tag values for pedestrian or vehicle right-of-ways that make up the routable network
 // (does not include `raceway`)
 export let osmRoutableHighwayTagValues = {
-  motorway: true, trunk: true, primary: true, secondary: true, tertiary: true, residential: true,
-  motorway_link: true, trunk_link: true, primary_link: true, secondary_link: true, tertiary_link: true,
-  unclassified: true, road: true, service: true, track: true, living_street: true, bus_guideway: true,
-  path: true, footway: true, cycleway: true, bridleway: true, pedestrian: true, corridor: true, steps: true,
+  motorway: true,
+  trunk: true,
+  primary: true,
+  secondary: true,
+  tertiary: true,
+  residential: true,
+  motorway_link: true,
+  trunk_link: true,
+  primary_link: true,
+  secondary_link: true,
+  tertiary_link: true,
+  unclassified: true,
+  road: true,
+  service: true,
+  track: true,
+  living_street: true,
+  bus_guideway: true,
+  path: true,
+  footway: true,
+  cycleway: true,
+  bridleway: true,
+  pedestrian: true,
+  corridor: true,
+  steps: true,
 };
 // "highway" tag values that generally do not allow motor vehicles
 export let osmPathHighwayTagValues = {
-  path: true, footway: true, cycleway: true, bridleway: true, pedestrian: true, corridor: true, steps: true,
+  path: true,
+  footway: true,
+  cycleway: true,
+  bridleway: true,
+  pedestrian: true,
+  corridor: true,
+  steps: true,
 };
 
 // "railway" tag values representing existing railroad tracks (purposely does not include 'abandoned')
@@ -245,5 +279,11 @@ export let osmRailwayTrackTagValues = {
 
 // "waterway" tag values for line features representing water flow
 export let osmFlowingWaterwayTagValues = {
-  canal: true, ditch: true, drain: true, fish_pass: true, river: true, stream: true, tidal_channel: true,
+  canal: true,
+  ditch: true,
+  drain: true,
+  fish_pass: true,
+  river: true,
+  stream: true,
+  tidal_channel: true,
 };

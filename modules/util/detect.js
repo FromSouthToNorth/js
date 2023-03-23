@@ -46,7 +46,8 @@ export function utilDetect(refresh) {
 
   // detect other browser capabilities
   // Legacy Opera has incomplete svg style support. See #715
-  _detected.opera = (_detected.browser.toLowerCase() === 'opera' && Number(_detected.version) < 15);
+  _detected.opera = (_detected.browser.toLowerCase() === 'opera' &&
+      Number(_detected.version) < 15);
 
   if (_detected.browser.toLowerCase() === 'msie') {
     _detected.ie = true;
@@ -59,7 +60,6 @@ export function utilDetect(refresh) {
   }
 
   _detected.filedrop = (window.FileReader && 'ondrop' in window);
-
 
   /* Platform */
   if (/Win/.test(ua)) {
@@ -80,37 +80,34 @@ export function utilDetect(refresh) {
   }
 
   _detected.isMobileWebKit = (/\b(iPad|iPhone|iPod)\b/.test(ua) ||
-      // HACK: iPadOS 13+ requests desktop sites by default by using a Mac user agent,
-      // so assume any "mac" with multitouch is actually iOS
-      (navigator.platform === 'MacIntel' && 'maxTouchPoints' in navigator && navigator.maxTouchPoints > 1)) &&
-    /WebKit/.test(ua) &&
-    !/Edge/.test(ua) &&
-    !window.MSStream;
-
+          // HACK: iPadOS 13+ requests desktop sites by default by using a Mac user agent,
+          // so assume any "mac" with multitouch is actually iOS
+          (navigator.platform === 'MacIntel' && 'maxTouchPoints' in navigator &&
+              navigator.maxTouchPoints > 1)) &&
+      /WebKit/.test(ua) &&
+      !/Edge/.test(ua) &&
+      !window.MSStream;
 
   /* Locale */
   // An array of locales requested by the browser in priority order.
   _detected.browserLocales = Array.from(new Set( // remove duplicates
-    [navigator.language]
-    .concat(navigator.languages || [])
-    .concat([
-      // old property for backwards compatibility
-      navigator.userLanguage,
-    ])
-    // remove any undefined values
-    .filter(Boolean),
+      [navigator.language].concat(navigator.languages || []).concat([
+        // old property for backwards compatibility
+        navigator.userLanguage,
+      ])
+          // remove any undefined values
+          .filter(Boolean),
   ));
-
 
   /* Host */
   const loc = window.top.location;
   let origin = loc.origin;
   if (!origin) {  // for unpatched IE11
-    origin = loc.protocol + '//' + loc.hostname + (loc.port ? ':' + loc.port : '');
+    origin = loc.protocol + '//' + loc.hostname +
+        (loc.port ? ':' + loc.port : '');
   }
 
   _detected.host = origin + loc.pathname;
-
 
   return _detected;
 }

@@ -7,11 +7,9 @@ import { localizer } from '../core';
 
 import { nominatimApiUrl } from '../../config/id.js';
 
-
 let apibase = nominatimApiUrl;
 let _inflight = {};
 let _nominatimCache;
-
 
 export default {
 
@@ -21,28 +19,30 @@ export default {
   },
 
   reset: function() {
-    Object.values(_inflight).forEach(function(controller) { controller.abort(); });
+    Object.values(_inflight).forEach(function(controller) {
+      controller.abort();
+    });
     _inflight = {};
     _nominatimCache = new RBush();
   },
 
-
-  countryCode: function (location, callback) {
+  countryCode: function(location, callback) {
     this.reverse(location, function(err, result) {
       if (err) {
         return callback(err);
-      } else if (result.address) {
+      }
+      else if (result.address) {
         return callback(null, result.address.country_code);
-      } else {
+      }
+      else {
         return callback('Unable to geocode', null);
       }
     });
   },
 
-
-  reverse: function (loc, callback) {
+  reverse: function(loc, callback) {
     let cached = _nominatimCache.search(
-      { minX: loc[0], minY: loc[1], maxX: loc[0], maxY: loc[1] }
+        { minX: loc[0], minY: loc[1], maxX: loc[0], maxY: loc[1] },
     );
 
     if (cached.length > 0) {
@@ -50,7 +50,13 @@ export default {
       return;
     }
 
-    let params = { zoom: 13, format: 'json', addressdetails: 1, lat: loc[1], lon: loc[0] };
+    let params = {
+      zoom: 13,
+      format: 'json',
+      addressdetails: 1,
+      lat: loc[1],
+      lon: loc[0],
+    };
     let url = apibase + 'reverse?' + utilQsString(params);
 
     if (_inflight[url]) return;
@@ -60,27 +66,24 @@ export default {
     d3_json(url, {
       signal: controller.signal,
       headers: {
-        'Accept-Language': localizer.localeCodes().join(',')
-      }
-    })
-    .then(function(result) {
+        'Accept-Language': localizer.localeCodes().join(','),
+      },
+    }).then(function(result) {
       delete _inflight[url];
       if (result && result.error) {
         throw new Error(result.error);
       }
       let extent = geoExtent(loc).padByMeters(200);
-      _nominatimCache.insert(Object.assign(extent.bbox(), {data: result}));
+      _nominatimCache.insert(Object.assign(extent.bbox(), { data: result }));
       if (callback) callback(null, result);
-    })
-    .catch(function(err) {
+    }).catch(function(err) {
       delete _inflight[url];
       if (err.name === 'AbortError') return;
       if (callback) callback(err.message);
     });
   },
 
-
-  search: function (val, callback) {
+  search: function(val, callback) {
     let searchVal = encodeURIComponent(val);
     let url = apibase + 'search/' + searchVal + '?limit=10&format=json';
 
@@ -91,21 +94,19 @@ export default {
     d3_json(url, {
       signal: controller.signal,
       headers: {
-        'Accept-Language': localizer.localeCodes().join(',')
-      }
-    })
-    .then(function(result) {
+        'Accept-Language': localizer.localeCodes().join(','),
+      },
+    }).then(function(result) {
       delete _inflight[url];
       if (result && result.error) {
         throw new Error(result.error);
       }
       if (callback) callback(null, result);
-    })
-    .catch(function(err) {
+    }).catch(function(err) {
       delete _inflight[url];
       if (err.name === 'AbortError') return;
       if (callback) callback(err.message);
     });
-  }
+  },
 
 };

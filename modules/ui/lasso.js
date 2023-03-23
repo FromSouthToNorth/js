@@ -8,36 +8,28 @@ export function uiLasso(context) {
   lasso.coordinates = [];
 
   function lasso(selection) {
-    context.container()
-      .classed('lasso', true);
+    context.container().classed('lasso', true);
 
-    group = selection
-      .append('g')
-      .attr('class', 'lasso hide');
+    group = selection.append('g').attr('class', 'lasso hide');
 
-    polygon = group
-      .append('path')
-      .attr('class', 'lasso-path');
+    polygon = group.append('path').attr('class', 'lasso-path');
 
-    group
-      .call(uiToggle(true));
+    group.call(uiToggle(true));
   }
-
 
   function draw() {
     if (polygon) {
-      polygon.data([lasso.coordinates])
-        .attr('d', function(d) { return 'M' + d.join(' L') + ' Z'; });
+      polygon.data([lasso.coordinates]).attr('d', function(d) {
+        return 'M' + d.join(' L') + ' Z';
+      });
     }
   }
 
-
-  lasso.extent = function () {
+  lasso.extent = function() {
     return lasso.coordinates.reduce(function(extent, point) {
       return extent.extend(geoExtent(point));
     }, geoExtent());
   };
-
 
   lasso.p = function(_) {
     if (!arguments.length) return lasso;
@@ -45,7 +37,6 @@ export function uiLasso(context) {
     draw();
     return lasso;
   };
-
 
   lasso.close = function() {
     if (group) {
@@ -55,7 +46,6 @@ export function uiLasso(context) {
     }
     context.container().classed('lasso', false);
   };
-
 
   return lasso;
 }

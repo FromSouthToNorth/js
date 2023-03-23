@@ -79,17 +79,18 @@ export function rendererMap(context) {
   let _zoomerPannerFunction = 'PointerEvent' in window ? utilZoomPan : d3_zoom;
 
   let _zoomerPanner = _zoomerPannerFunction().
-  scaleExtent([kMin, kMax]).
-  interpolate(d3_interpolate).
-  filter(zoomEventFilter).
-  on('zoom.map', zoomPan).
-  on('start.map', function(d3_event) {
-    _pointerDown = d3_event && (d3_event.type === 'pointerdown' ||
-        (d3_event.sourceEvent && d3_event.sourceEvent.type === 'pointerdown'));
-  }).
-  on('end.map', function() {
-    _pointerDown = false;
-  });
+      scaleExtent([kMin, kMax]).
+      interpolate(d3_interpolate).
+      filter(zoomEventFilter).
+      on('zoom.map', zoomPan).
+      on('start.map', function(d3_event) {
+        _pointerDown = d3_event && (d3_event.type === 'pointerdown' ||
+            (d3_event.sourceEvent && d3_event.sourceEvent.type ===
+                'pointerdown'));
+      }).
+      on('end.map', function() {
+        _pointerDown = false;
+      });
 
   const _doubleUpHandler = utilDoubleUp();
 
@@ -120,16 +121,16 @@ export function rendererMap(context) {
     }
 
     context.history().
-    on('merge.map', function() {
-      scheduleRedraw();
-    }).
-    on('change.map', immediateRedraw).
-    on('undone.map', function(stack, fromStack) {
-      didUndoOrRedo(fromStack.transform);
-    }).
-    on('redone.map', function(stack) {
-      didUndoOrRedo(stack.transform);
-    });
+        on('merge.map', function() {
+          scheduleRedraw();
+        }).
+        on('change.map', immediateRedraw).
+        on('undone.map', function(stack, fromStack) {
+          didUndoOrRedo(fromStack.transform);
+        }).
+        on('redone.map', function(stack) {
+          didUndoOrRedo(stack.transform);
+        });
 
     context.background().on('change.map', immediateRedraw);
 
@@ -144,13 +145,13 @@ export function rendererMap(context) {
       // disable swipe-to-navigate browser pages on trackpad/magic mouse – #5552
       d3_event.preventDefault();
     }).
-    call(_zoomerPanner).
-    call(_zoomerPanner.transform, projection.transform()).
-    on('dblclick.zoom', null); // override d3-zoom dblclick handling
+        call(_zoomerPanner).
+        call(_zoomerPanner.transform, projection.transform()).
+        on('dblclick.zoom', null); // override d3-zoom dblclick handling
 
     map.supersurface = supersurface = selection.append('div').
-    attr('class', 'supersurface').
-    call(utilSetTransform, 0, 0);
+        attr('class', 'supersurface').
+        call(utilSetTransform, 0, 0);
 
     // Need a wrapper div because Opera can't cope with an absolutely positioned
     // SVG element: http://bl.ocks.org/jfirebaugh/6fbfbd922552bf776c16
@@ -159,38 +160,39 @@ export function rendererMap(context) {
     map.surface = surface = wrapper.call(drawLayers).selectAll('.surface');
 
     surface.call(drawLabels.observe).
-    call(_doubleUpHandler).
-    on(_pointerPrefix + 'down.zoom', function(d3_event) {
-      _lastPointerEvent = d3_event;
-      if (d3_event.button === 2) {
-        d3_event.stopPropagation();
-      }
-    }, true).
-    on(_pointerPrefix + 'up.zoom', function(d3_event) {
-      _lastPointerEvent = d3_event;
-      if (resetTransform()) {
-        immediateRedraw();
-      }
-    }).
-    on(_pointerPrefix + 'move.map', function(d3_event) {
-      _lastPointerEvent = d3_event;
-    }).
-    on(_pointerPrefix + 'over.vertices', function(d3_event) {
-      if (map.editableDataEnabled() && !_isTransformed) {
-        let hover = d3_event.target.__data__;
-        surface.call(drawVertices.drawHover, context.graph(), hover,
-            map.extent());
-        dispatch.call('drawn', this, {full: false});
-      }
-    }).
-    on(_pointerPrefix + 'out.vertices', function(d3_event) {
-      if (map.editableDataEnabled() && !_isTransformed) {
-        let hover = d3_event.relatedTarget && d3_event.relatedTarget.__data__;
-        surface.call(drawVertices.drawHover, context.graph(), hover,
-            map.extent());
-        dispatch.call('drawn', this, {full: false});
-      }
-    });
+        call(_doubleUpHandler).
+        on(_pointerPrefix + 'down.zoom', function(d3_event) {
+          _lastPointerEvent = d3_event;
+          if (d3_event.button === 2) {
+            d3_event.stopPropagation();
+          }
+        }, true).
+        on(_pointerPrefix + 'up.zoom', function(d3_event) {
+          _lastPointerEvent = d3_event;
+          if (resetTransform()) {
+            immediateRedraw();
+          }
+        }).
+        on(_pointerPrefix + 'move.map', function(d3_event) {
+          _lastPointerEvent = d3_event;
+        }).
+        on(_pointerPrefix + 'over.vertices', function(d3_event) {
+          if (map.editableDataEnabled() && !_isTransformed) {
+            let hover = d3_event.target.__data__;
+            surface.call(drawVertices.drawHover, context.graph(), hover,
+                map.extent());
+            dispatch.call('drawn', this, { full: false });
+          }
+        }).
+        on(_pointerPrefix + 'out.vertices', function(d3_event) {
+          if (map.editableDataEnabled() && !_isTransformed) {
+            let hover = d3_event.relatedTarget &&
+                d3_event.relatedTarget.__data__;
+            surface.call(drawVertices.drawHover, context.graph(), hover,
+                map.extent());
+            dispatch.call('drawn', this, { full: false });
+          }
+        });
 
     const detected = utilDetect();
 
@@ -267,7 +269,7 @@ export function rendererMap(context) {
       context.enter(modeBrowse(context));
     }
 
-    dispatch.call('drawn', this, {full: true});
+    dispatch.call('drawn', this, { full: true });
   }
 
   function drawEditable(difference, extent) {
@@ -284,12 +286,12 @@ export function rendererMap(context) {
     if (map.isInWideSelection()) {
       data = [];
       utilEntityAndDeepMemberIDs(mode.selectedIDs(), context.graph()).
-      forEach(function(id) {
-        const entity = context.hasEntity(id);
-        if (entity) {
-          data.push(entity);
-        }
-      });
+          forEach(function(id) {
+            const entity = context.hasEntity(id);
+            if (entity) {
+              data.push(entity);
+            }
+          });
       fullRedraw = true;
       filter = utilFunctor(true);
       // selected features should always be visible, so we can skip filtering
@@ -341,13 +343,13 @@ export function rendererMap(context) {
     }
 
     surface.call(drawVertices, graph, data, filter, map.extent(), fullRedraw)
-    // .call(drawLines, graph, data, filter)
-    // .call(drawAreas, graph, data, filter)
-    // .call(drawMidpoints, graph, data, filter, map.trimmedExtent())
-    .call(drawLabels, graph, data, filter, _dimensions, fullRedraw);
+        // .call(drawLines, graph, data, filter)
+        // .call(drawAreas, graph, data, filter)
+        // .call(drawMidpoints, graph, data, filter, map.trimmedExtent())
+        .call(drawLabels, graph, data, filter, _dimensions, fullRedraw);
     // .call(drawPoints, graph, data, filter);
 
-    dispatch.call('drawn', this, {full: true});
+    dispatch.call('drawn', this, { full: true });
   }
 
   function zoomPan(event, key, transform) {
@@ -566,9 +568,9 @@ export function rendererMap(context) {
     // class surface as `lowzoom` around z17-z18.5 (based on latitude)
     const lat = map.center()[1];
     const lowzoom = d3_scaleLinear().
-    domain([-60, 0, 60]).
-    range([17, 18.5, 17]).
-    clamp(true);
+        domain([-60, 0, 60]).
+        range([17, 18.5, 17]).
+        clamp(true);
 
     surface.classed('low-zoom', zoom <= lowzoom(lat));
 
@@ -640,12 +642,12 @@ export function rendererMap(context) {
 
     if (duration) {
       _selection.transition().
-      duration(duration).
-      on('start', function() {
-        map.startEase();
-      }).
-      call(_zoomerPanner.transform,
-          d3_zoomIdentity.translate(t2.x, t2.y).scale(t2.k));
+          duration(duration).
+          on('start', function() {
+            map.startEase();
+          }).
+          call(_zoomerPanner.transform,
+              d3_zoomIdentity.translate(t2.x, t2.y).scale(t2.k));
     }
     else {
       projection.transform(t2);
@@ -714,12 +716,12 @@ export function rendererMap(context) {
 
     if (duration) {
       _selection.transition().
-      duration(duration).
-      on('start', function() {
-        map.startEase();
-      }).
-      call(_zoomerPanner.transform,
-          d3_zoomIdentity.translate(t[0], t[1]).scale(k));
+          duration(duration).
+          on('start', function() {
+            map.startEase();
+          }).
+          call(_zoomerPanner.transform,
+              d3_zoomIdentity.translate(t[0], t[1]).scale(k));
     }
     else {
       projection.translate(t);
@@ -976,7 +978,7 @@ export function rendererMap(context) {
     return map.withinEditableZoom();
   };
 
-  map._minZoom = function(val) {
+  map.minZoom = function(val) {
     if (!arguments.length) return _minZoom;
     _minZoom = val;
     return map;

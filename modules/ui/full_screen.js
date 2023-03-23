@@ -19,7 +19,6 @@ export function uiFullScreen(context) {
     }
   }
 
-
   function getExitFullScreenFn() {
     if (document.exitFullscreen) {
       return document.exitFullscreen;
@@ -35,19 +34,16 @@ export function uiFullScreen(context) {
     }
   }
 
-
   function isFullScreen() {
     return document.fullscreenElement ||
-      document.mozFullScreenElement ||
-      document.webkitFullscreenElement ||
-      document.msFullscreenElement;
+        document.mozFullScreenElement ||
+        document.webkitFullscreenElement ||
+        document.msFullscreenElement;
   }
-
 
   function isSupported() {
     return !!getFullScreenFn();
   }
-
 
   function fullScreen(d3_event) {
     d3_event.preventDefault();
@@ -61,8 +57,7 @@ export function uiFullScreen(context) {
     }
   }
 
-
-  return function () { // selection) {
+  return function() { // selection) {
     if (!isSupported()) return;
 
     // button = selection.append('button')

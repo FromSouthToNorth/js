@@ -9,7 +9,6 @@ import { select as d3_select } from 'd3-selection';
 import { scaleQuantize as d3_scaleQuantize } from 'd3-scale';
 import { timer as d3_timer } from 'd3-timer';
 
-
 export function behaviorBreathe() {
   let duration = 800;
   let steps = 4;
@@ -20,70 +19,59 @@ export function behaviorBreathe() {
   let _done = false;
   let _timer;
 
-
   function ratchetyInterpolator(a, b, steps, units) {
     a = Number(a);
     b = Number(b);
-    let sample = d3_scaleQuantize()
-    .domain([0, 1])
-    .range(d3_quantize(d3_interpolateNumber(a, b), steps));
+    let sample = d3_scaleQuantize().
+        domain([0, 1]).
+        range(d3_quantize(d3_interpolateNumber(a, b), steps));
 
-    return function (t) {
+    return function(t) {
       return String(sample(t)) + (units || '');
     };
   }
 
-
   function reset(selection) {
-    selection
-    .style('stroke-opacity', null)
-    .style('stroke-width', null)
-    .style('fill-opacity', null)
-    .style('r', null);
+    selection.style('stroke-opacity', null).
+        style('stroke-width', null).
+        style('fill-opacity', null).
+        style('r', null);
   }
-
 
   function setAnimationParams(transition, fromTo) {
     let toFrom = (fromTo === 'from' ? 'to' : 'from');
 
-    transition
-    .styleTween('stroke-opacity', function (d) {
+    transition.styleTween('stroke-opacity', function(d) {
       return ratchetyInterpolator(
-        _params[d.id][toFrom].opacity,
-        _params[d.id][fromTo].opacity,
-        steps,
+          _params[d.id][toFrom].opacity,
+          _params[d.id][fromTo].opacity,
+          steps,
       );
-    })
-    .styleTween('stroke-width', function (d) {
+    }).styleTween('stroke-width', function(d) {
       return ratchetyInterpolator(
-        _params[d.id][toFrom].width,
-        _params[d.id][fromTo].width,
-        steps,
-        'px',
+          _params[d.id][toFrom].width,
+          _params[d.id][fromTo].width,
+          steps,
+          'px',
       );
-    })
-    .styleTween('fill-opacity', function (d) {
+    }).styleTween('fill-opacity', function(d) {
       return ratchetyInterpolator(
-        _params[d.id][toFrom].opacity,
-        _params[d.id][fromTo].opacity,
-        steps,
+          _params[d.id][toFrom].opacity,
+          _params[d.id][fromTo].opacity,
+          steps,
       );
-    })
-    .styleTween('r', function (d) {
+    }).styleTween('r', function(d) {
       return ratchetyInterpolator(
-        _params[d.id][toFrom].width,
-        _params[d.id][fromTo].width,
-        steps,
-        'px',
+          _params[d.id][toFrom].width,
+          _params[d.id][fromTo].width,
+          steps,
+          'px',
       );
     });
   }
 
-
   function calcAnimationParams(selection) {
-    selection
-    .call(reset)
-    .each(function (d) {
+    selection.call(reset).each(function(d) {
       let s = d3_select(this);
       let tag = s.node().tagName;
       let p = { 'from': {}, 'to': {} };
@@ -110,7 +98,6 @@ export function behaviorBreathe() {
     });
   }
 
-
   function run(surface, fromTo) {
     let toFrom = (fromTo === 'from' ? 'to' : 'from');
     let currSelected = surface.selectAll(selector);
@@ -122,7 +109,8 @@ export function behaviorBreathe() {
       return;
     }
 
-    if (!deepEqual(currSelected.data(), _selected.data()) || currClassed !== _classed) {
+    if (!deepEqual(currSelected.data(), _selected.data()) || currClassed !==
+        _classed) {
       _selected.call(reset);
       _classed = currClassed;
       _selected = currSelected.call(calcAnimationParams);
@@ -130,28 +118,27 @@ export function behaviorBreathe() {
 
     let didCallNextRun = false;
 
-    _selected
-    .transition()
-    .duration(duration)
-    .call(setAnimationParams, fromTo)
-    .on('end', function () {
-      // `end` event is called for each selected element, but we want
-      // it to run only once
-      if (!didCallNextRun) {
-        surface.call(run, toFrom);
-        didCallNextRun = true;
-      }
+    _selected.transition().
+        duration(duration).
+        call(setAnimationParams, fromTo).
+        on('end', function() {
+          // `end` event is called for each selected element, but we want
+          // it to run only once
+          if (!didCallNextRun) {
+            surface.call(run, toFrom);
+            didCallNextRun = true;
+          }
 
-      // if entity was deselected, remove breathe styling
-      if (!d3_select(this).classed('selected')) {
-        reset(d3_select(this));
-      }
-    });
+          // if entity was deselected, remove breathe styling
+          if (!d3_select(this).classed('selected')) {
+            reset(d3_select(this));
+          }
+        });
   }
 
   function behavior(surface) {
     _done = false;
-    _timer = d3_timer(function () {
+    _timer = d3_timer(function() {
       // wait for elements to actually become selected
       if (surface.selectAll(selector).empty()) {
         return false;
@@ -163,7 +150,7 @@ export function behaviorBreathe() {
     }, 20);
   }
 
-  behavior.restartIfNeeded = function (surface) {
+  behavior.restartIfNeeded = function(surface) {
     if (_selected.empty()) {
       surface.call(run, 'from');
       if (_timer) {
@@ -172,16 +159,13 @@ export function behaviorBreathe() {
     }
   };
 
-  behavior.off = function () {
+  behavior.off = function() {
     _done = true;
     if (_timer) {
       _timer.stop();
     }
-    _selected
-    .interrupt()
-    .call(reset);
+    _selected.interrupt().call(reset);
   };
-
 
   return behavior;
 }

@@ -39,9 +39,11 @@ export function presetPreset(presetID, preset, addable, allFields, allPresets) {
 
   _this.originalMoreFields = (_this.moreFields || []);
 
-  _this.fields = () => _resolvedFields || (_resolvedFields = resolveFields('fields'));
+  _this.fields = () => _resolvedFields ||
+      (_resolvedFields = resolveFields('fields'));
 
-  _this.moreFields = () => _resolvedMoreFields || (_resolvedMoreFields = resolveFields('moreFields'));
+  _this.moreFields = () => _resolvedMoreFields ||
+      (_resolvedMoreFields = resolveFields('moreFields'));
 
   _this.resetFields = () => _resolvedFields = _resolvedMoreFields = null;
 
@@ -91,7 +93,6 @@ export function presetPreset(presetID, preset, addable, allFields, allPresets) {
     return score;
   };
 
-
   _this.t = (scope, options) => {
     const textID = `_tagging.presets.presets.${presetID}.${scope}`;
     return t(textID, options);
@@ -115,13 +116,14 @@ export function presetPreset(presetID, preset, addable, allFields, allPresets) {
   }
 
   _this.name = () => {
-    return resolveReference('originalName')
-    .t('name', { 'default': _this.originalName || presetID });
+    return resolveReference('originalName').
+        t('name', { 'default': _this.originalName || presetID });
   };
 
   _this.nameLabel = () => {
-    return resolveReference('originalName')
-    .t.append('name', { 'default': _this.originalName || presetID });
+    return resolveReference('originalName').
+        t.
+        append('name', { 'default': _this.originalName || presetID });
   };
 
   _this.subtitle = () => {
@@ -143,19 +145,25 @@ export function presetPreset(presetID, preset, addable, allFields, allPresets) {
   };
 
   _this.aliases = () => {
-    return resolveReference('originalName')
-    .t('aliases', { 'default': _this.originalAliases }).trim().split(/\s*[\r\n]+\s*/);
+    return resolveReference('originalName').
+        t('aliases', { 'default': _this.originalAliases }).
+        trim().
+        split(/\s*[\r\n]+\s*/);
   };
 
   _this.terms = () => {
-    return resolveReference('originalName')
-    .t('terms', { 'default': _this.originalTerms })
-    .toLowerCase().trim().split(/\s*,+\s*/);
+    return resolveReference('originalName').
+        t('terms', { 'default': _this.originalTerms }).
+        toLowerCase().
+        trim().
+        split(/\s*,+\s*/);
   };
 
   _this.searchName = () => {
     if (!_searchName) {
-      _searchName = (_this.suggestion ? _this.originalName : _this.name()).toLowerCase();
+      _searchName = (_this.suggestion ?
+                     _this.originalName :
+                     _this.name()).toLowerCase();
     }
     return _searchName;
   };
@@ -184,32 +192,32 @@ export function presetPreset(presetID, preset, addable, allFields, allPresets) {
 
   _this.isFallback = () => {
     const tagCount = Object.keys(_this.tags).length;
-    return tagCount === 0 || (tagCount === 1 && _this.tags.hasOwnProperty('area'));
+    return tagCount === 0 ||
+        (tagCount === 1 && _this.tags.hasOwnProperty('area'));
   };
 
-
-  _this.addable = function (val) {
+  _this.addable = function(val) {
     if (!arguments.length) return _addable;
     _addable = val;
     return _this;
   };
 
-
   _this.reference = () => {
     // Lookup documentation on Wikidata...
     const qid = (
-      _this.tags.wikidata ||
-      _this.tags['flag:wikidata'] ||
-      _this.tags['brand:wikidata'] ||
-      _this.tags['network:wikidata'] ||
-      _this.tags['operator:wikidata']
+        _this.tags.wikidata ||
+        _this.tags['flag:wikidata'] ||
+        _this.tags['brand:wikidata'] ||
+        _this.tags['network:wikidata'] ||
+        _this.tags['operator:wikidata']
     );
     if (qid) {
       return { qid: qid };
     }
 
     // Lookup documentation on OSM Wikibase...
-    let key = _this.originalReference.key || Object.keys(utilObjectOmit(_this.tags, 'name'))[0];
+    let key = _this.originalReference.key ||
+        Object.keys(utilObjectOmit(_this.tags, 'name'))[0];
     let value = _this.originalReference.value || _this.tags[key];
 
     if (value === '*') {
@@ -220,17 +228,18 @@ export function presetPreset(presetID, preset, addable, allFields, allPresets) {
     }
   };
 
-
   _this.unsetTags = (tags, geometry, ignoringKeys, skipFieldDefaults) => {
     // allow manually keeping some tags
-    let removeTags = ignoringKeys ? utilObjectOmit(_this.removeTags, ignoringKeys) : _this.removeTags;
+    let removeTags = ignoringKeys ?
+                     utilObjectOmit(_this.removeTags, ignoringKeys) :
+                     _this.removeTags;
     tags = utilObjectOmit(tags, Object.keys(removeTags));
 
     if (geometry && !skipFieldDefaults) {
       _this.fields().forEach(field => {
         if (field.matchGeometry(geometry) && field.key &&
-          field.default === tags[field.key] &&
-          (!ignoringKeys || ignoringKeys.indexOf(field.key) === -1)) {
+            field.default === tags[field.key] &&
+            (!ignoringKeys || ignoringKeys.indexOf(field.key) === -1)) {
           delete tags[field.key];
         }
       });
@@ -239,7 +248,6 @@ export function presetPreset(presetID, preset, addable, allFields, allPresets) {
     delete tags.area;
     return tags;
   };
-
 
   _this.setTags = (tags, geometry, skipFieldDefaults) => {
     const addTags = _this.addTags;
@@ -268,7 +276,8 @@ export function presetPreset(presetID, preset, addable, allFields, allPresets) {
         let needsAreaTag = true;
         for (let k in addTags) {
           if (_this.geometry.indexOf('line') === -1 && k in osmAreaKeys
-            || k in osmAreaKeysExceptions && addTags[k] in osmAreaKeysExceptions[k]) {
+              || k in osmAreaKeysExceptions && addTags[k] in
+              osmAreaKeysExceptions[k]) {
             needsAreaTag = false;
             break;
           }
@@ -281,7 +290,8 @@ export function presetPreset(presetID, preset, addable, allFields, allPresets) {
 
     if (geometry && !skipFieldDefaults) {
       _this.fields().forEach(field => {
-        if (field.matchGeometry(geometry) && field.key && !tags[field.key] && field.default) {
+        if (field.matchGeometry(geometry) && field.key && !tags[field.key] &&
+            field.default) {
           tags[field.key] = field.default;
         }
       });
@@ -290,11 +300,12 @@ export function presetPreset(presetID, preset, addable, allFields, allPresets) {
     return tags;
   };
 
-
   // For a preset without fields, use the fields of the parent preset.
   // Replace {preset} placeholders with the fields of the specified presets.
   function resolveFields(which) {
-    const fieldIDs = (which === 'fields' ? _this.originalFields : _this.originalMoreFields);
+    const fieldIDs = (which === 'fields' ?
+                      _this.originalFields :
+                      _this.originalMoreFields);
     let resolved = [];
 
     fieldIDs.forEach(fieldID => {
@@ -306,7 +317,8 @@ export function presetPreset(presetID, preset, addable, allFields, allPresets) {
         resolved.push(allFields[fieldID]);
       }
       else {
-        console.log(`Cannot resolve "${fieldID}" found in ${_this.id}.${which}`);  // eslint-disable-line no-console
+        console.log(
+            `Cannot resolve "${fieldID}" found in ${_this.id}.${which}`);  // eslint-disable-line no-console
       }
     });
 
@@ -320,7 +332,6 @@ export function presetPreset(presetID, preset, addable, allFields, allPresets) {
     }
 
     return utilArrayUniq(resolved);
-
 
     // returns an array of fields to inherit from the given presetID, if found
     function inheritFields(presetID, which) {
@@ -338,19 +349,18 @@ export function presetPreset(presetID, preset, addable, allFields, allPresets) {
       }
     }
 
-
     // Skip `fields` for the keys which define the preset.
     // These are usually `typeCombo` fields like `shop=*`
     function shouldInherit(f) {
       if (f.key && _this.tags[f.key] !== undefined &&
-        // inherit anyway if multiple values are allowed or just a checkbox
-        f.type !== 'multiCombo' && f.type !== 'semiCombo' && f.type !== 'manyCombo' && f.type !== 'check'
+          // inherit anyway if multiple values are allowed or just a checkbox
+          f.type !== 'multiCombo' && f.type !== 'semiCombo' && f.type !==
+          'manyCombo' && f.type !== 'check'
       ) return false;
 
       return true;
     }
   }
-
 
   function stripDiacritics(s) {
     // split combined diacritical characters into their parts

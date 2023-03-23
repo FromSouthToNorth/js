@@ -1,5 +1,9 @@
-import { geoVecAngle, geoVecCross, geoVecLength, geoVecSubtract } from './vector.js';
-
+import {
+  geoVecAngle,
+  geoVecCross,
+  geoVecLength,
+  geoVecSubtract,
+} from './vector.js';
 
 // Return the counterclockwise angle in the range (-pi, pi)
 // between the positive X axis and the line intersecting a and b.
@@ -9,7 +13,7 @@ export function geoAngle(a, b, projection) {
 
 export function geoEdgeEqual(a, b) {
   return (a[0] === b[0] && a[1] === b[1]) ||
-    (a[0] === b[1] && a[1] === b[0]);
+      (a[0] === b[1] && a[1] === b[0]);
 }
 
 // Return whether point is contained in polygon.
@@ -33,7 +37,7 @@ export function geoPointInPolygon(point, polygon) {
     const yj = polygon[j][1];
 
     const intersect = ((yi > y) !== (yj > y)) &&
-      (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
     if (intersect) inside = !inside;
   }
 
@@ -41,21 +45,21 @@ export function geoPointInPolygon(point, polygon) {
 }
 
 export function geoPolygonContainsPolygon(outer, inner) {
-  return inner.every(function (point) {
+  return inner.every(function(point) {
     return geoPointInPolygon(point, outer);
   });
 }
 
 export function geoPolygonIntersectsPolygon(outer, inner, checkSegments) {
   function testPoints(outer, inner) {
-    return inner.some(function (point) {
+    return inner.some(function(point) {
       return geoPointInPolygon(point, outer);
     });
   }
 
-  return testPoints(outer, inner) || (!!checkSegments && geoPathHasIntersections(outer, inner));
+  return testPoints(outer, inner) ||
+      (!!checkSegments && geoPathHasIntersections(outer, inner));
 }
-
 
 // Choose the edge with the minimal distance from `point` to its orthogonal
 // projection onto that edge, if such a projection exists, or the distance to
@@ -63,8 +67,12 @@ export function geoPolygonIntersectsPolygon(outer, inner, checkSegments) {
 // chosen edge, the chosen `loc` on that edge, and the `distance` to to it.
 export function geoChooseEdge(nodes, point, projection, activeID) {
   let dist = geoVecLength;
-  let points = nodes.map(function (n) { return projection(n.loc); });
-  let ids = nodes.map(function (n) { return n.id; });
+  let points = nodes.map(function(n) {
+    return projection(n.loc);
+  });
+  let ids = nodes.map(function(n) {
+    return n.id;
+  });
   let min = Infinity;
   let idx;
   let loc;
@@ -152,7 +160,6 @@ export function geoPathLength(path) {
   }
   return length;
 }
-
 
 // If the given point is at the edge of the padded viewport,
 // return a vector that will nudge the viewport in that direction

@@ -69,7 +69,7 @@ export function uiInit(context) {
     }
 
     container.attr('lang', localizer.localeCode()).
-    attr('dir', localizer.textDirection());
+        attr('dir', localizer.textDirection());
 
     // setup fullscreen keybindings (no button shown at this time)
     container.call(uiFullScreen(context));
@@ -78,12 +78,12 @@ export function uiInit(context) {
     map.redrawEnable(false); // don't draw until we've set zoom/lat/long
 
     const content = container.append('div').
-    attr('class', 'main-content active');
+        attr('class', 'main-content active');
 
     content.append('div').
-    attr('class', 'main-map').
-    attr('dir', 'ltr').
-    call(map);
+        attr('class', 'main-map').
+        attr('dir', 'ltr').
+        call(map);
 
     ui.onResize();
     map.redrawEnable(true);

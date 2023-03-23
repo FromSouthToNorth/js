@@ -23,8 +23,9 @@ export function utilArrayIdentical(a, b) {
 //   [4]
 export function utilArrayDifference(a, b) {
   const other = new Set(b);
-  return Array.from(new Set(a))
-              .filter(function (v) { return !other.has(v); });
+  return Array.from(new Set(a)).filter(function(v) {
+    return !other.has(v);
+  });
 }
 
 // Intersection (a ∩ b): create a set that contains those elements of set a that are also in set b.
@@ -34,8 +35,9 @@ export function utilArrayDifference(a, b) {
 //   [2,3]
 export function utilArrayIntersection(a, b) {
   let other = new Set(b);
-  return Array.from(new Set(a))
-              .filter(function (v) { return other.has(v); });
+  return Array.from(new Set(a)).filter(function(v) {
+    return other.has(v);
+  });
 }
 
 /**
@@ -81,7 +83,7 @@ export function utilArrayFlatten(a) {
 //     5: [{type: 'Cat', name: 'Tiger'}, {type: 'Dog', name: 'Rover'}]
 //   }
 export function utilArrayGroupBy(a, key) {
-  return a.reduce(function (acc, item) {
+  return a.reduce(function(acc, item) {
     let group = (typeof key === 'function') ? key(item) : item[key];
     (acc[group] = acc[group] || []).push(item);
     return acc;
@@ -96,7 +98,7 @@ export function utilArrayChunk(a, chunkSize) {
   if (!chunkSize || chunkSize < 0) return [a.slice()];
 
   let result = new Array(Math.ceil(a.length / chunkSize));
-  return Array.from(result, function (item, i) {
+  return Array.from(result, function(item, i) {
     return a.slice(i * chunkSize, i * chunkSize + chunkSize);
   });
 }
@@ -108,6 +110,8 @@ export function utilArrayChunk(a, chunkSize) {
 //   [1,2,3,4]
 export function utilArrayUnion(a, b) {
   const result = new Set(a);
-  b.forEach(function (v) { result.add(v); });
+  b.forEach(function(v) {
+    result.add(v);
+  });
   return Array.from(result);
 }

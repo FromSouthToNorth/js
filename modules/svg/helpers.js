@@ -1,11 +1,10 @@
 import {
   geoIdentity as d3_geoIdentity,
   geoPath as d3_geoPath,
-  geoStream as d3_geoStream
+  geoStream as d3_geoStream,
 } from 'd3-geo';
 
 import { geoVecAdd, geoVecAngle, geoVecLength } from '../geo';
-
 
 // Touch targets control which other vertices we can drag a vertex onto.
 //
@@ -40,8 +39,8 @@ export function svgPassiveVertex(node, graph, activeID) {
 
         if (isClosed) {  // wraparound if needed
           max = nodes.length - 1;
-          if (ix1 < 0)   ix1 = max + ix1;
-          if (ix2 < 0)   ix2 = max + ix2;
+          if (ix1 < 0) ix1 = max + ix1;
+          if (ix2 < 0) ix2 = max + ix2;
           if (ix3 > max) ix3 = ix3 - max;
           if (ix4 > max) ix4 = ix4 - max;
         }
@@ -58,7 +57,6 @@ export function svgPassiveVertex(node, graph, activeID) {
   return 1;   // ok
 }
 
-
 export function svgMarkerSegments(projection, graph, dt,
                                   shouldReverse,
                                   bothDirections) {
@@ -67,7 +65,9 @@ export function svgMarkerSegments(projection, graph, dt,
     let offset = dt;
     let segments = [];
     let clip = d3_geoIdentity().clipExtent(projection.clipExtent()).stream;
-    let coordinates = graph.childNodes(entity).map(function(n) { return n.loc; });
+    let coordinates = graph.childNodes(entity).map(function(n) {
+      return n.loc;
+    });
     let a, b;
 
     if (shouldReverse(entity)) {
@@ -76,10 +76,13 @@ export function svgMarkerSegments(projection, graph, dt,
 
     d3_geoStream({
       type: 'LineString',
-      coordinates: coordinates
+      coordinates: coordinates,
     }, projection.stream(clip({
-      lineStart: function() {},
-      lineEnd: function() { a = null; },
+      lineStart: function() {
+      },
+      lineEnd: function() {
+        a = null;
+      },
       point: function(x, y) {
         b = [x, y];
 
@@ -92,7 +95,7 @@ export function svgMarkerSegments(projection, graph, dt,
             let dy = dt * Math.sin(heading);
             let p = [
               a[0] + offset * Math.cos(heading),
-              a[1] + offset * Math.sin(heading)
+              a[1] + offset * Math.sin(heading),
             ];
 
             // gather coordinates
@@ -108,14 +111,16 @@ export function svgMarkerSegments(projection, graph, dt,
             let j;
 
             for (j = 0; j < coord.length; j++) {
-              segment += (j === 0 ? 'M' : 'L') + coord[j][0] + ',' + coord[j][1];
+              segment += (j === 0 ? 'M' : 'L') + coord[j][0] + ',' +
+                  coord[j][1];
             }
             segments.push({ id: entity.id, index: i++, d: segment });
 
             if (bothDirections(entity)) {
               segment = '';
               for (j = coord.length - 1; j >= 0; j--) {
-                segment += (j === coord.length - 1 ? 'M' : 'L') + coord[j][0] + ',' + coord[j][1];
+                segment += (j === coord.length - 1 ? 'M' : 'L') + coord[j][0] +
+                    ',' + coord[j][1];
               }
               segments.push({ id: entity.id, index: i++, d: segment });
             }
@@ -125,13 +130,12 @@ export function svgMarkerSegments(projection, graph, dt,
         }
 
         a = b;
-      }
+      },
     })));
 
     return segments;
   };
 }
-
 
 export function svgPath(projection, graph, isArea) {
 
@@ -149,17 +153,21 @@ export function svgPath(projection, graph, isArea) {
   let viewport = projection.clipExtent();
   let paddedExtent = [
     [viewport[0][0] - padding, viewport[0][1] - padding],
-    [viewport[1][0] + padding, viewport[1][1] + padding]
+    [viewport[1][0] + padding, viewport[1][1] + padding],
   ];
   let clip = d3_geoIdentity().clipExtent(paddedExtent).stream;
   let project = projection.stream;
-  let path = d3_geoPath()
-  .projection({stream: function(output) { return project(clip(output)); }});
+  let path = d3_geoPath().projection({
+    stream: function(output) {
+      return project(clip(output));
+    },
+  });
 
   let svgpath = function(entity) {
     if (entity.id in cache) {
       return cache[entity.id];
-    } else {
+    }
+    else {
       return cache[entity.id] = path(entity.asGeoJSON(graph));
     }
   };
@@ -168,17 +176,18 @@ export function svgPath(projection, graph, isArea) {
     if (d.__featurehash__ !== undefined) {
       if (d.__featurehash__ in cache) {
         return cache[d.__featurehash__];
-      } else {
+      }
+      else {
         return cache[d.__featurehash__] = path(d);
       }
-    } else {
+    }
+    else {
       return path(d);
     }
   };
 
   return svgpath;
 }
-
 
 export function svgPointTransform(projection) {
   let svgpoint = function(entity) {
@@ -194,14 +203,14 @@ export function svgPointTransform(projection) {
   return svgpoint;
 }
 
-
 export function svgRelationMemberTags(graph) {
   return function(entity) {
     let tags = entity.tags;
     let shouldCopyMultipolygonTags = !entity.hasInterestingTags();
     graph.parentRelations(entity).forEach(function(relation) {
       let type = relation.tags.type;
-      if ((type === 'multipolygon' && shouldCopyMultipolygonTags) || type === 'boundary') {
+      if ((type === 'multipolygon' && shouldCopyMultipolygonTags) || type ===
+          'boundary') {
         tags = Object.assign({}, relation.tags, tags);
       }
     });
@@ -209,12 +218,12 @@ export function svgRelationMemberTags(graph) {
   };
 }
 
-
 export function svgSegmentWay(way, graph, activeID) {
   // When there is no activeID, we can memoize this expensive computation
   if (activeID === undefined) {
     return graph.transient(way, 'waySegments', getWaySegments);
-  } else {
+  }
+  else {
     return getWaySegments();
   }
 
@@ -233,11 +242,14 @@ export function svgSegmentWay(way, graph, activeID) {
       if (start.type !== undefined) {
         if (start.node.id === activeID || end.node.id === activeID) {
           // push nothing
-        } else if (isActiveWay && (start.type === 2 || end.type === 2)) {   // one adjacent vertex
+        }
+        else if (isActiveWay && (start.type === 2 || end.type === 2)) {   // one adjacent vertex
           pushActive(start, end, i);
-        } else if (start.type === 0 && end.type === 0) {   // both active vertices
+        }
+        else if (start.type === 0 && end.type === 0) {   // both active vertices
           pushActive(start, end, i);
-        } else {
+        }
+        else {
           pushPassive(start, end, i);
         }
       }
@@ -256,12 +268,12 @@ export function svgSegmentWay(way, graph, activeID) {
           target: true,
           entity: way,
           nodes: [start.node, end.node],
-          index: index
+          index: index,
         },
         geometry: {
           type: 'LineString',
-          coordinates: [start.node.loc, end.node.loc]
-        }
+          coordinates: [start.node.loc, end.node.loc],
+        },
       });
     }
 
@@ -273,12 +285,12 @@ export function svgSegmentWay(way, graph, activeID) {
           target: true,
           entity: way,
           nodes: [start.node, end.node],
-          index: index
+          index: index,
         },
         geometry: {
           type: 'LineString',
-          coordinates: [start.node.loc, end.node.loc]
-        }
+          coordinates: [start.node.loc, end.node.loc],
+        },
       });
     }
   }

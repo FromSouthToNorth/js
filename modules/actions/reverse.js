@@ -73,7 +73,6 @@ export function actionReverse(entityID, options) {
     NNW: 'SSE',
   };
 
-
   function reverseKey(key) {
     for (let i = 0; i < keyReplacements.length; ++i) {
       let replacement = keyReplacements[i];
@@ -84,7 +83,6 @@ export function actionReverse(entityID, options) {
     return key;
   }
 
-
   function reverseValue(key, value, includeAbsolute) {
     if (ignoreKey.test(key)) return value;
 
@@ -94,7 +92,9 @@ export function actionReverse(entityID, options) {
 
     }
     else if (key === 'incline' && numeric.test(value)) {
-      return value.replace(numeric, function (_, sign) { return sign === '-' ? '' : '-'; });
+      return value.replace(numeric, function(_, sign) {
+        return sign === '-' ? '' : '-';
+      });
 
     }
     else if (options && options.reverseOneway && key === 'oneway') {
@@ -124,7 +124,6 @@ export function actionReverse(entityID, options) {
     return valueReplacements[value] || value;
   }
 
-
   // Reverse the direction of tags attached to the nodes - #3076
   function reverseNodeTags(graph, nodeIDs) {
     for (let i = 0; i < nodeIDs.length; i++) {
@@ -133,13 +132,13 @@ export function actionReverse(entityID, options) {
 
       let tags = {};
       for (let key in node.tags) {
-        tags[reverseKey(key)] = reverseValue(key, node.tags[key], node.id === entityID);
+        tags[reverseKey(key)] = reverseValue(key, node.tags[key],
+            node.id === entityID);
       }
       graph = graph.replace(node.update({ tags: tags }));
     }
     return graph;
   }
-
 
   function reverseWay(graph, way) {
     let nodes = way.nodes.slice().reverse();
@@ -150,8 +149,8 @@ export function actionReverse(entityID, options) {
       tags[reverseKey(key)] = reverseValue(key, way.tags[key]);
     }
 
-    graph.parentRelations(way).forEach(function (relation) {
-      relation.members.forEach(function (member, index) {
+    graph.parentRelations(way).forEach(function(relation) {
+      relation.members.forEach(function(member, index) {
         if (member.id === way.id && (role = roleReplacements[member.role])) {
           relation = relation.updateMember({ role: role }, index);
           graph = graph.replace(relation);
@@ -161,12 +160,11 @@ export function actionReverse(entityID, options) {
 
     // Reverse any associated directions on nodes on the way and then replace
     // the way itself with the reversed node ids and updated way tags
-    return reverseNodeTags(graph, nodes)
-    .replace(way.update({ nodes: nodes, tags: tags }));
+    return reverseNodeTags(graph, nodes).
+        replace(way.update({ nodes: nodes, tags: tags }));
   }
 
-
-  let action = function (graph) {
+  let action = function(graph) {
     let entity = graph.entity(entityID);
     if (entity.type === 'way') {
       return reverseWay(graph, entity);
@@ -174,7 +172,7 @@ export function actionReverse(entityID, options) {
     return reverseNodeTags(graph, [entityID]);
   };
 
-  action.disabled = function (graph) {
+  action.disabled = function(graph) {
     let entity = graph.hasEntity(entityID);
     if (!entity || entity.type === 'way') return false;
 
@@ -187,7 +185,7 @@ export function actionReverse(entityID, options) {
     return 'nondirectional_node';
   };
 
-  action.entityID = function () {
+  action.entityID = function() {
     return entityID;
   };
 
