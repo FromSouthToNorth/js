@@ -9,7 +9,6 @@ import { actionScale } from '../actions/scale';
 
 import { behaviorBreathe } from '../behavior/breathe';
 import { behaviorHover } from '../behavior/hover';
-import { behaviorLasso } from '../behavior/lasso';
 import { behaviorPaste } from '../behavior/paste';
 
 import {
