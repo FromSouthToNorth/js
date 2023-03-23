@@ -32,6 +32,7 @@ export {
   utilArrayDifference,
   utilArrayIntersection,
   utilArrayIdentical,
+  utilArrayFlatten,
 } from './array.js';
 
 export { utilObjectOmit } from './object.js';

@@ -48,6 +48,16 @@ export function utilArrayUniq(a) {
   return Array.from(new Set(a));
 }
 
+// Flattens two level array into a single level
+// var a = [[1,2,3],[4,5,6],[7]];
+// utilArrayFlatten(a);
+//   [1,2,3,4,5,6,7];
+export function utilArrayFlatten(a) {
+  return a.reduce(function(acc, val) {
+    return acc.concat(val);
+  }, []);
+}
+
 // Groups the items of the Array according to the given key
 // `key` can be passed as a property or as a key function
 //

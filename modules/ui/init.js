@@ -8,6 +8,8 @@ import { utilDetect } from '../util/index.js';
 import { uiFullScreen } from './full_screen.js';
 import { utilGetDimensions } from '../util/index.js';
 import { uiPhotoviewer } from './photoviewer.js';
+import { uiMapInMap } from './map_in_map.js';
+import { uiNotice } from './notice.js';
 
 export function uiInit(context) {
   let _initCounter = 0;
@@ -129,6 +131,10 @@ export function uiInit(context) {
       .append('div')
       .attr('class', 'select-trap')
       .text('t');
+
+    overMap
+    .call(uiMapInMap(context))
+    .call(uiNotice(context));
 
     // Map controls
     const controlsWrap = overMap

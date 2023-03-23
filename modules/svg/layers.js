@@ -1,11 +1,14 @@
 import { dispatch as d3_dispatch } from 'd3-dispatch';
 import { select as d3_select } from 'd3-selection';
 import { utilArrayDifference, utilGetDimensions, utilRebind } from '../util/index.js';
+import { svgOsm } from './osm.js';
 
 export function svgLayers(projection, context) {
   const dispatch = d3_dispatch('change');
   let svg = d3_select(null);
-  let _layers = [];
+  let _layers = [
+    { id: 'osm', layer: svgOsm(projection, context, dispatch) },
+  ];
 
   function drawLayers(selection) {
     svg = selection.selectAll('.surface').data([0]);
@@ -54,7 +57,7 @@ export function svgLayers(projection, context) {
   drawLayers.add = function (what) {
     const arr = [].concat(what);
     arr.forEach(obj => {
-      if ('id' in obj && 'layer' in onj) {
+      if ('id' in obj && 'layer' in obj) {
         _layers.push(obj);
       }
     });

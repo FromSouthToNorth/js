@@ -6,3 +6,5 @@ export { uiToggle } from './toggle.js';
 export { uiLasso } from './lasso.js';
 export { uiInit } from './init.js';
 export { uiFullScreen } from './full_screen.js';
+export { uiMapInMap } from './map_in_map.js';
+export { uiNotice } from './notice.js';
