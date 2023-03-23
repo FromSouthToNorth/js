@@ -1,6 +1,5 @@
 import { select as d3_select } from 'd3-selection';
 
-import { prefs } from '../core/preferences';
 import { t, localizer } from '../core/localizer';
 import { presetManager } from '../presets';
 import { behaviorHash } from '../behavior';
@@ -8,8 +7,6 @@ import { utilDetect } from '../util/index.js';
 import { uiFullScreen } from './full_screen.js';
 import { utilGetDimensions } from '../util/index.js';
 import { uiPhotoviewer } from './photoviewer.js';
-import { uiMapInMap } from './map_in_map.js';
-import { uiNotice } from './notice.js';
 
 export function uiInit(context) {
   let _initCounter = 0;
@@ -19,20 +16,20 @@ export function uiInit(context) {
 
   function render(container) {
 
-    container.on('click.ui', function (d3_event) {
+    container.on('click.ui', function(d3_event) {
       if (d3_event.button !== 0) return;
       if (!d3_event.composedPath) return;
 
       // some targets have default click events we don't want to override
-      const isOkayTarget = d3_event.composedPath().some(function (node) {
+      const isOkayTarget = d3_event.composedPath().some(function(node) {
         // we only care about element nodes
         return node.nodeType === 1 &&
-          // clicking <input> focuses it and/or changes a value
-          (node.nodeName === 'INPUT' ||
-            // clicking <label> affects its <input> by default
-            node.nodeName === 'LABEL' ||
-            // clicking <a> opens a hyperlink by default
-            node.nodeName === 'A');
+            // clicking <input> focuses it and/or changes a value
+            (node.nodeName === 'INPUT' ||
+                // clicking <label> affects its <input> by default
+                node.nodeName === 'LABEL' ||
+                // clicking <a> opens a hyperlink by default
+                node.nodeName === 'A');
       });
       if (isOkayTarget) return;
 
@@ -43,111 +40,51 @@ export function uiInit(context) {
 
     // only WebKit supports gesture events
     if ('GestureEvent ' in window &&
-      // Listening for gesture events on iOS 13.4+ breaks double-tapping,
-      // but we only need to do this on desktop Safari anyway. – #7694
-      !detected.isMobileWebKit) {
+        // Listening for gesture events on iOS 13.4+ breaks double-tapping,
+        // but we only need to do this on desktop Safari anyway. – #7694
+        !detected.isMobileWebKit) {
 
       // On iOS we disable pinch-to-zoom of the UI via the `touch-action`
       // CSS property, but on desktop Safari we need to manually cancel the
       // default gesture events.
-      container.on('gesturestart.ui gesturechange.ui gestureend.ui', function (d3_event) {
-        // disable pinch-to-zoom of the UI via multitouch trackpads on macOS Safari
-        d3_event.preventDefault();
-      });
+      container.on('gesturestart.ui gesturechange.ui gestureend.ui',
+          function(d3_event) {
+            // disable pinch-to-zoom of the UI via multitouch trackpads on macOS Safari
+            d3_event.preventDefault();
+          });
     }
 
     if ('PointerEvent' in window) {
-      d3_select(window)
-        .on('pointerdown.ui pointerup.ui', function (d3_event) {
-          const pointerType = d3_event.pointerType || 'mouse';
-          if (_lastPointerType !== pointerType) {
-            _lastPointerType = pointerType;
-            container
-              .attr('pointer', pointerType);
-          }
-        }, true);
+      d3_select(window).on('pointerdown.ui pointerup.ui', function(d3_event) {
+        const pointerType = d3_event.pointerType || 'mouse';
+        if (_lastPointerType !== pointerType) {
+          _lastPointerType = pointerType;
+          container.attr('pointer', pointerType);
+        }
+      }, true);
     }
     else {
       _lastPointerType = 'mouse';
-      container
-        .attr('pointer', 'mouse');
+      container.attr('pointer', 'mouse');
     }
 
-    container
-      .attr('lang', localizer.localeCode())
-      .attr('dir', localizer.textDirection());
+    container.attr('lang', localizer.localeCode()).
+    attr('dir', localizer.textDirection());
 
     // setup fullscreen keybindings (no button shown at this time)
-    container
-      .call(uiFullScreen(context));
+    container.call(uiFullScreen(context));
 
     const map = context.map();
     map.redrawEnable(false); // don't draw until we've set zoom/lat/long
 
-    map
-      .on('hitMinZoom.ui', function () {
-        // ui.flash
-        //   .iconName('#iD-icon-no')
-        //   .label(t.append('cannot_zoom'))();
-      });
+    const content = container.append('div').
+    attr('class', 'main-content active');
 
-    container
-      .append('svg')
-      .attr('id', 'ideditor-defs');
-    // .call(ui.svgDefs);
+    content.append('div').
+    attr('class', 'main-map').
+    attr('dir', 'ltr').
+    call(map);
 
-    container
-      .append('div')
-      .attr('class', 'sidebar');
-    // .call(ui.sidebar);
-
-    const content = container
-      .append('div')
-      .attr('class', 'main-content active');
-
-    // Top toolbar
-    // content
-    //   .append('div')
-    //   .attr('class', 'top-toolbar-wrap')
-    //   .append('div')
-    //   .attr('class', 'top-toolbar fillD');
-    // .call(uiTopToolbar(context));
-
-    content
-      .append('div')
-      .attr('class', 'main-map')
-      .attr('dir', 'ltr')
-      .call(map);
-
-    const overMap = content
-      .append('div')
-      .attr('class', 'over-map');
-
-    // HACK: Mobile Safari 14 likes to select anything selectable when long-
-    // pressing, even if it's not targeted. This conflicts with long-pressing
-    // to show the edit menu. We add a selectable offscreen element as the first
-    // child to trick Safari into not showing the selection UI.
-    overMap
-      .append('div')
-      .attr('class', 'select-trap')
-      .text('t');
-
-    overMap
-    .call(uiMapInMap(context))
-    // .call(uiNotice(context));
-
-    // Map controls
-    const controlsWrap = overMap
-      .append('div')
-      .attr('class', 'map-controls-wrap');
-
-    const controls = controlsWrap
-      .append('div')
-      .attr('class', 'map-controls');
-
-
-    // Setup map dimensions and move map to initial center/zoom.
-    // This should happen after .main-content and toolbars exist.
     ui.onResize();
     map.redrawEnable(true);
 
@@ -167,13 +104,11 @@ export function uiInit(context) {
     return _loadPromise = Promise.all([
       localizer.ensureLoaded(),
       presetManager.ensureLoaded(),
-    ])
-      .then(() => {
-        if (!context.container().empty()) {
-          render(context.container());
-        }
-      })
-      .catch(err => console.error(err)); // eslint-disable-line
+    ]).then(() => {
+      if (!context.container().empty()) {
+        render(context.container());
+      }
+    }).catch(err => console.error(err)); // eslint-disable-line
   };
 
   ui.photoviewer = uiPhotoviewer(context);
@@ -184,7 +119,8 @@ export function uiInit(context) {
     // Recalc dimensions of map and sidebar.. (`true` = force recalc)
     // This will call `getBoundingClientRect` and trigger reflow,
     //  but the values will be cached for later use.
-    const mapDimensions = utilGetDimensions(context.container().select('.main-content'), true);
+    const mapDimensions = utilGetDimensions(
+        context.container().select('.main-content'), true);
     utilGetDimensions(context.container().select('.sidebar'), true);
 
     if (withPan !== undefined) {
@@ -209,7 +145,7 @@ export function uiInit(context) {
   };
 
   // Call checkOverflow when resizing or whenever the contents change.
-  ui.checkOverflow = function (selector, reset) {
+  ui.checkOverflow = function(selector, reset) {
     if (reset) {
       delete _needWidth[selector];
     }
@@ -227,7 +163,7 @@ export function uiInit(context) {
     else if (scrollWidth >= needed) {
       selection.classed('narrow', false);
     }
-  }
+  };
 
   return ui;
 
