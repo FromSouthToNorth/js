@@ -10,6 +10,7 @@ export {
   geoVecEqual,
   geoVecDot,
   geoVecInterp,
+  geoVecScale,
 } from './vector.js';
 
 export {

@@ -264,6 +264,18 @@ export function utilDisplayName(entity) {
   return name;
 }
 
+export function utilDisplayNameForPath(entity) {
+  let name = utilDisplayName(entity);
+  let isFirefox = utilDetect().browser.toLowerCase().indexOf('firefox') > -1;
+  let isNewChromium = Number(utilDetect().version.split('.')[0]) >= 96.0;
+
+  if (!isFirefox && !isNewChromium && name && rtlRegex.test(name)) {
+    name = fixRTLTextForSvg(name);
+  }
+
+  return name;
+}
+
 export function utilDisplayType(id) {
   return {
     n: t('inspector.node'),
@@ -329,6 +341,22 @@ export function utilEditDistance(a, b) {
   }
   return matrix[b.length][a.length];
 }
+
+// https://stackoverflow.com/questions/194846/is-there-any-kind-of-hash-code-function-in-javascript
+// https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+export function utilHashcode(str) {
+  let hash = 0;
+  if (str.length === 0) {
+    return hash;
+  }
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+}
+
 
 // Returns version of `str` with all runs of special characters replaced by `_`;
 // suitable for HTML ids, classes, selectors, etc.

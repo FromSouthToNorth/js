@@ -18,6 +18,11 @@ export function geoVecSubtract(a, b) {
   return [a[0] - b[0], a[1] - b[1]];
 }
 
+// vector scaling
+export function geoVecScale(a, mag) {
+  return [ a[0] * mag, a[1] * mag ];
+}
+
 export function geoVecLength(a, b) {
   return Math.sqrt(geoVecLengthSquare(a, b));
 }

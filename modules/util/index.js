@@ -18,6 +18,8 @@ export {
   utilDisplayName,
   utilDisplayLabel,
   utilDisplayType,
+  utilDisplayNameForPath,
+  utilHashcode,
 } from './util.js';
 
 export { utilRebind } from './rebind.js';

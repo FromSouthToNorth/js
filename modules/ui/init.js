@@ -6,6 +6,8 @@ import { presetManager } from '../presets';
 import { behaviorHash } from '../behavior';
 import { utilDetect } from '../util/index.js';
 import { uiFullScreen } from './full_screen.js';
+import { utilGetDimensions } from '../util/index.js';
+import { uiPhotoviewer } from './photoviewer.js';
 
 export function uiInit(context) {
   let _initCounter = 0;
@@ -119,6 +121,24 @@ export function uiInit(context) {
       .append('div')
       .attr('class', 'over-map');
 
+    // HACK: Mobile Safari 14 likes to select anything selectable when long-
+    // pressing, even if it's not targeted. This conflicts with long-pressing
+    // to show the edit menu. We add a selectable offscreen element as the first
+    // child to trick Safari into not showing the selection UI.
+    overMap
+      .append('div')
+      .attr('class', 'select-trap')
+      .text('t');
+
+    // Map controls
+    const controlsWrap = overMap
+      .append('div')
+      .attr('class', 'map-controls-wrap');
+
+    const controls = controlsWrap
+      .append('div')
+      .attr('class', 'map-controls');
+
     map.redrawEnable(true);
   }
 
@@ -139,6 +159,59 @@ export function uiInit(context) {
       })
       .catch(err => console.error(err)); // eslint-disable-line
   };
+
+  ui.photoviewer = uiPhotoviewer(context);
+
+  ui.onResize = function(withPan) {
+    const map = context.map();
+
+    // Recalc dimensions of map and sidebar.. (`true` = force recalc)
+    // This will call `getBoundingClientRect` and trigger reflow,
+    //  but the values will be cached for later use.
+    const mapDimensions = utilGetDimensions(context.container().select('.main-content'), true);
+    utilGetDimensions(context.container().select('.sidebar'), true);
+
+    if (withPan !== undefined) {
+      map.redrawEnable(false);
+      map.pan(withPan);
+      map.redrawEnable(true);
+    }
+    map.dimensions(mapDimensions);
+
+    ui.photoviewer.onMapResize();
+
+    // check if header or footer have overflowed
+    ui.checkOverflow('.top-toolbar');
+    ui.checkOverflow('.map-footer-bar');
+
+    // Use outdated code so it works on Explorer
+    const resizeWindowEvent = document.createEvent('Event');
+
+    resizeWindowEvent.initEvent('resizeWindow', true, true);
+
+    document.dispatchEvent(resizeWindowEvent);
+  };
+
+  // Call checkOverflow when resizing or whenever the contents change.
+  ui.checkOverflow = function (selector, reset) {
+    if (reset) {
+      delete _needWidth[selector];
+    }
+    const selection = context.container().select(selector);
+    if (selection.empty()) return;
+    const scrollWidth = selection.property('scrollWidth');
+    const clientWidth = selection.property('clientWidth');
+    const needed = _needWidth[selector] || scrollWidth;
+    if (scrollWidth > clientWidth) {    // overflow happening
+      selection.classed('narrow', true);
+      if (!_needWidth[selector]) {
+        _needWidth[selector] = scrollWidth;
+      }
+    }
+    else if (scrollWidth >= needed) {
+      selection.classed('narrow', false);
+    }
+  }
 
   return ui;
 

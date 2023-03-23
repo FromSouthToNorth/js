@@ -8,3 +8,6 @@ export { actionMove } from './move.js';
 export { actionScale } from './scale.js';
 export { actionCopyEntities } from './copy_entities.js';
 export { actionNoop } from './noop.js';
+export { actionDiscardTags } from './discard_tags.js';
+export { actionMergeRemoteChanges } from './merge_remote_changes.js';
+export { actionRevert } from './revert.js';

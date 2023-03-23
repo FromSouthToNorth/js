@@ -20,7 +20,7 @@ import {
 import { geoExtent, geoRawMercator, geoScaleToZoom, geoZoomToScale } from '../geo/index.js';
 
 import { prefs } from '../core/index.js';
-import { svgLayers } from '../svg/index.js';
+import { svgLabels, svgLayers, svgVertices } from '../svg/index.js';
 
 /** constants */
 const TILESIZE = 256;
@@ -88,6 +88,12 @@ export function rendererMap(context) {
 
   const scheduleRedraw = _throttle(redraw, 750);
 
+  function cancelPendingRedraw() {
+    scheduleRedraw.cancel();
+    // isRedrawScheduled = false;
+    // window.cancelIdleCallback(pendingRedrawCall);
+  }
+
   function map(selection) {
     _selection = selection;
     context.on('change.map', immediateRedraw);
@@ -142,7 +148,7 @@ export function rendererMap(context) {
     map.supersurface = supersurface = selection.append('div')
       .attr('class', 'supersurface')
       .call(utilSetTransform, 0, 0);
-    
+
     // Need a wrapper div because Opera can't cope with an absolutely positioned
     // SVG element: http://bl.ocks.org/jfirebaugh/6fbfbd922552bf776c16
     wrapper = supersurface
@@ -155,7 +161,7 @@ export function rendererMap(context) {
 
 
     surface
-      // .call(drawLabels.observe)
+      .call(drawLabels.observe)
       .call(_doubleUpHandler)
       .on(_pointerPrefix + 'down.zoom', function(d3_event) {
         _lastPointerEvent = d3_event;
@@ -242,8 +248,9 @@ export function rendererMap(context) {
 
   map.init = function () {
     drawLayers = svgLayers(projection, context);
+    drawVertices = svgVertices(projection, context);
+    drawLabels = svgLabels(projection, context);
   }
-
 
   function editOff() {
     context.features().resetStats();
@@ -695,11 +702,30 @@ export function rendererMap(context) {
     return d3_event.button !== 2;
   }
 
-  function cancelPendingRedraw() {
-    scheduleRedraw.cancel();
-    // isRedrawScheduled = false;
-    // window.cancelIdleCallback(pendingRedrawCall);
-  }
+  map.pan = function(delta, duration) {
+    const t = projection.translate();
+    const k = projection.scale();
+
+    t[0] += delta[0];
+    t[1] += delta[1];
+
+    if (duration) {
+      _selection
+      .transition()
+      .duration(duration)
+      .on('start', function() { map.startEase(); })
+      .call(_zoomerPanner.transform, d3_zoomIdentity.translate(t[0], t[1]).scale(k));
+    }
+    else {
+      projection.translate(t);
+      _transformStart = projection.transform();
+      _selection.call(_zoomerPanner.transform, _transformStart);
+      dispatch.call('move', this, map);
+      immediateRedraw();
+    }
+
+    return map;
+  };
 
 
   map.dimensions = function (val) {
@@ -710,7 +736,7 @@ export function rendererMap(context) {
     projection.clipExtent([[0, 0], _dimensions]);
     _getMouseCoords = utilFastMouse(supersurface.node());
 
-    // scheduleRedraw();
+    scheduleRedraw();
     return map;
   };
 
@@ -782,7 +808,7 @@ export function rendererMap(context) {
       return Math.max(geoScaleToZoom(projection.scale(), TILESIZE), 0);
     }
 
-    if (z2 < _minzoom) {
+    if (z2 < _minZoom) {
       surface.interrupt();
       dispatch.call('hitMinZoom', this, map);
       z2 = context.minEditableZoom();
@@ -907,13 +933,6 @@ export function rendererMap(context) {
     }
   };
 
-  map.trimmedExtentZoom = function (val) {
-    const trimY = 120;
-    const trimX = 40;
-    const trimmed = [_dimensions[0] - trimX, _dimensions[1] - trimY];
-    return calcExtentZoom(geoExtent(val), trimmed);
-  };
-
   function calcExtentZoom(extent, dim) {
     const tl = projection([extent[0][0], extent[1][1]]);
     const br = projection([extent[1][0], extent[0][1]]);
@@ -928,6 +947,13 @@ export function rendererMap(context) {
 
   map.extentZoom = function (val) {
     return calcExtentZoom(geoExtent(val), _dimensions);
+  };
+
+  map.trimmedExtentZoom = function (val) {
+    const trimY = 120;
+    const trimX = 40;
+    const trimmed = [_dimensions[0] - trimX, _dimensions[1] - trimY];
+    return calcExtentZoom(geoExtent(val), trimmed);
   };
 
   map.withinEditableZoom = function () {
@@ -954,7 +980,7 @@ export function rendererMap(context) {
   };
 
   map._minZoom = function (val) {
-    if (!arguments.length) return _minzoom;
+    if (!arguments.length) return _minZoom;
     _minZoom = val;
     return map;
   };

@@ -1,20 +1,26 @@
-import _debounce from 'lodash-es/debounce.js';
+import _debounce from 'lodash-es/debounce';
 
-import { select as d3_select } from 'd3-selection';
 import { dispatch as d3_dispatch } from 'd3-dispatch';
+import { json as d3_json } from 'd3-fetch';
+import { select as d3_select } from 'd3-selection';
 
 import packageJSON from '../../package.json';
 
-import { t } from './localizer.js';
-import { fileFetcher } from './file_fetcher.js';
-import { localizer } from './localizer.js';
+import { t } from '../core/localizer';
 
-import { utilCleanOsmString, utilKeybinding, utilRebind, utilStringQs } from '../util/index.js';
+import { fileFetcher } from './file_fetcher';
+import { localizer } from './localizer';
+import { coreHistory } from './history';
+import { coreValidator } from './validator';
+import { coreUploader } from './uploader';
 import { geoRawMercator } from '../geo/index.js';
-import { rendererBackground, rendererFeatures, rendererMap } from '../renderer/index.js';
-import { services } from '../services/index.js';
-import { coreHistory } from './history.js';
-import { uiInit } from '../ui/index.js';
+import { modeSelect } from '../modes/select';
+import { presetManager } from '../presets';
+import { rendererBackground, rendererFeatures, rendererMap, rendererPhotos } from '../renderer';
+import { services } from '../services';
+import { uiInit } from '../ui/init';
+import { utilKeybinding, utilRebind, utilStringQs, utilCleanOsmString } from '../util';
+
 
 export function coreContext() {
   const dispatch = d3_dispatch('enter', 'exit', 'change');
@@ -22,29 +28,29 @@ export function coreContext() {
   let _deferred = new Set();
 
   context.version = packageJSON.version;
-  context.privacyVersion = '2023年3月16日14:36:47';
+  context.privacyVersion = '20201202';
 
   // iD will alter the hash so cache the parameters intended to setup the session
   context.initialHashParams = window.location.hash ? utilStringQs(window.location.hash) : {};
 
   /* Changeset */
   // An osmChangeset object. Not loaded until needed.
-  context.changest = null;
+  context.changeset = null;
 
   let _defaultChangesetComment = context.initialHashParams.comment;
   let _defaultChangesetSource = context.initialHashParams.source;
   let _defaultChangesetHashtags = context.initialHashParams.hashtags;
-  context.defaultChangesetComment = function (val) {
+  context.defaultChangesetComment = function(val) {
     if (!arguments.length) return _defaultChangesetComment;
     _defaultChangesetComment = val;
     return context;
   };
-  context.defaultChangesetSource = function (val) {
+  context.defaultChangesetSource = function(val) {
     if (!arguments.length) return _defaultChangesetSource;
     _defaultChangesetSource = val;
     return context;
   };
-  context.defaultChangesetHashtags = function (val) {
+  context.defaultChangesetHashtags = function(val) {
     if (!arguments.length) return _defaultChangesetHashtags;
     _defaultChangesetHashtags = val;
     return context;
@@ -55,18 +61,19 @@ export function coreContext() {
 
   // If true, iD will update the title based on what the user is doing
   let _setsDocumentTitle = true;
-  context.setsDocumentTitle = function (val) {
+  context.setsDocumentTitle = function(val) {
     if (!arguments.length) return _setsDocumentTitle;
     _setsDocumentTitle = val;
     return context;
   };
   // The part of the title that is always the same
   let _documentTitleBase = document.title;
-  context.documentTitleBase = function (val) {
+  context.documentTitleBase = function(val) {
     if (!arguments.length) return _documentTitleBase;
     _documentTitleBase = val;
     return context;
   };
+
 
   /* User interface and keybinding */
   let _ui;
@@ -76,6 +83,7 @@ export function coreContext() {
   let _keybinding = utilKeybinding('context');
   context.keybinding = () => _keybinding;
   d3_select(document).call(_keybinding);
+
 
   /* Straight accessors. Avoid using these if you can. */
   // Instantiate the connection here because it doesn't require passing in
@@ -89,8 +97,116 @@ export function coreContext() {
   context.validator = () => _validator;
   context.uploader = () => _uploader;
 
+  /* Connection */
+  context.preauth = (options) => {
+    if (_connection) {
+      _connection.switch(options);
+    }
+    return context;
+  };
+
+
+  // A string or array or locale codes to prefer over the browser's settings
+  context.locale = function(locale) {
+    if (!arguments.length) return localizer.localeCode();
+    localizer.preferredLocaleCodes(locale);
+    return context;
+  };
+
+
+  function afterLoad(cid, callback) {
+    return (err, result) => {
+      if (err) {
+        // 400 Bad Request, 401 Unauthorized, 403 Forbidden..
+        if (err.status === 400 || err.status === 401 || err.status === 403) {
+          if (_connection) {
+            _connection.logout();
+          }
+        }
+        if (typeof callback === 'function') {
+          callback(err);
+        }
+        return;
+
+      } else if (_connection && _connection.getConnectionId() !== cid) {
+        if (typeof callback === 'function') {
+          callback({ message: 'Connection Switched', status: -1 });
+        }
+        return;
+
+      } else {
+        _history.merge(result.data, result.extent);
+        if (typeof callback === 'function') {
+          callback(err, result);
+        }
+        return;
+      }
+    };
+  }
+
+
+  context.loadTiles = (projection, callback) => {
+    const handle = window.requestIdleCallback(() => {
+      _deferred.delete(handle);
+      if (_connection && context.editableDataEnabled()) {
+        const cid = _connection.getConnectionId();
+        _connection.loadTiles(projection, afterLoad(cid, callback));
+      }
+    });
+    _deferred.add(handle);
+  };
+
+  context.loadTileAtLoc = (loc, callback) => {
+    const handle = window.requestIdleCallback(() => {
+      _deferred.delete(handle);
+      if (_connection && context.editableDataEnabled()) {
+        const cid = _connection.getConnectionId();
+        _connection.loadTileAtLoc(loc, afterLoad(cid, callback));
+      }
+    });
+    _deferred.add(handle);
+  };
+
+  // Download the full entity and its parent relations. The callback may be called multiple times.
+  context.loadEntity = (entityID, callback) => {
+    if (_connection) {
+      const cid = _connection.getConnectionId();
+      _connection.loadEntity(entityID, afterLoad(cid, callback));
+      // We need to fetch the parent relations separately.
+      _connection.loadEntityRelations(entityID, afterLoad(cid, callback));
+    }
+  };
+
+  context.zoomToEntity = (entityID, zoomTo) => {
+
+    // be sure to load the entity even if we're not going to zoom to it
+    context.loadEntity(entityID, (err, result) => {
+      if (err) return;
+      if (zoomTo !== false) {
+        const entity = result.data.find(e => e.id === entityID);
+        if (entity) {
+          _map.zoomTo(entity);
+        }
+      }
+    });
+
+    _map.on('drawn.zoomToEntity', () => {
+      if (!context.hasEntity(entityID)) return;
+      _map.on('drawn.zoomToEntity', null);
+      context.on('enter.zoomToEntity', null);
+      context.enter(modeSelect(context, [entityID]));
+    });
+
+    context.on('enter.zoomToEntity', () => {
+      if (_mode.id !== 'browse') {
+        _map.on('drawn.zoomToEntity', null);
+        context.on('enter.zoomToEntity', null);
+      }
+    });
+  };
+
   let _minEditableZoom = 16;
-  context.minEditableZoom = function (val) {
+  context.minEditableZoom = function(val) {
     if (!arguments.length) return _minEditableZoom;
     _minEditableZoom = val;
     if (_connection) {
@@ -108,9 +224,10 @@ export function coreContext() {
   context.cleanTagValue = (val) => utilCleanOsmString(val, context.maxCharsForTagValue());
   context.cleanRelationRole = (val) => utilCleanOsmString(val, context.maxCharsForRelationRole());
 
+
   /* History */
   let _inIntro = false;
-  context.inIntro = function (val) {
+  context.inIntro = function(val) {
     if (!arguments.length) return _inIntro;
     _inIntro = val;
     return context;
@@ -132,8 +249,7 @@ export function coreContext() {
         return;
       }
 
-    }
-    else {
+    } else {
       canSave = context.selectedIDs().every(id => {
         const entity = context.hasEntity(id);
         return entity && !entity.isDegenerate();
@@ -148,22 +264,23 @@ export function coreContext() {
     }
   };
 
-
   // Debounce save, since it's a synchronous localStorage write,
   // and history changes can happen frequently (e.g. when dragging).
   context.debouncedSave = _debounce(context.save, 350);
 
   function withDebouncedSave(fn) {
-    return function () {
+    return function() {
       const result = fn.apply(_history, arguments);
       context.debouncedSave();
       return result;
     };
   }
 
+
   /* Graph */
   context.hasEntity = (id) => _history.graph().hasEntity(id);
   context.entity = (id) => _history.graph().entity(id);
+
 
   /* Modes */
   let _mode;
@@ -197,9 +314,36 @@ export function coreContext() {
     return context;
   };
 
+
+  /* Behaviors */
+  context.install = (behavior) => context.surface().call(behavior);
+  context.uninstall = (behavior) => context.surface().call(behavior.off);
+
+
+  /* Copy/Paste */
+  let _copyGraph;
+  context.copyGraph = () => _copyGraph;
+
+  let _copyIDs = [];
+  context.copyIDs = function(val) {
+    if (!arguments.length) return _copyIDs;
+    _copyIDs = val;
+    _copyGraph = _history.graph();
+    return context;
+  };
+
+  let _copyLonLat;
+  context.copyLonLat = function(val) {
+    if (!arguments.length) return _copyLonLat;
+    _copyLonLat = val;
+    return context;
+  };
+
+
   /* Background */
   let _background;
   context.background = () => _background;
+
 
   /* Features */
   let _features;
@@ -210,11 +354,26 @@ export function coreContext() {
     return _features.hasHiddenConnections(entity, graph);
   };
 
-  /** Map */
+
+  /* Photos */
+  let _photos;
+  context.photos = () => _photos;
+
+
+  /* Map */
   let _map;
   context.map = () => _map;
   context.layers = () => _map.layers();
   context.surface = () => _map.surface;
+  context.editableDataEnabled = () => _map.editableDataEnabled();
+  context.surfaceRect = () => _map.surface.node().getBoundingClientRect();
+  context.editable = () => {
+    // don't allow editing during save
+    const mode = context.mode();
+    if (!mode || mode.id === 'save') return false;
+    return _map.editableDataEnabled();
+  };
+
 
   /* Debug */
   let _debugFlags = {
@@ -233,23 +392,32 @@ export function coreContext() {
     return context;
   };
 
+
   /* Container */
   let _container = d3_select(null);
-  context.container = function (val) {
+  context.container = function(val) {
     if (!arguments.length) return _container;
     _container = val;
     _container.classed('ideditor', true);
     return context;
   };
-  context.containerNode = function (val) {
+  context.containerNode = function(val) {
     if (!arguments.length) return context.container().node();
     context.container(d3_select(val));
     return context;
   };
 
+  let _embed;
+  context.embed = function(val) {
+    if (!arguments.length) return _embed;
+    _embed = val;
+    return context;
+  };
+
+
   /* Assets */
   let _assetPath = '';
-  context.assetPath = function (val) {
+  context.assetPath = function(val) {
     if (!arguments.length) return _assetPath;
     _assetPath = val;
     fileFetcher.assetPath(val);
@@ -257,12 +425,13 @@ export function coreContext() {
   };
 
   let _assetMap = {};
-  context.assetMap = function (val) {
+  context.assetMap = function(val) {
     if (!arguments.length) return _assetMap;
     _assetMap = val;
     fileFetcher.assetMap(val);
     return context;
   };
+
   context.asset = (val) => {
     if (/^http(s)?:\/\//i.test(val)) return val;
     const filename = _assetPath + val;
@@ -270,6 +439,7 @@ export function coreContext() {
   };
 
   context.imagePath = (val) => context.asset(`img/${val}`);
+
 
   /* reset (aka flush) */
   context.reset = context.flush = () => {
@@ -299,19 +469,26 @@ export function coreContext() {
     return context;
   };
 
+
   /* Projections */
   context.projection = geoRawMercator();
   context.curtainProjection = geoRawMercator();
 
+
+  /* Init */
   context.init = () => {
+
     instantiateInternal();
+
     initializeDependents();
+
     return context;
 
     // Load variables and properties. No property of `context` should be accessed
     // until this is complete since load statuses are indeterminate. The order
     // of instantiation shouldn't matter.
     function instantiateInternal() {
+
       _history = coreHistory(context);
       context.graph = _history.graph;
       context.pauseChangeDispatch = _history.pauseChangeDispatch;
@@ -323,15 +500,32 @@ export function coreContext() {
       context.undo = withDebouncedSave(_history.undo);
       context.redo = withDebouncedSave(_history.redo);
 
+      _validator = coreValidator(context);
+      _uploader = coreUploader(context);
+
       _background = rendererBackground(context);
       _features = rendererFeatures(context);
       _map = rendererMap(context);
+      _photos = rendererPhotos(context);
 
       _ui = uiInit(context);
     }
 
+    // Set up objects that might need to access properties of `context`. The order
+    // might matter if dependents make calls to each other. Be wary of async calls.
     function initializeDependents() {
+
+      if (context.initialHashParams.presets) {
+        presetManager.addablePresetIDs(new Set(context.initialHashParams.presets.split(',')));
+      }
+
+      if (context.initialHashParams.locale) {
+        localizer.preferredLocaleCodes(context.initialHashParams.locale);
+      }
+
+      // kick off some async work
       localizer.ensureLoaded();
+      presetManager.ensureLoaded();
       _background.ensureLoaded();
 
       Object.values(services).forEach(service => {
@@ -341,11 +535,25 @@ export function coreContext() {
       });
 
       _map.init();
+      _validator.init();
+      _features.init();
+
+      if (services.maprules && context.initialHashParams.maprules) {
+        d3_json(context.initialHashParams.maprules)
+        .then(mapcss => {
+          services.maprules.init();
+          mapcss.forEach(mapcssSelector => services.maprules.addRule(mapcssSelector));
+        })
+        .catch(() => { /* ignore */ });
+      }
+
+      // if the container isn't available, e.g. when testing, don't load the UI
       if (!context.container().empty()) {
         _ui.ensureLoaded()
-          .then(() => {
-            _background.init();
-          });
+        .then(() => {
+          _background.init();
+          _photos.init();
+        });
       }
     }
   };
