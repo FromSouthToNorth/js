@@ -142,17 +142,6 @@ export function coreContext() {
     _deferred.add(handle);
   };
 
-  context.loadTileAtLoc = (loc, callback) => {
-    const handle = window.requestIdleCallback(() => {
-      _deferred.delete(handle);
-      if (_connection && context.editableDataEnabled()) {
-        const cid = _connection.getConnectionId();
-        _connection.loadTileAtLoc(loc, afterLoad(cid, callback));
-      }
-    });
-    _deferred.add(handle);
-  };
-
   // Download the full entity and its parent relations. The callback may be called multiple times.
   context.loadEntity = (entityID, callback) => {
     if (_connection) {
@@ -194,18 +183,6 @@ export function coreContext() {
     return context;
   };
 
-  // String length limits in Unicode characters, not JavaScript UTF-16 code units
-  context.maxCharsForTagKey = () => 255;
-  context.maxCharsForTagValue = () => 255;
-  context.maxCharsForRelationRole = () => 255;
-
-  context.cleanTagKey = (val) => utilCleanOsmString(val,
-      context.maxCharsForTagKey());
-  context.cleanTagValue = (val) => utilCleanOsmString(val,
-      context.maxCharsForTagValue());
-  context.cleanRelationRole = (val) => utilCleanOsmString(val,
-      context.maxCharsForRelationRole());
-
   /* History */
   let _inIntro = false;
   context.inIntro = function(val) {
@@ -246,18 +223,6 @@ export function coreContext() {
     }
   };
 
-  // Debounce save, since it's a synchronous localStorage write,
-  // and history changes can happen frequently (e.g. when dragging).
-  context.debouncedSave = _debounce(context.save, 350);
-
-  function withDebouncedSave(fn) {
-    return function() {
-      const result = fn.apply(_history, arguments);
-      context.debouncedSave();
-      return result;
-    };
-  }
-
   /* Graph */
   context.hasEntity = (id) => _history.graph().hasEntity(id);
   context.entity = (id) => _history.graph().entity(id);
@@ -280,44 +245,6 @@ export function coreContext() {
       _mode.selectedIDs()) || [];
   context.activeID = () => _mode && _mode.activeID && _mode.activeID();
 
-  let _selectedNoteID;
-  context.selectedNoteID = function(noteID) {
-    if (!arguments.length) return _selectedNoteID;
-    _selectedNoteID = noteID;
-    return context;
-  };
-
-  // NOTE: Don't change the name of this until UI v3 is merged
-  let _selectedErrorID;
-  context.selectedErrorID = function(errorID) {
-    if (!arguments.length) return _selectedErrorID;
-    _selectedErrorID = errorID;
-    return context;
-  };
-
-  /* Behaviors */
-  context.install = (behavior) => context.surface().call(behavior);
-  context.uninstall = (behavior) => context.surface().call(behavior.off);
-
-  /* Copy/Paste */
-  let _copyGraph;
-  context.copyGraph = () => _copyGraph;
-
-  let _copyIDs = [];
-  context.copyIDs = function(val) {
-    if (!arguments.length) return _copyIDs;
-    _copyIDs = val;
-    _copyGraph = _history.graph();
-    return context;
-  };
-
-  let _copyLonLat;
-  context.copyLonLat = function(val) {
-    if (!arguments.length) return _copyLonLat;
-    _copyLonLat = val;
-    return context;
-  };
-
   /* Background */
   let _background;
   context.background = () => _background;
@@ -331,10 +258,6 @@ export function coreContext() {
     return _features.hasHiddenConnections(entity, graph);
   };
 
-  /* Photos */
-  let _photos;
-  context.photos = () => _photos;
-
   /* Map */
   let _map;
   context.map = () => _map;
@@ -347,23 +270,6 @@ export function coreContext() {
     const mode = context.mode();
     if (!mode || mode.id === 'save') return false;
     return _map.editableDataEnabled();
-  };
-
-  /* Debug */
-  let _debugFlags = {
-    tile: false,        // tile boundaries
-    collision: false,   // label collision bounding boxes
-    imagery: false,     // imagery bounding polygons
-    target: false,      // touch targets
-    downloaded: false,   // downloaded data from osm
-  };
-  context.debugFlags = () => _debugFlags;
-  context.getDebug = (flag) => flag && _debugFlags[flag];
-  context.setDebug = function(flag, val) {
-    if (arguments.length === 1) val = true;
-    _debugFlags[flag] = val;
-    dispatch.call('change');
-    return context;
   };
 
   /* Container */
@@ -380,61 +286,12 @@ export function coreContext() {
     return context;
   };
 
-  let _embed;
-  context.embed = function(val) {
-    if (!arguments.length) return _embed;
-    _embed = val;
-    return context;
-  };
-
   /* Assets */
   let _assetPath = '';
   context.assetPath = function(val) {
     if (!arguments.length) return _assetPath;
     _assetPath = val;
     fileFetcher.assetPath(val);
-    return context;
-  };
-
-  let _assetMap = {};
-  context.assetMap = function(val) {
-    if (!arguments.length) return _assetMap;
-    _assetMap = val;
-    fileFetcher.assetMap(val);
-    return context;
-  };
-
-  context.asset = (val) => {
-    if (/^http(s)?:\/\//i.test(val)) return val;
-    const filename = _assetPath + val;
-    return _assetMap[filename] || filename;
-  };
-
-  context.imagePath = (val) => context.asset(`img/${val}`);
-
-  /* reset (aka flush) */
-  context.reset = context.flush = () => {
-    context.debouncedSave.cancel();
-
-    Array.from(_deferred).forEach(handle => {
-      window.cancelIdleCallback(handle);
-      _deferred.delete(handle);
-    });
-
-    Object.values(services).forEach(service => {
-      if (service && typeof service.reset === 'function') {
-        service.reset(context);
-      }
-    });
-
-    context.changeset = null;
-
-    _features.reset();
-    _history.reset();
-
-    // don't leave stale state in the inspector
-    context.container().select('.inspector-wrap *').remove();
-
     return context;
   };
 
@@ -457,15 +314,6 @@ export function coreContext() {
     function instantiateInternal() {
 
       _history = coreHistory(context);
-      context.graph = _history.graph;
-      context.pauseChangeDispatch = _history.pauseChangeDispatch;
-      context.resumeChangeDispatch = _history.resumeChangeDispatch;
-      context.perform = withDebouncedSave(_history.perform);
-      context.replace = withDebouncedSave(_history.replace);
-      context.pop = withDebouncedSave(_history.pop);
-      context.overwrite = withDebouncedSave(_history.overwrite);
-      context.undo = withDebouncedSave(_history.undo);
-      context.redo = withDebouncedSave(_history.redo);
 
       _background = rendererBackground(context);
       _map = rendererMap(context);

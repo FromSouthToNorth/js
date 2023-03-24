@@ -23,7 +23,8 @@ if (args.watch) {
 else {
   const build = await context.rebuild();
   if (args.stats) {
-    fs.writeFileSync('./dist/esbuild.json', JSON.stringify(build.metafile, null, 2));
+    fs.writeFileSync('./dist/esbuild.json',
+        JSON.stringify(build.metafile, null, 2));
   }
   await context.dispose();
 }

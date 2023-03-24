@@ -20,8 +20,6 @@
     "vparse": "^1.1.0"
   },
   "dependencies": {
-    "@datastructures-js/heap": "^4.3.1",
-    "@datastructures-js/priority-queue": "^6.2.0",
     "@ideditor/location-conflation": "^1.1.0",
     "@mapbox/geojson-area": "^0.2.2",
     "@mapbox/sexagesimal": "^1.2.0",

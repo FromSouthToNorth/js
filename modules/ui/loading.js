@@ -14,10 +14,6 @@ export function uiLoading(context) {
         append('div').
         attr('class', 'modal-section fillL');
 
-    loadertext.append('img').
-        attr('class', 'loader').
-        attr('src', context.imagePath('loader-white.gif'));
-
     loadertext.append('h3').html(_message);
 
     _modalSelection.select('button.close').attr('class', 'hide');
