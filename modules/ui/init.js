@@ -1,6 +1,9 @@
+import { select as d3_select } from 'd3-selection';
 import { localizer } from '../core/localizer';
 import { presetManager } from '../presets';
 import { behaviorHash } from '../behavior';
+
+import { utilGetDimensions } from '../util/index.js';
 
 export function uiInit(context) {
 
@@ -10,12 +13,12 @@ export function uiInit(context) {
     map.redrawEnable(false); // don't draw until we've set zoom/lat/long
 
     const content = container.append('div').
-        attr('class', 'main-content active');
+    attr('class', 'main-content active');
 
     content.append('div').
-        attr('class', 'main-map').
-        attr('dir', 'ltr').
-        call(map);
+    attr('class', 'main-map').
+    attr('dir', 'ltr').
+    call(map);
 
     map.redrawEnable(true);
 
@@ -24,6 +27,10 @@ export function uiInit(context) {
     if (!ui.hash.hadLocation) {
       map.centerZoom([0, 0], 2);
     }
+
+    d3_select(window).on('resize.editor', function() {
+      ui.onResize();
+    });
   }
 
   let ui = {};
@@ -40,6 +47,18 @@ export function uiInit(context) {
         render(context.container());
       }
     }).catch(err => console.error(err)); // eslint-disable-line
+  };
+
+  ui.onResize = function(withPan) {
+    let map = context.map();
+
+    const mapDimensions = utilGetDimensions(
+        context.container().select('.main-content'), true);
+    utilGetDimensions(context.container().select('.sidebar'), true);
+
+    if (withPan) {
+    }
+    map.dimensions(mapDimensions);
   };
 
   return ui;
