@@ -9,6 +9,7 @@ import { scaleLinear as d3_scaleLinear } from 'd3-scale';
 import {
   utilBindOnce,
   utilDetect,
+  utilDoubleUp,
   utilFastMouse,
   utilGetDimensions,
   utilRebind,
@@ -81,6 +82,8 @@ export function rendererMap(context) {
     _pointerDown = false;
   });
 
+  const _doubleUpHandler = utilDoubleUp();
+
   const scheduleRedraw = _throttle(redraw, 750);
 
   function cancelPendingRedraw() {
@@ -114,6 +117,11 @@ export function rendererMap(context) {
     wrapper = supersurface.append('div').attr('class', 'layer layer-data');
 
     map.surface = surface = wrapper.call(drawLayers).selectAll('.surface');
+
+    surface.call(_doubleUpHandler);
+    _doubleUpHandler.on('doubleUp.map', function(d3_event, p0) {
+      console.log('doubleUp.map: ', d3_event, p0);
+    });
 
     map.dimensions(utilGetDimensions(selection));
   }

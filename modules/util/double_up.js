@@ -58,9 +58,9 @@ export function utilDoubleUp() {
     _pointer.upCount += 1;
 
     if (_pointer.upCount === 2) { // double up!
-      var loc = [d3_event.clientX, d3_event.clientY];
+      let loc = [d3_event.clientX, d3_event.clientY];
       if (pointerIsValidFor(loc)) {
-        var locInThis = utilFastMouse(this)(d3_event);
+        let locInThis = utilFastMouse(this)(d3_event);
         dispatch.call('doubleUp', this, d3_event, locInThis);
       }
       // clear the pointer info in any case
