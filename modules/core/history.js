@@ -9,8 +9,12 @@ import { coreTree } from './tree';
 import { osmEntity } from '../osm/entity';
 import { uiLoading } from '../ui/loading';
 import {
-  utilArrayDifference, utilArrayGroupBy, utilArrayUnion,
-  utilObjectOmit, utilRebind, utilSessionMutex,
+  utilArrayDifference,
+  utilArrayGroupBy,
+  utilArrayUnion,
+  utilObjectOmit,
+  utilRebind,
+  utilSessionMutex,
 } from '../util';
 
 export function coreHistory(context) {
