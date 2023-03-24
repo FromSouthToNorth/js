@@ -11,10 +11,7 @@ import { t } from '../core/localizer';
 import { fileFetcher } from './file_fetcher';
 import { localizer } from './localizer';
 import { coreHistory } from './history';
-import { coreValidator } from './validator';
-import { coreUploader } from './uploader';
 import { geoRawMercator } from '../geo/index.js';
-import { modeSelect } from '../modes/select';
 import { presetManager } from '../presets';
 import {
   rendererBackground,
@@ -99,12 +96,8 @@ export function coreContext() {
   // `context` and it's needed for pre-init calls like `preauth`
   let _connection = services.osm;
   let _history;
-  let _validator;
-  let _uploader;
   context.connection = () => _connection;
   context.history = () => _history;
-  context.validator = () => _validator;
-  context.uploader = () => _uploader;
 
   /* Connection */
   context.preauth = (options) => {
@@ -196,13 +189,6 @@ export function coreContext() {
           _map.zoomTo(entity);
         }
       }
-    });
-
-    _map.on('drawn.zoomToEntity', () => {
-      if (!context.hasEntity(entityID)) return;
-      _map.on('drawn.zoomToEntity', null);
-      context.on('enter.zoomToEntity', null);
-      context.enter(modeSelect(context, [entityID]));
     });
 
     context.on('enter.zoomToEntity', () => {
@@ -458,10 +444,8 @@ export function coreContext() {
 
     context.changeset = null;
 
-    _validator.reset();
     _features.reset();
     _history.reset();
-    _uploader.reset();
 
     // don't leave stale state in the inspector
     context.container().select('.inspector-wrap *').remove();
@@ -498,8 +482,6 @@ export function coreContext() {
       context.undo = withDebouncedSave(_history.undo);
       context.redo = withDebouncedSave(_history.redo);
 
-      _validator = coreValidator(context);
-      _uploader = coreUploader(context);
 
       _background = rendererBackground(context);
       _features = rendererFeatures(context);
@@ -534,7 +516,6 @@ export function coreContext() {
       });
 
       _map.init();
-      _validator.init();
       _features.init();
 
       if (services.maprules && context.initialHashParams.maprules) {

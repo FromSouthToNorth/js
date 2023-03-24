@@ -80,7 +80,7 @@ export function utilQsString(obj, noencode) {
   // "/" in map states, ":", ",", {" and "}" in background
   function softEncode(s) {
     return encodeURIComponent(s).
-        replace(/(%2F|%3A|%2C|%7B|%7D)/g, decodeURIComponent);
+    replace(/(%2F|%3A|%2C|%7B|%7D)/g, decodeURIComponent);
   }
 
   return Object.keys(obj).sort().map((key) => {
@@ -192,9 +192,9 @@ export function utilSetTransform(el, x, y, scale) {
   const prop = transformProperty = transformProperty ||
       utilPrefixCSSProperty('Transform');
   const translate = utilDetect().opera ?
-                    'translate(' + x + 'px,' + y + 'px)'
-                                       :
-                    'translate3d(' + x + 'px,' + y + 'px,0)';
+      'translate(' + x + 'px,' + y + 'px)'
+      :
+      'translate3d(' + x + 'px,' + y + 'px,0)';
   return el.style(prop, translate + (scale ? ' scale(' + scale + ')' : ''));
 }
 
@@ -298,8 +298,8 @@ export function utilDisplayLabel(entity, graphOrGeometry, verbose) {
   let result;
   let displayName = utilDisplayName(entity);
   let preset = typeof graphOrGeometry === 'string' ?
-               presetManager.matchTags(entity.tags, graphOrGeometry) :
-               presetManager.match(entity, graphOrGeometry);
+      presetManager.matchTags(entity.tags, graphOrGeometry) :
+      presetManager.match(entity, graphOrGeometry);
   let presetName = preset &&
       (preset.suggestion ? preset.subtitle() : preset.name());
 

@@ -264,11 +264,6 @@ export function rendererMap(context) {
       'select-error': true,
     };
 
-    let mode = context.mode();
-    if (mode && !allowed[mode.id]) {
-      context.enter(modeBrowse(context));
-    }
-
     dispatch.call('drawn', this, { full: true });
   }
 

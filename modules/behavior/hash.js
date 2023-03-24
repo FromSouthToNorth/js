@@ -2,16 +2,12 @@ import _throttle from 'lodash-es/throttle';
 
 import { select as d3_select } from 'd3-selection';
 
-import { geoSphericalDistance } from '../geo';
-import { modeBrowse } from '../modes/browse';
-import { modeSelect } from '../modes/select';
 import {
   utilDisplayLabel,
   utilObjectOmit,
   utilQsString,
   utilStringQs,
 } from '../util';
-import { utilArrayIdentical } from '../util/array';
 import { t } from '../core/localizer';
 import { prefs } from '../core/preferences';
 
@@ -153,33 +149,10 @@ export function behaviorHash(context) {
       let mode = context.mode();
 
       context.map().
-          centerZoom([
-                mapArgs[2],
-                Math.min(_latitudeLimit, Math.max(-_latitudeLimit, mapArgs[1]))],
-              mapArgs[0]);
-
-      if (q.id && mode) {
-        let ids = q.id.split(',').filter(function(id) {
-          return context.hasEntity(id);
-        });
-        if (ids.length &&
-            (mode.id === 'browse' || (mode.id === 'select' &&
-                !utilArrayIdentical(mode.selectedIDs(), ids)))) {
-          context.enter(modeSelect(context, ids));
-          return;
-        }
-      }
-
-      let center = context.map().center();
-      let dist = geoSphericalDistance(center, [mapArgs[2], mapArgs[1]]);
-      let maxdist = 500;
-
-      // Don't allow the hash location to change too much while drawing
-      // This can happen if the user accidentally hit the back button.  #3996
-      if (mode && mode.id.match(/^draw/) !== null && dist > maxdist) {
-        context.enter(modeBrowse(context));
-        return;
-      }
+      centerZoom([
+            mapArgs[2],
+            Math.min(_latitudeLimit, Math.max(-_latitudeLimit, mapArgs[1]))],
+          mapArgs[0]);
     }
   }
 
@@ -212,10 +185,10 @@ export function behaviorHash(context) {
       // center map at last visited map location
       const mapArgs = prefs('map-location').split('/').map(Number);
       context.map().
-          centerZoom([
-                mapArgs[2],
-                Math.min(_latitudeLimit, Math.max(-_latitudeLimit, mapArgs[1]))],
-              mapArgs[0]);
+      centerZoom([
+            mapArgs[2],
+            Math.min(_latitudeLimit, Math.max(-_latitudeLimit, mapArgs[1]))],
+          mapArgs[0]);
 
       updateHashIfNeeded();
 

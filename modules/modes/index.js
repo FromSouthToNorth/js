@@ -1,1 +1,0 @@
-import { modeBrowse } from 'browse.js';

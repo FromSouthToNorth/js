@@ -6,7 +6,6 @@ import { osmAuth } from 'osm-auth';
 
 import { JXON } from '../util';
 import { geoExtent, geoRawMercator, geoVecAdd, geoZoomToScale } from '../geo';
-import { osmEntity, osmNode, osmNote, osmRelation, osmWay } from '../osm';
 import {
   utilArrayChunk,
   utilArrayGroupBy,

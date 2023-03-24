@@ -1,5 +1,4 @@
 export { coreContext } from './context.js';
-export { coreFileFetcher, fileFetcher } from './file_fetcher';
 export { coreDifference } from './difference';
 export { coreGraph } from './graph';
 export { coreHistory } from './history';
