@@ -2,6 +2,7 @@ import { dispatch as d3_dispatch } from 'd3-dispatch';
 import { select as d3_select } from 'd3-selection';
 import {
   utilArrayDifference,
+  utilSetDimensions,
   utilGetDimensions,
   utilRebind,
 } from '../util/index.js';
@@ -71,7 +72,7 @@ export function svgLayers(projection, context) {
 
   drawLayers.dimensions = function(val) {
     if (!arguments.length) return utilGetDimensions(svg);
-    utilGetDimensions(svg, val);
+    utilSetDimensions(svg, val);
     return this;
   };
 

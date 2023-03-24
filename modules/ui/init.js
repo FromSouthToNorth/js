@@ -54,11 +54,17 @@ export function uiInit(context) {
 
     const mapDimensions = utilGetDimensions(
         context.container().select('.main-content'), true);
-    utilGetDimensions(context.container().select('.sidebar'), true);
 
     if (withPan) {
     }
     map.dimensions(mapDimensions);
+
+    // Use outdated code so it works on Explorer
+    const resizeWindowEvent = document.createEvent('Event');
+
+    resizeWindowEvent.initEvent('resizeWindow', true, true);
+
+    document.dispatchEvent(resizeWindowEvent);
   };
 
   return ui;
