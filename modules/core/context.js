@@ -1,11 +1,7 @@
-import _debounce from 'lodash-es/debounce';
-
 import { dispatch as d3_dispatch } from 'd3-dispatch';
 import { select as d3_select } from 'd3-selection';
 
 import packageJSON from '../../package.json';
-
-import { t } from '../core/localizer';
 
 import { fileFetcher } from './file_fetcher';
 import { localizer } from './localizer';
@@ -20,45 +16,14 @@ import { uiInit } from '../ui/init';
 import {
   utilKeybinding,
   utilRebind,
-  utilStringQs,
-  utilCleanOsmString,
 } from '../util';
 
 export function coreContext() {
   const dispatch = d3_dispatch('enter', 'exit', 'change');
   let context = utilRebind({}, dispatch, 'on');
-  let _deferred = new Set();
 
   context.version = packageJSON.version;
   context.privacyVersion = '20201202';
-
-  // iD will alter the hash so cache the parameters intended to setup the session
-  context.initialHashParams = window.location.hash ?
-      utilStringQs(window.location.hash) :
-      {};
-
-  /* Changeset */
-  // An osmChangeset object. Not loaded until needed.
-  context.changeset = null;
-
-  let _defaultChangesetComment = context.initialHashParams.comment;
-  let _defaultChangesetSource = context.initialHashParams.source;
-  let _defaultChangesetHashtags = context.initialHashParams.hashtags;
-  context.defaultChangesetComment = function(val) {
-    if (!arguments.length) return _defaultChangesetComment;
-    _defaultChangesetComment = val;
-    return context;
-  };
-  context.defaultChangesetSource = function(val) {
-    if (!arguments.length) return _defaultChangesetSource;
-    _defaultChangesetSource = val;
-    return context;
-  };
-  context.defaultChangesetHashtags = function(val) {
-    if (!arguments.length) return _defaultChangesetHashtags;
-    _defaultChangesetHashtags = val;
-    return context;
-  };
 
   /* Document title */
   /* (typically shown as the label for the browser window/tab) */
@@ -81,10 +46,8 @@ export function coreContext() {
   /* User interface and keybinding */
   let _ui;
   context.ui = () => _ui;
-  context.lastPointerType = () => _ui.lastPointerType();
 
   let _keybinding = utilKeybinding('context');
-  context.keybinding = () => _keybinding;
   d3_select(document).call(_keybinding);
 
   /* Straight accessors. Avoid using these if you can. */
@@ -131,17 +94,6 @@ export function coreContext() {
     };
   }
 
-  context.loadTiles = (projection, callback) => {
-    const handle = window.requestIdleCallback(() => {
-      _deferred.delete(handle);
-      if (_connection && context.editableDataEnabled()) {
-        const cid = _connection.getConnectionId();
-        _connection.loadTiles(projection, afterLoad(cid, callback));
-      }
-    });
-    _deferred.add(handle);
-  };
-
   // Download the full entity and its parent relations. The callback may be called multiple times.
   context.loadEntity = (entityID, callback) => {
     if (_connection) {
@@ -173,54 +125,12 @@ export function coreContext() {
     });
   };
 
-  let _minEditableZoom = 16;
-  context.minEditableZoom = function(val) {
-    if (!arguments.length) return _minEditableZoom;
-    _minEditableZoom = val;
-    if (_connection) {
-      _connection.tileZoom(val);
-    }
-    return context;
-  };
-
   /* History */
   let _inIntro = false;
   context.inIntro = function(val) {
     if (!arguments.length) return _inIntro;
     _inIntro = val;
     return context;
-  };
-
-  // Immediately save the user's history to localstorage, if possible
-  // This is called someteimes, but also on the `window.onbeforeunload` handler
-  context.save = () => {
-    // no history save, no message onbeforeunload
-    if (_inIntro || context.container().select('.modal').size()) return;
-
-    let canSave;
-    if (_mode && _mode.id === 'save') {
-      canSave = false;
-
-      // Attempt to prevent user from creating duplicate changes - see #5200
-      if (services.osm && services.osm.isChangesetInflight()) {
-        _history.clearSaved();
-        return;
-      }
-
-    }
-    else {
-      canSave = context.selectedIDs().every(id => {
-        const entity = context.hasEntity(id);
-        return entity && !entity.isDegenerate();
-      });
-    }
-
-    if (canSave) {
-      _history.save();
-    }
-    if (_history.hasChanges()) {
-      return t('save.unsaved_changes');
-    }
   };
 
   /* Graph */
@@ -263,14 +173,6 @@ export function coreContext() {
   context.map = () => _map;
   context.layers = () => _map.layers();
   context.surface = () => _map.surface;
-  context.editableDataEnabled = () => _map.editableDataEnabled();
-  context.surfaceRect = () => _map.surface.node().getBoundingClientRect();
-  context.editable = () => {
-    // don't allow editing during save
-    const mode = context.mode();
-    if (!mode || mode.id === 'save') return false;
-    return _map.editableDataEnabled();
-  };
 
   /* Container */
   let _container = d3_select(null);
