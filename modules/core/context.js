@@ -1,7 +1,6 @@
 import _debounce from 'lodash-es/debounce';
 
 import { dispatch as d3_dispatch } from 'd3-dispatch';
-import { json as d3_json } from 'd3-fetch';
 import { select as d3_select } from 'd3-selection';
 
 import packageJSON from '../../package.json';
@@ -12,12 +11,9 @@ import { fileFetcher } from './file_fetcher';
 import { localizer } from './localizer';
 import { coreHistory } from './history';
 import { geoRawMercator } from '../geo/index.js';
-import { presetManager } from '../presets';
 import {
   rendererBackground,
-  rendererFeatures,
   rendererMap,
-  rendererPhotos,
 } from '../renderer';
 import { services } from '../services';
 import { uiInit } from '../ui/init';
@@ -38,7 +34,7 @@ export function coreContext() {
 
   // iD will alter the hash so cache the parameters intended to setup the session
   context.initialHashParams = window.location.hash ?
-                              utilStringQs(window.location.hash) :
+      utilStringQs(window.location.hash) :
       {};
 
   /* Changeset */
@@ -100,12 +96,6 @@ export function coreContext() {
   context.history = () => _history;
 
   /* Connection */
-  context.preauth = (options) => {
-    if (_connection) {
-      _connection.switch(options);
-    }
-    return context;
-  };
 
   // A string or array or locale codes to prefer over the browser's settings
   context.locale = function(locale) {
@@ -126,22 +116,17 @@ export function coreContext() {
         if (typeof callback === 'function') {
           callback(err);
         }
-        return;
-
       }
       else if (_connection && _connection.getConnectionId() !== cid) {
         if (typeof callback === 'function') {
           callback({ message: 'Connection Switched', status: -1 });
         }
-        return;
-
       }
       else {
         _history.merge(result.data, result.extent);
         if (typeof callback === 'function') {
           callback(err, result);
         }
-        return;
       }
     };
   }
@@ -482,11 +467,8 @@ export function coreContext() {
       context.undo = withDebouncedSave(_history.undo);
       context.redo = withDebouncedSave(_history.redo);
 
-
       _background = rendererBackground(context);
-      _features = rendererFeatures(context);
       _map = rendererMap(context);
-      _photos = rendererPhotos(context);
 
       _ui = uiInit(context);
     }
@@ -494,19 +476,6 @@ export function coreContext() {
     // Set up objects that might need to access properties of `context`. The order
     // might matter if dependents make calls to each other. Be wary of async calls.
     function initializeDependents() {
-
-      if (context.initialHashParams.presets) {
-        presetManager.addablePresetIDs(
-            new Set(context.initialHashParams.presets.split(',')));
-      }
-
-      if (context.initialHashParams.locale) {
-        localizer.preferredLocaleCodes(context.initialHashParams.locale);
-      }
-
-      // kick off some async work
-      localizer.ensureLoaded();
-      presetManager.ensureLoaded();
       _background.ensureLoaded();
 
       Object.values(services).forEach(service => {
@@ -516,22 +485,11 @@ export function coreContext() {
       });
 
       _map.init();
-      _features.init();
-
-      if (services.maprules && context.initialHashParams.maprules) {
-        d3_json(context.initialHashParams.maprules).then(mapcss => {
-          services.maprules.init();
-          mapcss.forEach(
-              mapcssSelector => services.maprules.addRule(mapcssSelector));
-        }).catch(() => { /* ignore */
-        });
-      }
 
       // if the container isn't available, e.g. when testing, don't load the UI
       if (!context.container().empty()) {
         _ui.ensureLoaded().then(() => {
           _background.init();
-          _photos.init();
         });
       }
     }

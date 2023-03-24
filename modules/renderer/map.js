@@ -134,8 +134,6 @@ export function rendererMap(context) {
 
     context.background().on('change.map', immediateRedraw);
 
-    context.features().on('redraw.map', immediateRedraw);
-
     drawLayers.on('change.map', function() {
       context.background().updateImagery();
       immediateRedraw();
@@ -572,15 +570,6 @@ export function rendererMap(context) {
     if (!difference) {
       supersurface.call(context.background());
       wrapper.call(drawLayers);
-    }
-
-    // OSM
-    if (map.editableDataEnabled() || map.isInWideSelection()) {
-      context.loadTiles(projection);
-      drawEditable(difference, extent);
-    }
-    else {
-      editOff();
     }
 
     _transformStart = projection.transform();
