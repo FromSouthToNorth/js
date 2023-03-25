@@ -20,6 +20,7 @@ export function uiInit(context) {
     attr('dir', 'ltr').
     call(map);
 
+    ui.onResize();
     map.redrawEnable(true);
 
     ui.hash = behaviorHash(context);
