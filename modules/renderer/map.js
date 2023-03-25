@@ -139,6 +139,35 @@ export function rendererMap(context) {
     });
 
     map.dimensions(utilGetDimensions(selection));
+
+    function zoomIn(delta) {
+      console.log('zoomIn: ', delta);
+      setCenterZoom(map.center(), ~~map.zoom() + delta, 250, true);
+    }
+
+    function zoomOut(delta) {
+      setCenterZoom(map.center(), ~~map.zoom() - delta, 250, true);
+    }
+
+    map.zoomIn = function() {
+      zoomIn(1);
+    };
+    map.zoomInFurther = function() {
+      zoomIn(4);
+    };
+    map.canZoomIn = function() {
+      return map.zoom() < maxZoom;
+    };
+
+    map.zoomOut = function() {
+      zoomOut(1);
+    };
+    map.zoomOutFurther = function() {
+      zoomOut(4);
+    };
+    map.canZoomOut = function() {
+      return map.zoom() > minZoom;
+    };
   }
 
   function pxCenter() {
@@ -432,7 +461,7 @@ export function rendererMap(context) {
     t[1] += center[1] - point[1];
 
     return setTransform(
-        d3_zoomIdentity.translate(t[0], t[1]).scale(k2, duration, force));
+        d3_zoomIdentity.translate(t[0], t[1]).scale(k2), duration, force);
   }
 
   function zoomEventFilter(d3_event) {
@@ -462,6 +491,33 @@ export function rendererMap(context) {
 
     return d3_event.button !== 2;
   }
+
+  map.pan = function(delta, duration) {
+    const t = projection.translate();
+    const k = projection.scale();
+
+    t[0] += delta[0];
+    t[1] += delta[1];
+
+    if (duration) {
+      _selection.transition().
+          duration(duration).
+          on('start', function() {
+            map.startEase();
+          }).
+          call(_zoomerPanner.transform,
+              d3_zoomIdentity.translate(t[0], t[1]).scale(k));
+    }
+    else {
+      projection.translate(t);
+      _transformStart = projection.transform();
+      _selection.call(_zoomerPanner.transform, _transformStart);
+      duration.call('move', this, map);
+      immediateRedraw();
+    }
+
+    return map;
+  };
 
   map.dimensions = function(val) {
     if (!arguments.length) return _dimensions;

@@ -47,7 +47,9 @@ export function coreContext() {
   let _ui;
   context.ui = () => _ui;
 
+  /* 按键绑定 */
   let _keybinding = utilKeybinding('context');
+  context.keybinding = () => _keybinding;
   d3_select(document).call(_keybinding);
 
   /* Straight accessors. Avoid using these if you can. */
@@ -196,6 +198,22 @@ export function coreContext() {
     fileFetcher.assetPath(val);
     return context;
   };
+
+  let _assetMap = {};
+  context.assetMap = function(val) {
+    if (!arguments.length) return _assetMap;
+    _assetMap = val;
+    fileFetcher.assetMap(val);
+    return context;
+  };
+
+  context.asset = (val) => {
+    if (/^http(s)?:\/\//i.test(val)) return val;
+    const filename = _assetPath + val;
+    return _assetMap[filename] || filename;
+  }
+
+  context.imagePath = (val) => context.asset(`img/${val}`);
 
   /* Projections */
   context.projection = geoRawMercator();
