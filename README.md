@@ -17,8 +17,12 @@ pnpm install
 pnpm dev
 ```
 
-### modules core
+### 加载地图执行顺序
 
-主要的核心代码
+- *coreContext.init* 初始化 *uiInit*
 
-- **coreContext** 全局对象的引导对象
+- *coreContext* 读取 *servicesOsm* 
+
+```
+
+```

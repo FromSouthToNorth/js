@@ -8,6 +8,7 @@ import { uiCmd } from './cmd.js';
 import { uiFlash } from './flash.js';
 import { uiZoom } from './zoom.js';
 import { svgDefs } from '../svg/index.js';
+import { uiAttribution } from './attribution.js';
 
 export function uiInit(context) {
 
@@ -30,6 +31,11 @@ export function uiInit(context) {
         call(map);
 
     const overMap = content.append('div').attr('class', 'over-map');
+
+    overMap.append('div').
+        attr('class', 'attribution-wrap').
+        attr('dir', 'ltr').
+        call(uiAttribution(context));
 
     const controlsWrap = overMap.append('div').
         attr('class', 'map-controls-wrap');

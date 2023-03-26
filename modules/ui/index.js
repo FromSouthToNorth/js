@@ -6,3 +6,4 @@ export { uiZoom } from './zoom.js';
 export { uiTooltip } from './tooltip.js';
 export { uiPopover } from './popover.js';
 export { uiFlash } from './flash.js';
+export { uiAttribution } from './attribution.js';
