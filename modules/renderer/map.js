@@ -69,18 +69,18 @@ export function rendererMap(context) {
   let _zoomerPannerFunction = 'PointerEvent' in window ? utilZoomPan : d3_zoom;
 
   let _zoomerPanner = _zoomerPannerFunction().
-      scaleExtent([kMin, kMax]).
-      interpolate(d3_interpolate).
-      filter(zoomEventFilter).
-      on('zoom.map', zoomPan).
-      on('start.map', function(d3_event) {
-        _pointerDown = d3_event && (d3_event.type === 'pointerdown' ||
-            (d3_event.sourceEvent && d3_event.sourceEvent.type ===
-                'pointerdown'));
-      }).
-      on('end.map', function() {
-        _pointerDown = false;
-      });
+  scaleExtent([kMin, kMax]).
+  interpolate(d3_interpolate).
+  filter(zoomEventFilter).
+  on('zoom.map', zoomPan).
+  on('start.map', function(d3_event) {
+    _pointerDown = d3_event && (d3_event.type === 'pointerdown' ||
+        (d3_event.sourceEvent && d3_event.sourceEvent.type ===
+            'pointerdown'));
+  }).
+  on('end.map', function() {
+    _pointerDown = false;
+  });
 
   const _doubleUpHandler = utilDoubleUp();
 
@@ -104,13 +104,13 @@ export function rendererMap(context) {
       // disable swipe-to-navigate browser pages on trackpad/magic mouse – #5552
       d3_event.preventDefault();
     }).
-        call(_zoomerPanner).
-        call(_zoomerPanner.transform, projection.transform()).
-        on('dblclick.zoom', null); // override d3-zoom dblclick handling
+    call(_zoomerPanner).
+    call(_zoomerPanner.transform, projection.transform()).
+    on('dblclick.zoom', null); // override d3-zoom dblclick handling
 
     map.supersurface = supersurface = selection.append('div').
-        attr('class', 'supersurface').
-        call(utilSetTransform, 0, 0);
+    attr('class', 'supersurface').
+    call(utilSetTransform, 0, 0);
 
     // Need a wrapper div because Opera can't cope with an absolutely positioned
     // SVG element: http://bl.ocks.org/jfirebaugh/6fbfbd922552bf776c16
@@ -376,9 +376,9 @@ export function rendererMap(context) {
     // class surface as `lowzoom` around z17-z18.5 (based on latitude)
     const lat = map.center()[1];
     const lowZoom = d3_scaleLinear().
-        domain([-60, 0, 60]).
-        range([17, 18.5, 17]).
-        clamp(true);
+    domain([-60, 0, 60]).
+    range([17, 18.5, 17]).
+    clamp(true);
 
     surface.classed('low-zoom', zoom <= lowZoom(lat));
 
@@ -427,12 +427,12 @@ export function rendererMap(context) {
 
     if (duration) {
       _selection.transition().
-          duration(duration).
-          on('start', function() {
-            map.startEase();
-          }).
-          call(_zoomerPanner.transform,
-              d3_zoomIdentity.translate(t2.x, t2.y).scale(t2.k));
+      duration(duration).
+      on('start', function() {
+        map.startEase();
+      }).
+      call(_zoomerPanner.transform,
+          d3_zoomIdentity.translate(t2.x, t2.y).scale(t2.k));
     }
     else {
       projection.transform(t2);
@@ -501,12 +501,12 @@ export function rendererMap(context) {
 
     if (duration) {
       _selection.transition().
-          duration(duration).
-          on('start', function() {
-            map.startEase();
-          }).
-          call(_zoomerPanner.transform,
-              d3_zoomIdentity.translate(t[0], t[1]).scale(k));
+      duration(duration).
+      on('start', function() {
+        map.startEase();
+      }).
+      call(_zoomerPanner.transform,
+          d3_zoomIdentity.translate(t[0], t[1]).scale(k));
     }
     else {
       projection.translate(t);

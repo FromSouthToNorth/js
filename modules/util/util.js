@@ -345,6 +345,18 @@ export function utilEditDistance(a, b) {
   return matrix[b.length][a.length];
 }
 
+export function utilNoAuto(selection) {
+  let isText = (selection.size() && selection.node().tagName.toLowerCase() ===
+      'textarea');
+
+  return selection
+  // assign 'new-password' even for non-password fields to prevent browsers (Chrome) ignoring 'off'
+  .attr('autocomplete', 'new-password').
+  attr('autocorrect', 'off').
+  attr('autocapitalize', 'off').
+  attr('spellcheck', isText ? 'true' : 'false');
+}
+
 // https://stackoverflow.com/questions/194846/is-there-any-kind-of-hash-code-function-in-javascript
 // https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
 export function utilHashcode(str) {

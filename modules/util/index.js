@@ -20,6 +20,7 @@ export {
   utilDisplayType,
   utilDisplayNameForPath,
   utilHashcode,
+  utilNoAuto,
 } from './util.js';
 
 export { utilRebind } from './rebind.js';

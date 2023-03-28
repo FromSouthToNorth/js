@@ -52,10 +52,10 @@ export function geoRawMercator() {
   };
 
   projection.stream = d3_geoTransform({
-    point: (x, y) => {
+    point: function(x, y) {
       const vec = projection([x, y]);
       this.stream.point(vec[0], vec[1]);
-    },
+    }
   }).stream;
 
   return projection;

@@ -176,6 +176,23 @@ export function coreContext() {
   context.layers = () => _map.layers();
   context.surface = () => _map.surface;
 
+  /* Debug */
+  let _debugFlags = {
+    tile: false,        // tile boundaries
+    collision: false,   // label collision bounding boxes
+    imagery: false,     // imagery bounding polygons
+    target: false,      // touch targets
+    downloaded: false   // downloaded data from osm
+  };
+  context.debugFlags = () => _debugFlags;
+  context.getDebug = (flag) => flag && _debugFlags[flag];
+  context.setDebug = function(flag, val) {
+    if (arguments.length === 1) val = true;
+    _debugFlags[flag] = val;
+    dispatch.call('change');
+    return context;
+  };
+
   /* Container */
   let _container = d3_select(null);
   context.container = function(val) {

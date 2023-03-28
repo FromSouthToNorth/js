@@ -28,6 +28,7 @@
     "@turf/bbox": "^6.5.0",
     "@turf/bbox-clip": "^6.5.0",
     "@turf/turf": "^6.5.0",
+    "marked": "^4.3.0",
     "aes-js": "^3.1.2",
     "d3-array": "^3.2.3",
     "d3-dispatch": "^3.0.1",

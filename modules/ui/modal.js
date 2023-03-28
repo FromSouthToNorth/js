@@ -12,8 +12,8 @@ export function uiModal(selection, blocking) {
   previous.transition().duration(200).style('opacity', 0).remove();
 
   let shaded = selection.append('div').
-      attr('class', 'shaded').
-      style('opacity', 0);
+  attr('class', 'shaded').
+  style('opacity', 0);
 
   shaded.close = () => {
     shaded.transition().duration(200).style('opacity', 0).remove();
@@ -26,8 +26,8 @@ export function uiModal(selection, blocking) {
   let modal = shaded.append('div').attr('class', 'modal fillL');
 
   modal.append('input').
-      attr('class', 'keytrap keytrap-first').
-      on('focus.keytrap', moveFocusToLast);
+  attr('class', 'keytrap keytrap-first').
+  on('focus.keytrap', moveFocusToLast);
 
   if (!blocking) {
     shaded.on('click.remove-modal', (d3_event) => {
@@ -37,10 +37,10 @@ export function uiModal(selection, blocking) {
     });
 
     modal.append('button').
-        attr('class', 'close').
-        attr('title', t('icons.close')).
-        on('click', shaded.close).
-        call(svgIcon('#iD-icon-close'));
+    attr('class', 'close').
+    attr('title', t('icons.close')).
+    on('click', shaded.close).
+    call(svgIcon('#iD-icon-close'));
 
     keybinding.on('⌫', shaded.close).on('⎋', shaded.close);
 
@@ -50,8 +50,8 @@ export function uiModal(selection, blocking) {
   modal.append('div').attr('class', 'content');
 
   modal.append('input').
-      attr('class', 'keytrap keytrap-last').
-      on('focus.keytrap', moveFocusToFirst);
+  attr('class', 'keytrap keytrap-last').
+  on('focus.keytrap', moveFocusToFirst);
 
   if (animate) {
     shaded.transition().style('opacity', 1);
@@ -64,8 +64,8 @@ export function uiModal(selection, blocking) {
 
   function moveFocusToFirst() {
     let node = modal
-        // there are additional rules about what's focusable, but this suits our purposes
-        .select('a, button, input:not(.keytrap), select, textarea').node();
+    // there are additional rules about what's focusable, but this suits our purposes
+    .select('a, button, input:not(.keytrap), select, textarea').node();
 
     if (node) {
       node.focus();
