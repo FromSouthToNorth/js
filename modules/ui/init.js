@@ -5,7 +5,6 @@ import { behaviorHash } from '../behavior';
 
 import { utilGetDimensions } from '../util/index.js';
 import { uiCmd } from './cmd.js';
-import { uiFlash } from './flash.js';
 import { uiZoom } from './zoom.js';
 import { svgDefs } from '../svg/index.js';
 import { uiAttribution } from './attribution.js';
@@ -195,8 +194,6 @@ export function uiInit(context) {
   };
 
   ui.svgDefs = svgDefs(context);
-
-  ui.flash = uiFlash(context);
 
   return ui;
 
