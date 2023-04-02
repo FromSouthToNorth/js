@@ -15,7 +15,8 @@ export function coreTree(head) {
   let tree = {};
 
   function entityBBox(entity) {
-    let bbox = entity.extent(head).bbox();
+    let bbox = entity.extent(head)
+      .bbox();
     bbox.id = entity.id;
     _bboxes[entity.id] = bbox;
     return bbox;
@@ -58,27 +59,30 @@ export function coreTree(head) {
       }
     });
     if (segments.length) _segmentsRTree.load(
-        segments.map(segmentBBox).filter(Boolean));
+      segments.map(segmentBBox)
+        .filter(Boolean));
   }
 
   function updateParents(entity, insertions, memo) {
-    head.parentWays(entity).forEach(function(way) {
-      if (_bboxes[way.id]) {
-        removeEntity(way);
-        insertions[way.id] = way;
-      }
-      updateParents(way, insertions, memo);
-    });
+    head.parentWays(entity)
+      .forEach(function(way) {
+        if (_bboxes[way.id]) {
+          removeEntity(way);
+          insertions[way.id] = way;
+        }
+        updateParents(way, insertions, memo);
+      });
 
-    head.parentRelations(entity).forEach(function(relation) {
-      if (memo[entity.id]) return;
-      memo[entity.id] = true;
-      if (_bboxes[relation.id]) {
-        removeEntity(relation);
-        insertions[relation.id] = relation;
-      }
-      updateParents(relation, insertions, memo);
-    });
+    head.parentRelations(entity)
+      .forEach(function(relation) {
+        if (memo[entity.id]) return;
+        memo[entity.id] = true;
+        if (_bboxes[relation.id]) {
+          removeEntity(relation);
+          insertions[relation.id] = relation;
+        }
+        updateParents(relation, insertions, memo);
+      });
   }
 
   tree.rebase = function(entities, force) {
@@ -119,23 +123,26 @@ export function coreTree(head) {
     let insertions = {};
 
     if (changed.deletion) {
-      diff.deleted().forEach(function(entity) {
-        removeEntity(entity);
-      });
+      diff.deleted()
+        .forEach(function(entity) {
+          removeEntity(entity);
+        });
     }
 
     if (changed.geometry) {
-      diff.modified().forEach(function(entity) {
-        removeEntity(entity);
-        insertions[entity.id] = entity;
-        updateParents(entity, insertions, {});
-      });
+      diff.modified()
+        .forEach(function(entity) {
+          removeEntity(entity);
+          insertions[entity.id] = entity;
+          updateParents(entity, insertions, {});
+        });
     }
 
     if (changed.addition) {
-      diff.created().forEach(function(entity) {
-        insertions[entity.id] = entity;
-      });
+      diff.created()
+        .forEach(function(entity) {
+          insertions[entity.id] = entity;
+        });
     }
 
     loadEntities(Object.values(insertions));
@@ -144,17 +151,19 @@ export function coreTree(head) {
   // returns an array of entities with bounding boxes overlapping `extent` for the given `graph`
   tree.intersects = function(extent, graph) {
     updateToGraph(graph);
-    return _rtree.search(extent.bbox()).map(function(bbox) {
-      return graph.entity(bbox.id);
-    });
+    return _rtree.search(extent.bbox())
+      .map(function(bbox) {
+        return graph.entity(bbox.id);
+      });
   };
 
   // returns an array of segment objects with bounding boxes overlapping `extent` for the given `graph`
   tree.waySegments = function(extent, graph) {
     updateToGraph(graph);
-    return _segmentsRTree.search(extent.bbox()).map(function(bbox) {
-      return bbox.segment;
-    });
+    return _segmentsRTree.search(extent.bbox())
+      .map(function(bbox) {
+        return bbox.segment;
+      });
   };
 
   return tree;

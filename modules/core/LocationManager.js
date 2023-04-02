@@ -134,9 +134,9 @@ export class LocationManager {
       obj.locationSetID = locationSetID;
 
       if (!result.feature.geometry.coordinates.length ||
-          !result.feature.properties.area) {
+        !result.feature.properties.area) {
         throw new Error(
-            `locationSet ${locationSetID} resolves to an empty feature.`);
+          `locationSet ${locationSetID} resolves to an empty feature.`);
       }
 
       let geojson = JSON.parse(JSON.stringify(result.feature));   // deep clone
@@ -179,7 +179,7 @@ export class LocationManager {
    */
   mergeCustomGeoJSON(fc) {
     if (!fc || fc.type !== 'FeatureCollection' ||
-        !Array.isArray(fc.features)) return;
+      !Array.isArray(fc.features)) return;
 
     fc.features.forEach(feature => {
       feature.properties = feature.properties || {};

@@ -65,7 +65,8 @@ export function coreDifference(base, head) {
     // through them all can become a performance bottleneck. Optimize by
     // resolving duplicates and using a basic `for` loop
     let ids = utilArrayUniq(
-        Object.keys(head.entities).concat(Object.keys(base.entities)));
+      Object.keys(head.entities)
+        .concat(Object.keys(base.entities)));
     for (let i = 0; i < ids.length; i++) {
       checkEntityID(ids[i]);
     }
@@ -86,60 +87,65 @@ export function coreDifference(base, head) {
   // pass true to include affected relation members
   _diff.extantIDs = function extantIDs(includeRelMembers) {
     let result = new Set();
-    Object.keys(_changes).forEach(function(id) {
-      if (_changes[id].head) {
-        result.add(id);
-      }
+    Object.keys(_changes)
+      .forEach(function(id) {
+        if (_changes[id].head) {
+          result.add(id);
+        }
 
-      let h = _changes[id].head;
-      let b = _changes[id].base;
-      let entity = h || b;
+        let h = _changes[id].head;
+        let b = _changes[id].base;
+        let entity = h || b;
 
-      if (includeRelMembers && entity.type === 'relation') {
-        let mh = h ? h.members.map(function(m) {
-          return m.id;
-        }) : [];
-        let mb = b ? b.members.map(function(m) {
-          return m.id;
-        }) : [];
-        utilArrayUnion(mh, mb).forEach(function(memberID) {
-          if (head.hasEntity(memberID)) {
-            result.add(memberID);
-          }
-        });
-      }
-    });
+        if (includeRelMembers && entity.type === 'relation') {
+          let mh = h ? h.members.map(function(m) {
+            return m.id;
+          }) : [];
+          let mb = b ? b.members.map(function(m) {
+            return m.id;
+          }) : [];
+          utilArrayUnion(mh, mb)
+            .forEach(function(memberID) {
+              if (head.hasEntity(memberID)) {
+                result.add(memberID);
+              }
+            });
+        }
+      });
 
     return Array.from(result);
   };
 
   _diff.modified = function modified() {
     let result = [];
-    Object.values(_changes).forEach(function(change) {
-      if (change.base && change.head) {
-        result.push(change.head);
-      }
-    });
+    Object.values(_changes)
+      .forEach(function(change) {
+        if (change.base && change.head) {
+          result.push(change.head);
+        }
+      });
     return result;
   };
 
   _diff.created = function created() {
     let result = [];
-    Object.values(_changes).forEach(function(change) {
-      if (!change.base && change.head) {
-        result.push(change.head);
-      }
-    });
+    Object.values(_changes)
+      .forEach(function(change) {
+        if (!change.base && change.head) {
+          result.push(change.head);
+        }
+      });
     return result;
   };
 
   _diff.deleted = function deleted() {
     let result = [];
-    Object.values(_changes).forEach(function(change) {
-      if (change.base && !change.head) {
-        result.push(change.base);
-      }
-    });
+    Object.values(_changes)
+      .forEach(function(change) {
+        if (change.base && !change.head) {
+          result.push(change.base);
+        }
+      });
     return result;
   };
 
@@ -216,8 +222,8 @@ export function coreDifference(base, head) {
       let i;
 
       if (extent &&
-          (!h || !h.intersects(extent, head)) &&
-          (!b || !b.intersects(extent, base))) {
+        (!h || !h.intersects(extent, head)) &&
+        (!b || !b.intersects(extent, base))) {
         continue;
       }
 

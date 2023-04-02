@@ -70,11 +70,12 @@ export function uiSection(id, context) {
   // may be called multiple times
   section.render = function(selection) {
 
-    _containerSelection = selection.selectAll('.section-' + id).data([0]);
+    _containerSelection = selection.selectAll('.section-' + id)
+      .data([0]);
 
-    let sectionEnter = _containerSelection.enter().
-    append('div').
-    attr('class',
+    let sectionEnter = _containerSelection.enter()
+      .append('div')
+      .attr('class',
         'section section-' + id + ' ' + (_classes && _classes() || ''));
 
     _containerSelection = sectionEnter.merge(_containerSelection);
@@ -108,11 +109,12 @@ export function uiSection(id, context) {
     if (_disclosureContent) {
       if (!_disclosure) {
         _disclosure = uiDisclosure(context, id.replace(/-/g, '_'),
-            _expandedByDefault()).label(_label || '')
-        /*.on('toggled', function(expanded) {
-            if (expanded) { selection.node().parentNode.scrollTop += 200; }
-        })*/
-        .content(_disclosureContent);
+          _expandedByDefault())
+          .label(_label || '')
+          /*.on('toggled', function(expanded) {
+              if (expanded) { selection.node().parentNode.scrollTop += 200; }
+          })*/
+          .content(_disclosureContent);
       }
       if (_disclosureExpanded !== undefined) {
         _disclosure.expanded(_disclosureExpanded);

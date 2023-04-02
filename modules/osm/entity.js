@@ -113,7 +113,7 @@ osmEntity.prototype = {
     if (copies[this.id]) return copies[this.id];
 
     let copy = osmEntity(this,
-        { id: undefined, user: undefined, version: undefined });
+      { id: undefined, user: undefined, version: undefined });
     copies[this.id] = copy;
 
     return copy;
@@ -145,8 +145,9 @@ osmEntity.prototype = {
       else if (t1 !== t2) {
         changed = true;
         merged[k] = utilUnicodeCharsTruncated(
-            utilArrayUnion(t1.split(/;\s*/), t2.split(/;\s*/)).join(';'),
-            255, // avoid exceeding character limit; see also context.maxCharsForTagValue()
+          utilArrayUnion(t1.split(/;\s*/), t2.split(/;\s*/))
+            .join(';'),
+          255, // avoid exceeding character limit; see also context.maxCharsForTagValue()
         );
       }
     }
@@ -154,13 +155,15 @@ osmEntity.prototype = {
   },
 
   intersects: function(extent, resolver) {
-    return this.extent(resolver).intersects(extent);
+    return this.extent(resolver)
+      .intersects(extent);
   },
 
   hasNonGeometryTags: function() {
-    return Object.keys(this.tags).some(function(k) {
-      return k !== 'area';
-    });
+    return Object.keys(this.tags)
+      .some(function(k) {
+        return k !== 'area';
+      });
   },
 
   hasParentRelations: function(resolver) {
@@ -168,7 +171,8 @@ osmEntity.prototype = {
   },
 
   hasInterestingTags: function() {
-    return Object.keys(this.tags).some(osmIsInterestingTag);
+    return Object.keys(this.tags)
+      .some(osmIsInterestingTag);
   },
 
   isHighwayIntersection: function() {
@@ -189,14 +193,14 @@ osmEntity.prototype = {
     dataDeprecated.forEach(function(d) {
       let oldKeys = Object.keys(d.old);
       if (d.replace) {
-        let hasExistingValues = Object.keys(d.replace).
-            some(function(replaceKey) {
-              if (!tags[replaceKey] || d.old[replaceKey]) return false;
-              let replaceValue = d.replace[replaceKey];
-              if (replaceValue === '*') return false;
-              if (replaceValue === tags[replaceKey]) return false;
-              return true;
-            });
+        let hasExistingValues = Object.keys(d.replace)
+          .some(function(replaceKey) {
+            if (!tags[replaceKey] || d.old[replaceKey]) return false;
+            let replaceValue = d.replace[replaceKey];
+            if (replaceValue === '*') return false;
+            if (replaceValue === tags[replaceKey]) return false;
+            return true;
+          });
         // don't flag deprecated tags if the upgrade path would overwrite existing data - #7843
         if (hasExistingValues) return;
       }
@@ -205,7 +209,8 @@ osmEntity.prototype = {
         if (d.old[oldKey] === '*') return true;
         if (d.old[oldKey] === tags[oldKey]) return true;
 
-        let vals = tags[oldKey].split(';').filter(Boolean);
+        let vals = tags[oldKey].split(';')
+          .filter(Boolean);
         if (vals.length === 0) {
           return false;
         }

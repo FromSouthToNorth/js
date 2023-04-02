@@ -24,21 +24,22 @@ export function behaviorHash(context) {
     let zoom = map.zoom();
     let precision = Math.max(0, Math.ceil(Math.log(zoom) / Math.LN2));
     let oldParams = utilObjectOmit(utilStringQs(window.location.hash),
-        ['comment', 'source', 'hashtags', 'walkthrough'],
+      ['comment', 'source', 'hashtags', 'walkthrough'],
     );
     let newParams = {};
 
     delete oldParams.id;
-    let selected = context.selectedIDs().filter(function(id) {
-      return context.hasEntity(id);
-    });
+    let selected = context.selectedIDs()
+      .filter(function(id) {
+        return context.hasEntity(id);
+      });
     if (selected.length) {
       newParams.id = selected.join(',');
     }
 
     newParams.map = zoom.toFixed(2) +
-        '/' + center[1].toFixed(precision) +
-        '/' + center[0].toFixed(precision);
+      '/' + center[1].toFixed(precision) +
+      '/' + center[0].toFixed(precision);
 
     return Object.assign(oldParams, newParams);
   }
@@ -54,12 +55,13 @@ export function behaviorHash(context) {
     let changeCount;
     let titleID;
 
-    let selected = context.selectedIDs().filter(function(id) {
-      return context.hasEntity(id);
-    });
+    let selected = context.selectedIDs()
+      .filter(function(id) {
+        return context.hasEntity(id);
+      });
     if (selected.length) {
       let firstLabel = utilDisplayLabel(context.entity(selected[0]),
-          context.graph());
+        context.graph());
       if (selected.length > 1) {
         contextual = t('title.labeled_and_more', {
           labeled: firstLabel,
@@ -73,7 +75,9 @@ export function behaviorHash(context) {
     }
 
     if (includeChangeCount) {
-      changeCount = context.history().difference().summary().length;
+      changeCount = context.history()
+        .difference()
+        .summary().length;
       if (changeCount > 0) {
         titleID = contextual ? 'changes_context' : 'changes';
       }
@@ -109,7 +113,7 @@ export function behaviorHash(context) {
       // Update the URL hash without affecting the browser navigation stack,
       // though unavoidably creating a browser history entry
       window.history.replaceState(null,
-          computedTitle(false /* includeChangeCount */), latestHash);
+        computedTitle(false /* includeChangeCount */), latestHash);
 
       // set the title we want displayed for the browser tab/window
       updateTitle(true /* includeChangeCount */);
@@ -135,7 +139,8 @@ export function behaviorHash(context) {
     _cachedHash = window.location.hash;
 
     let q = utilStringQs(_cachedHash);
-    let mapArgs = (q.map || '').split('/').map(Number);
+    let mapArgs = (q.map || '').split('/')
+      .map(Number);
 
     if (mapArgs.length < 3 || mapArgs.some(isNaN)) {
       // replace bogus hash
@@ -148,8 +153,8 @@ export function behaviorHash(context) {
 
       let mode = context.mode();
 
-      context.map().
-      centerZoom([
+      context.map()
+        .centerZoom([
             mapArgs[2],
             Math.min(_latitudeLimit, Math.max(-_latitudeLimit, mapArgs[1]))],
           mapArgs[0]);
@@ -157,13 +162,16 @@ export function behaviorHash(context) {
   }
 
   function behavior() {
-    context.map().on('move.behaviorHash', _throttledUpdate);
+    context.map()
+      .on('move.behaviorHash', _throttledUpdate);
 
-    context.history().on('change.behaviorHash', _throttledUpdateTitle);
+    context.history()
+      .on('change.behaviorHash', _throttledUpdateTitle);
 
     context.on('enter.behaviorHash', _throttledUpdate);
 
-    d3_select(window).on('hashchange.behaviorHash', hashchange);
+    d3_select(window)
+      .on('hashchange.behaviorHash', hashchange);
 
     let q = utilStringQs(window.location.hash);
 
@@ -183,9 +191,11 @@ export function behaviorHash(context) {
     }
     else if (!q.id && prefs('map-location')) {
       // center map at last visited map location
-      const mapArgs = prefs('map-location').split('/').map(Number);
-      context.map().
-      centerZoom([
+      const mapArgs = prefs('map-location')
+        .split('/')
+        .map(Number);
+      context.map()
+        .centerZoom([
             mapArgs[2],
             Math.min(_latitudeLimit, Math.max(-_latitudeLimit, mapArgs[1]))],
           mapArgs[0]);
@@ -204,11 +214,13 @@ export function behaviorHash(context) {
     _throttledUpdate.cancel();
     _throttledUpdateTitle.cancel();
 
-    context.map().on('move.behaviorHash', null);
+    context.map()
+      .on('move.behaviorHash', null);
 
     context.on('enter.behaviorHash', null);
 
-    d3_select(window).on('hashchange.behaviorHash', null);
+    d3_select(window)
+      .on('hashchange.behaviorHash', null);
 
     window.location.hash = '';
   };

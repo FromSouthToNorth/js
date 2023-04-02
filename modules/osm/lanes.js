@@ -20,11 +20,11 @@ export function osmLanes(entity) {
 
   let maxspeedLanes = {};
   maxspeedLanes.unspecified = parseMaxspeedLanes(tags['maxspeed:lanes'],
-      maxspeed);
+    maxspeed);
   maxspeedLanes.forward = parseMaxspeedLanes(tags['maxspeed:lanes:forward'],
-      maxspeed);
+    maxspeed);
   maxspeedLanes.backward = parseMaxspeedLanes(tags['maxspeed:lanes:backward'],
-      maxspeed);
+    maxspeed);
 
   let psvLanes = {};
   psvLanes.unspecified = parseMiscLanes(tags['psv:lanes']);
@@ -171,23 +171,26 @@ function parseTurnLanes(tag) {
     'sharp_right', 'reverse', 'merge_to_left', 'merge_to_right', 'none',
   ];
 
-  return tag.split('|').map(function(s) {
-    if (s === '') s = 'none';
-    return s.split(';').map(function(d) {
-      return validValues.indexOf(d) === -1 ? 'unknown' : d;
+  return tag.split('|')
+    .map(function(s) {
+      if (s === '') s = 'none';
+      return s.split(';')
+        .map(function(d) {
+          return validValues.indexOf(d) === -1 ? 'unknown' : d;
+        });
     });
-  });
 }
 
 function parseMaxspeedLanes(tag, maxspeed) {
   if (!tag) return;
 
-  return tag.split('|').map(function(s) {
-    if (s === 'none') return s;
-    let m = parseInt(s, 10);
-    if (s === '' || m === maxspeed) return null;
-    return isNaN(m) ? 'unknown' : m;
-  });
+  return tag.split('|')
+    .map(function(s) {
+      if (s === 'none') return s;
+      let m = parseInt(s, 10);
+      if (s === '' || m === maxspeed) return null;
+      return isNaN(m) ? 'unknown' : m;
+    });
 }
 
 function parseMiscLanes(tag) {
@@ -197,10 +200,11 @@ function parseMiscLanes(tag) {
     'yes', 'no', 'designated',
   ];
 
-  return tag.split('|').map(function(s) {
-    if (s === '') s = 'no';
-    return validValues.indexOf(s) === -1 ? 'unknown' : s;
-  });
+  return tag.split('|')
+    .map(function(s) {
+      if (s === '') s = 'no';
+      return validValues.indexOf(s) === -1 ? 'unknown' : s;
+    });
 }
 
 function parseBicycleWay(tag) {
@@ -210,10 +214,11 @@ function parseBicycleWay(tag) {
     'yes', 'no', 'designated', 'lane',
   ];
 
-  return tag.split('|').map(function(s) {
-    if (s === '') s = 'no';
-    return validValues.indexOf(s) === -1 ? 'unknown' : s;
-  });
+  return tag.split('|')
+    .map(function(s) {
+      if (s === '') s = 'no';
+      return validValues.indexOf(s) === -1 ? 'unknown' : s;
+    });
 }
 
 function mapToLanesObj(lanesObj, data, key) {

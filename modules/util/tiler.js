@@ -41,24 +41,24 @@ export function utilTiler() {
     ];
 
     const cols = d3_range(
-        clamp(Math.floor(-origin[0]) - _margin, tileMin, tileMax + 1),
-        clamp(Math.ceil(_size[0] / k - origin[0]) + _margin, tileMin,
-            tileMax + 1),
+      clamp(Math.floor(-origin[0]) - _margin, tileMin, tileMax + 1),
+      clamp(Math.ceil(_size[0] / k - origin[0]) + _margin, tileMin,
+        tileMax + 1),
     );
     const rows = d3_range(
-        clamp(Math.floor(-origin[1]) - _margin, tileMin, tileMax + 1),
-        clamp(Math.ceil(_size[1] / k - origin[1]) + _margin, tileMin,
-            tileMax + 1),
+      clamp(Math.floor(-origin[1]) - _margin, tileMin, tileMax + 1),
+      clamp(Math.ceil(_size[1] / k - origin[1]) + _margin, tileMin,
+        tileMax + 1),
     );
 
     const tiles = [];
-    for (var i = 0; i < rows.length; i++) {
+    for (let i = 0; i < rows.length; i++) {
       const y = rows[i];
-      for (var j = 0; j < cols.length; j++) {
+      for (let j = 0; j < cols.length; j++) {
         const x = cols[j];
 
         if (i >= _margin && i <= rows.length - _margin &&
-            j >= _margin && j <= cols.length - _margin) {
+          j >= _margin && j <= cols.length - _margin) {
           tiles.unshift([x, y, z0]);  // tiles in view at beginning
         }
         else {
@@ -82,9 +82,9 @@ export function utilTiler() {
       projection.scale() * Math.PI - projection.translate()[1],
     ];
 
-    this.size(projection.clipExtent()[1]).
-        scale(projection.scale() * 2 * Math.PI).
-        translate(projection.translate());
+    this.size(projection.clipExtent()[1])
+      .scale(projection.scale() * 2 * Math.PI)
+      .translate(projection.translate());
 
     const tiles = tiler();
     const ts = tiles.scale;
@@ -99,30 +99,32 @@ export function utilTiler() {
         id: tile.toString(),
         xyz: tile,
         extent: geoExtent(
-            projection.invert([x, y + ts]),
-            projection.invert([x + ts, y]),
+          projection.invert([x, y + ts]),
+          projection.invert([x + ts, y]),
         ),
       };
-    }).filter(Boolean);
+    })
+      .filter(Boolean);
   };
 
   /**
    * getGeoJSON() returns a FeatureCollection for debugging tiles
    */
   tiler.getGeoJSON = function(projection) {
-    const features = tiler.getTiles(projection).map(function(tile) {
-      return {
-        type: 'Feature',
-        properties: {
-          id: tile.id,
-          name: tile.id,
-        },
-        geometry: {
-          type: 'Polygon',
-          coordinates: [tile.extent.polygon()],
-        },
-      };
-    });
+    const features = tiler.getTiles(projection)
+      .map(function(tile) {
+        return {
+          type: 'Feature',
+          properties: {
+            id: tile.id,
+            name: tile.id,
+          },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [tile.extent.polygon()],
+          },
+        };
+      });
 
     return {
       type: 'FeatureCollection',

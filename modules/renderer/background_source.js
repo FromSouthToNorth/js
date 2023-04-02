@@ -18,10 +18,11 @@ window.matchMedia(`
         (-webkit-min-device-pixel-ratio: 2), /* Safari */
         (min-resolution: 2dppx),             /* standard */
         (min-resolution: 192dpi)             /* fallback */
-    `).addListener(function() {
+    `)
+  .addListener(function() {
 
-  isRetina = window.devicePixelRatio && window.devicePixelRatio >= 2;
-});
+    isRetina = window.devicePixelRatio && window.devicePixelRatio >= 2;
+  });
 
 function localeDateString(s) {
   if (!s) return null;
@@ -49,8 +50,8 @@ export function rendererBackgroundSource(data) {
   let _description = source.description;
   let _best = !!source.best;
   let _template = source.encrypted ?
-                  utilAesDecrypt(source.template) :
-                  source.template;
+    utilAesDecrypt(source.template) :
+    source.template;
 
   source.tileSize = data.tileSize || 256;
   source.zoomExtent = data.zoomExtent || [0, 22];
@@ -81,14 +82,14 @@ export function rendererBackgroundSource(data) {
   source.hasDescription = function() {
     let id_safe = source.id.replace(/\./g, '<TX_DOT>');
     let descriptionText = localizer.tInfo('imagery.' + id_safe + '.description',
-        { default: escape(_description) }).text;
+      { default: escape(_description) }).text;
     return descriptionText !== '';
   };
 
   source.description = function() {
     let id_safe = source.id.replace(/\./g, '<TX_DOT>');
     return t.append('imagery.' + id_safe + '.description',
-        { default: escape(_description) });
+      { default: escape(_description) });
   };
 
   source.best = function() {
@@ -98,7 +99,7 @@ export function rendererBackgroundSource(data) {
   source.area = function() {
     if (!data.polygon) return Number.MAX_VALUE;  // worldwide
     let area = d3_geoArea(
-        { type: 'MultiPolygon', coordinates: [data.polygon] });
+      { type: 'MultiPolygon', coordinates: [data.polygon] });
     return isNaN(area) ? 0 : area;
   };
 
@@ -158,7 +159,7 @@ export function rendererBackgroundSource(data) {
       let projection = source.projection;
       let minXmaxY = tileToProjectedCoords(coord[0], coord[1], coord[2]);
       let maxXminY = tileToProjectedCoords(coord[0] + 1, coord[1] + 1,
-          coord[2]);
+        coord[2]);
 
       result = result.replace(/\{(\w+)\}/g, function(token, key) {
         switch (key) {
@@ -172,15 +173,16 @@ export function rendererBackgroundSource(data) {
           case 'bbox':
             // WMS 1.3 flips x/y for some coordinate systems including EPSG:4326 - #7557
             if (projection === 'EPSG:4326' &&
-                // The CRS parameter implies version 1.3 (prior versions use SRS)
-                /VERSION=1.3|CRS={proj}/.test(
-                    source.template().toUpperCase())) {
+              // The CRS parameter implies version 1.3 (prior versions use SRS)
+              /VERSION=1.3|CRS={proj}/.test(
+                source.template()
+                  .toUpperCase())) {
               return maxXminY.y + ',' + minXmaxY.x + ',' + minXmaxY.y + ',' +
-                  maxXminY.x;
+                maxXminY.x;
             }
             else {
               return minXmaxY.x + ',' + maxXminY.y + ',' + maxXminY.x + ',' +
-                  minXmaxY.y;
+                minXmaxY.y;
             }
           case 'w':
             return minXmaxY.x;
@@ -197,13 +199,13 @@ export function rendererBackgroundSource(data) {
 
     }
     else if (source.type === 'tms') {
-      result = result.replace('{x}', coord[0]).
-          replace('{y}', coord[1])
-          // TMS-flipped y coordinate
-          .replace(/\{[t-]y\}/, Math.pow(2, coord[2]) - coord[1] - 1).
-          replace(/\{z(oom)?\}/, coord[2])
-          // only fetch retina tiles for retina screens
-          .replace(/\{@2x\}|\{r\}/, isRetina ? '@2x' : '');
+      result = result.replace('{x}', coord[0])
+        .replace('{y}', coord[1])
+        // TMS-flipped y coordinate
+        .replace(/\{[t-]y\}/, Math.pow(2, coord[2]) - coord[1] - 1)
+        .replace(/\{z(oom)?\}/, coord[2])
+        // only fetch retina tiles for retina screens
+        .replace(/\{@2x\}|\{r\}/, isRetina ? '@2x' : '');
 
     }
     else if (source.type === 'bing') {
@@ -231,7 +233,7 @@ export function rendererBackgroundSource(data) {
 
   source.validZoom = function(z) {
     return source.zoomExtent[0] <= z &&
-        (source.overzoom || source.zoomExtent[1] > z);
+      (source.overzoom || source.zoomExtent[1] > z);
   };
 
   source.isLocatorOverlay = function() {
@@ -241,7 +243,7 @@ export function rendererBackgroundSource(data) {
   /* hides a source from the list, but leaves it available for use */
   source.isHidden = function() {
     return source.id === 'DigitalGlobe-Premium-vintage' ||
-        source.id === 'DigitalGlobe-Standard-vintage';
+      source.id === 'DigitalGlobe-Standard-vintage';
   };
 
   source.copyrightNotices = function() {
@@ -270,7 +272,7 @@ rendererBackgroundSource.Bing = function(data, dispatch) {
 
   let bing = rendererBackgroundSource(data);
   let key = utilAesDecrypt(
-      '5c875730b09c6b422433e807e1ff060b6536c791dbfffcffc4c6b18a1bdba1f14593d151adb50e19e1be1ab19aef813bf135d0f103475e5c724dec94389e45d0');
+    '5c875730b09c6b422433e807e1ff060b6536c791dbfffcffc4c6b18a1bdba1f14593d151adb50e19e1be1ab19aef813bf135d0f103475e5c724dec94389e45d0');
   /*
   missing tile image strictness param (n=)
   •	n=f -> (Fail) returns a 404
@@ -280,67 +282,73 @@ rendererBackgroundSource.Bing = function(data, dispatch) {
   const strictParam = 'n';
 
   let url = 'https://dev.virtualearth.net/REST/v1/Imagery/Metadata/AerialOSM?include=ImageryProviders&uriScheme=https&key=' +
-      key;
+    key;
   let cache = {};
   let inflight = {};
   let providers = [];
   let taskQueue = new IntervalTasksQueue(250);
   let metadataLastZoom = -1;
 
-  d3_json(url).then(function(json) {
-    let imageryResource = json.resourceSets[0].resources[0];
+  d3_json(url)
+    .then(function(json) {
+      let imageryResource = json.resourceSets[0].resources[0];
 
-    //retrieve and prepare up to date imagery template
-    let template = imageryResource.imageUrl; //https://ecn.{subdomain}.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=10339
-    let subDomains = imageryResource.imageUrlSubdomains; //["t0, t1, t2, t3"]
-    let subDomainNumbers = subDomains.map((subDomain) => {
-      return subDomain.substring(1);
-    }).join(',');
+      //retrieve and prepare up to date imagery template
+      let template = imageryResource.imageUrl; //https://ecn.{subdomain}.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=10339
+      let subDomains = imageryResource.imageUrlSubdomains; //["t0, t1, t2, t3"]
+      let subDomainNumbers = subDomains.map((subDomain) => {
+        return subDomain.substring(1);
+      })
+        .join(',');
 
-    template = template.replace('{subdomain}', `t{switch:${subDomainNumbers}}`).
-        replace('{quadkey}', '{u}');
-    if (!new URLSearchParams(template).has(strictParam)) {
-      template += `&${strictParam}=z`;
-    }
-    bing.template(template);
+      template = template.replace('{subdomain}', `t{switch:${subDomainNumbers}}`)
+        .replace('{quadkey}', '{u}');
+      if (!new URLSearchParams(template).has(strictParam)) {
+        template += `&${strictParam}=z`;
+      }
+      bing.template(template);
 
-    providers = imageryResource.imageryProviders.map(function(provider) {
-      return {
-        attribution: provider.attribution,
-        areas: provider.coverageAreas.map(function(area) {
-          return {
-            zoom: [area.zoomMin, area.zoomMax],
-            extent: geoExtent([area.bbox[1], area.bbox[0]],
+      providers = imageryResource.imageryProviders.map(function(provider) {
+        return {
+          attribution: provider.attribution,
+          areas: provider.coverageAreas.map(function(area) {
+            return {
+              zoom: [area.zoomMin, area.zoomMax],
+              extent: geoExtent([area.bbox[1], area.bbox[0]],
                 [area.bbox[3], area.bbox[2]]),
-          };
-        }),
-      };
+            };
+          }),
+        };
+      });
+      dispatch.call('change');
+    })
+    .catch(function() {
+      /* ignore */
     });
-    dispatch.call('change');
-  }).catch(function() {
-    /* ignore */
-  });
 
   bing.copyrightNotices = function(zoom, extent) {
     zoom = Math.min(zoom, 21);
     return providers.filter(function(provider) {
       return provider.areas.some(function(area) {
         return extent.intersects(area.extent) &&
-            area.zoom[0] <= zoom &&
-            area.zoom[1] >= zoom;
+          area.zoom[0] <= zoom &&
+          area.zoom[1] >= zoom;
       });
-    }).map(function(provider) {
-      return provider.attribution;
-    }).join(', ');
+    })
+      .map(function(provider) {
+        return provider.attribution;
+      })
+      .join(', ');
   };
 
   bing.getMetadata = function(center, tileCoord, callback) {
-    let tileID = tileCoord.slice(0, 3).join('/');
+    let tileID = tileCoord.slice(0, 3)
+      .join('/');
     let zoom = Math.min(tileCoord[2], 21);
     let centerPoint = center[1] + ',' + center[0];  // lat,lng
     let url = 'https://dev.virtualearth.net/REST/v1/Imagery/BasicMetadata/AerialOSM/' +
-        centerPoint +
-        '?zl=' + zoom + '&key=' + key;
+      centerPoint +
+      '?zl=' + zoom + '&key=' + key;
 
     if (inflight[tileID]) return;
 
@@ -359,25 +367,27 @@ rendererBackgroundSource.Bing = function(data, dispatch) {
     }
 
     taskQueue.enqueue(() => {
-      d3_json(url).then(function(result) {
-        delete inflight[tileID];
-        if (!result) {
-          throw new Error('Unknown Error');
-        }
-        let vintage = {
-          start: localeDateString(
+      d3_json(url)
+        .then(function(result) {
+          delete inflight[tileID];
+          if (!result) {
+            throw new Error('Unknown Error');
+          }
+          let vintage = {
+            start: localeDateString(
               result.resourceSets[0].resources[0].vintageStart),
-          end: localeDateString(result.resourceSets[0].resources[0].vintageEnd),
-        };
-        vintage.range = vintageRange(vintage);
+            end: localeDateString(result.resourceSets[0].resources[0].vintageEnd),
+          };
+          vintage.range = vintageRange(vintage);
 
-        let metadata = { vintage: vintage };
-        cache[tileID].metadata = metadata;
-        if (callback) callback(null, metadata);
-      }).catch(function(err) {
-        delete inflight[tileID];
-        if (callback) callback(err.message);
-      });
+          let metadata = { vintage: vintage };
+          cache[tileID].metadata = metadata;
+          if (callback) callback(null, metadata);
+        })
+        .catch(function(err) {
+          delete inflight[tileID];
+          if (callback) callback(err.message);
+        });
     });
   };
 
@@ -413,32 +423,34 @@ rendererBackgroundSource.Esri = function(data) {
     // calculate url z/y/x from the lat/long of the center of the map
     let x = (Math.floor((center[0] + 180) / 360 * Math.pow(2, z)));
     let y = (Math.floor((1 - Math.log(Math.tan(center[1] * Math.PI / 180) + 1 /
-        Math.cos(center[1] * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, z)));
+      Math.cos(center[1] * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, z)));
 
     // fetch an 8x8 grid to leverage cache
     let tilemapUrl = dummyUrl.replace(
-            /tile\/[0-9]+\/[0-9]+\/[0-9]+\?blankTile=false/, 'tilemap') + '/' + z +
-        '/' + y + '/' + x + '/8/8';
+        /tile\/[0-9]+\/[0-9]+\/[0-9]+\?blankTile=false/, 'tilemap') + '/' + z +
+      '/' + y + '/' + x + '/8/8';
 
     // make the request and introspect the response from the tilemap server
-    d3_json(tilemapUrl).then(function(tilemap) {
-      if (!tilemap) {
-        throw new Error('Unknown Error');
-      }
-      let hasTiles = true;
-      for (let i = 0; i < tilemap.data.length; i++) {
-        // 0 means an individual tile in the grid doesn't exist
-        if (!tilemap.data[i]) {
-          hasTiles = false;
-          break;
+    d3_json(tilemapUrl)
+      .then(function(tilemap) {
+        if (!tilemap) {
+          throw new Error('Unknown Error');
         }
-      }
+        let hasTiles = true;
+        for (let i = 0; i < tilemap.data.length; i++) {
+          // 0 means an individual tile in the grid doesn't exist
+          if (!tilemap.data[i]) {
+            hasTiles = false;
+            break;
+          }
+        }
 
-      // if any tiles are missing at level 20 we restrict maxZoom to 19
-      esri.zoomExtent[1] = (hasTiles ? 22 : 19);
-    }).catch(function() {
-      /* ignore */
-    });
+        // if any tiles are missing at level 20 we restrict maxZoom to 19
+        esri.zoomExtent[1] = (hasTiles ? 22 : 19);
+      })
+      .catch(function() {
+        /* ignore */
+      });
   };
 
   esri.getMetadata = function(center, tileCoord, callback) {
@@ -446,7 +458,8 @@ rendererBackgroundSource.Esri = function(data) {
       // rest endpoint is not available for ESRI's "clarity" imagery
       return callback(null, {});
     }
-    let tileID = tileCoord.slice(0, 3).join('/');
+    let tileID = tileCoord.slice(0, 3)
+      .join('/');
     let zoom = Math.min(tileCoord[2], esri.zoomExtent[1]);
     let centerPoint = center[0] + ',' + center[1];  // long, lat (as it should be)
     let unknown = t('info_panels.background.unknown');
@@ -458,7 +471,7 @@ rendererBackgroundSource.Esri = function(data) {
     // build up query using the layer appropriate to the current zoom
     let url = 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/4/query';
     url += '?returnGeometry=false&geometry=' + centerPoint +
-        '&inSR=4326&geometryType=esriGeometryPoint&outFields=*&f=json';
+      '&inSR=4326&geometryType=esriGeometryPoint&outFields=*&f=json';
 
     if (!cache[tileID]) {
       cache[tileID] = {};
@@ -468,54 +481,59 @@ rendererBackgroundSource.Esri = function(data) {
     }
 
     inflight[tileID] = true;
-    d3_json(url).then(function(result) {
-      delete inflight[tileID];
+    d3_json(url)
+      .then(function(result) {
+        delete inflight[tileID];
 
-      result = result.features.map(f => f.attributes).
-          filter(a => a.MinMapLevel <= zoom && a.MaxMapLevel >= zoom)[0];
+        result = result.features.map(f => f.attributes)
+          .filter(a => a.MinMapLevel <= zoom && a.MaxMapLevel >= zoom)[0];
 
-      if (!result) {
-        throw new Error('Unknown Error');
-      }
-      else if (result.features && result.features.length < 1) {
-        throw new Error('No Results');
-      }
-      else if (result.error && result.error.message) {
-        throw new Error(result.error.message);
-      }
+        if (!result) {
+          throw new Error('Unknown Error');
+        }
+        else if (result.features && result.features.length < 1) {
+          throw new Error('No Results');
+        }
+        else if (result.error && result.error.message) {
+          throw new Error(result.error.message);
+        }
 
-      // pass through the discrete capture date from metadata
-      let captureDate = localeDateString(result.SRC_DATE2);
-      vintage = {
-        start: captureDate,
-        end: captureDate,
-        range: captureDate,
-      };
-      metadata = {
-        vintage: vintage,
-        source: clean(result.NICE_NAME),
-        description: clean(result.NICE_DESC),
-        resolution: clean(+Number(result.SRC_RES).toFixed(4)),
-        accuracy: clean(+Number(result.SRC_ACC).toFixed(4)),
-      };
+        // pass through the discrete capture date from metadata
+        let captureDate = localeDateString(result.SRC_DATE2);
+        vintage = {
+          start: captureDate,
+          end: captureDate,
+          range: captureDate,
+        };
+        metadata = {
+          vintage: vintage,
+          source: clean(result.NICE_NAME),
+          description: clean(result.NICE_DESC),
+          resolution: clean(+Number(result.SRC_RES)
+            .toFixed(4)),
+          accuracy: clean(+Number(result.SRC_ACC)
+            .toFixed(4)),
+        };
 
-      // append units - meters
-      if (isFinite(metadata.resolution)) {
-        metadata.resolution += ' m';
-      }
-      if (isFinite(metadata.accuracy)) {
-        metadata.accuracy += ' m';
-      }
+        // append units - meters
+        if (isFinite(metadata.resolution)) {
+          metadata.resolution += ' m';
+        }
+        if (isFinite(metadata.accuracy)) {
+          metadata.accuracy += ' m';
+        }
 
-      cache[tileID].metadata = metadata;
-      if (callback) callback(null, metadata);
-    }).catch(function(err) {
-      delete inflight[tileID];
-      if (callback) callback(err.message);
-    });
+        cache[tileID].metadata = metadata;
+        if (callback) callback(null, metadata);
+      })
+      .catch(function(err) {
+        delete inflight[tileID];
+        if (callback) callback(err.message);
+      });
 
     function clean(val) {
-      return String(val).trim() || unknown;
+      return String(val)
+        .trim() || unknown;
     }
   };
 
@@ -573,8 +591,8 @@ rendererBackgroundSource.Custom = function(template) {
     }
 
     // from wms/wmts api path parameters
-    cleaned = cleaned.replace(/token\/(\w+)/, 'token/{apikey}').
-        replace(/key=(\w+)/, 'key={apikey}');
+    cleaned = cleaned.replace(/token\/(\w+)/, 'token/{apikey}')
+      .replace(/key=(\w+)/, 'key={apikey}');
     return 'Custom (' + cleaned + ' )';
   };
 

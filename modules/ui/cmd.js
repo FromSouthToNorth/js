@@ -15,13 +15,13 @@ export let uiCmd = function(code) {
   }
 
   let result = '',
-      replacements = {
-        '⌘': 'Ctrl',
-        '⇧': 'Shift',
-        '⌥': 'Alt',
-        '⌫': 'Backspace',
-        '⌦': 'Delete',
-      };
+    replacements = {
+      '⌘': 'Ctrl',
+      '⇧': 'Shift',
+      '⌥': 'Alt',
+      '⌫': 'Backspace',
+      '⌦': 'Delete',
+    };
 
   for (let i = 0; i < code.length; i++) {
     if (code[i] in replacements) {

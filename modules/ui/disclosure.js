@@ -22,30 +22,32 @@ export function uiDisclosure(context, key, expandedDefault) {
 
       let preference = prefs('disclosure.' + key + '.expanded');
       _expanded = preference === null ?
-          !!expandedDefault :
-          (preference === 'true');
+        !!expandedDefault :
+        (preference === 'true');
     }
 
-    let hideToggle = selection.selectAll('.hide-toggle-' + key).data([0]);
+    let hideToggle = selection.selectAll('.hide-toggle-' + key)
+      .data([0]);
 
     // enter
-    let hideToggleEnter = hideToggle.enter().
-    append('h3').
-    append('a').
-    attr('role', 'button').
-    attr('href', '#').
-    attr('class', 'hide-toggle hide-toggle-' + key).
-    call(svgIcon('', 'pre-text', 'hide-toggle-icon'));
+    let hideToggleEnter = hideToggle.enter()
+      .append('h3')
+      .append('a')
+      .attr('role', 'button')
+      .attr('href', '#')
+      .attr('class', 'hide-toggle hide-toggle-' + key)
+      .call(svgIcon('', 'pre-text', 'hide-toggle-icon'));
 
-    hideToggleEnter.append('span').attr('class', 'hide-toggle-text');
+    hideToggleEnter.append('span')
+      .attr('class', 'hide-toggle-text');
 
     // update
     hideToggle = hideToggleEnter.merge(hideToggle);
 
-    hideToggle.on('click', toggle).
-    attr('title', t(`icons.${_expanded ? 'collapse' : 'expand'}`)).
-    attr('aria-expanded', _expanded).
-    classed('expanded', _expanded);
+    hideToggle.on('click', toggle)
+      .attr('title', t(`icons.${_expanded ? 'collapse' : 'expand'}`))
+      .attr('aria-expanded', _expanded)
+      .classed('expanded', _expanded);
 
     const label = _label();
     const labelSelection = hideToggle.selectAll('.hide-toggle-text');
@@ -53,26 +55,28 @@ export function uiDisclosure(context, key, expandedDefault) {
       labelSelection.text(_label());
     }
     else {
-      labelSelection.text('').call(label);
+      labelSelection.text('')
+        .call(label);
     }
 
-    hideToggle.selectAll('.hide-toggle-icon').
-    attr('xlink:href', _expanded ?
+    hideToggle.selectAll('.hide-toggle-icon')
+      .attr('xlink:href', _expanded ?
         '#iD-icon-down'
         :
         (localizer.textDirection() === 'rtl') ?
-            '#iD-icon-backward' :
-            '#iD-icon-forward',
-    );
+          '#iD-icon-backward' :
+          '#iD-icon-forward',
+      );
 
-    let wrap = selection.selectAll('.disclosure-wrap').data([0]);
+    let wrap = selection.selectAll('.disclosure-wrap')
+      .data([0]);
 
     // enter/update
-    wrap = wrap.enter().
-    append('div').
-    attr('class', 'disclosure-wrap disclosure-wrap-' + key).
-    merge(wrap).
-    classed('hide', !_expanded);
+    wrap = wrap.enter()
+      .append('div')
+      .attr('class', 'disclosure-wrap disclosure-wrap-' + key)
+      .merge(wrap)
+      .classed('hide', !_expanded);
 
     if (_expanded) {
       wrap.call(_content);
@@ -87,18 +91,18 @@ export function uiDisclosure(context, key, expandedDefault) {
         prefs('disclosure.' + key + '.expanded', _expanded);
       }
 
-      hideToggle.classed('expanded', _expanded).
-      attr('aria-expanded', _expanded).
-      attr('title', t(`icons.${_expanded ? 'collapse' : 'expand'}`));
+      hideToggle.classed('expanded', _expanded)
+        .attr('aria-expanded', _expanded)
+        .attr('title', t(`icons.${_expanded ? 'collapse' : 'expand'}`));
 
-      hideToggle.selectAll('.hide-toggle-icon').
-      attr('xlink:href', _expanded ?
+      hideToggle.selectAll('.hide-toggle-icon')
+        .attr('xlink:href', _expanded ?
           '#iD-icon-down'
           :
           (localizer.textDirection() === 'rtl') ?
-              '#iD-icon-backward' :
-              '#iD-icon-forward',
-      );
+            '#iD-icon-backward' :
+            '#iD-icon-forward',
+        );
 
       wrap.call(uiToggle(_expanded));
 

@@ -7,9 +7,10 @@ export function utilKeybinding(namespace) {
 
   function testBindings(d3_event, isCapturing) {
     let didMatch = false;
-    const bindings = Object.keys(_keybindings).map(function(id) {
-      return _keybindings[id];
-    });
+    const bindings = Object.keys(_keybindings)
+      .map(function(id) {
+        return _keybindings[id];
+      });
     let i, binding;
 
     // Most key shortcuts will accept either lower or uppercase ('h' or 'H'),
@@ -60,7 +61,8 @@ export function utilKeybinding(namespace) {
         else if (Array.isArray(binding.event.key)) {
           if (binding.event.key.map(function(s) {
             return s.toLowerCase();
-          }).indexOf(event.key.toLowerCase()) === -1) {
+          })
+            .indexOf(event.key.toLowerCase()) === -1) {
             isMatch = false;
           }
         }
@@ -87,7 +89,7 @@ export function utilKeybinding(namespace) {
       }
       if (event.metaKey !== binding.event.modifiers.metaKey) return false;
       if (testShift && event.shiftKey !==
-          binding.event.modifiers.shiftKey) return false;
+        binding.event.modifiers.shiftKey) return false;
 
       return true;
     }
@@ -98,7 +100,8 @@ export function utilKeybinding(namespace) {
   }
 
   function bubble(d3_event) {
-    const tagName = d3.select(d3_event.target).node().tagName;
+    const tagName = d3.select(d3_event.target)
+      .node().tagName;
     if (tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA') {
       return;
     }
@@ -169,8 +172,8 @@ export function utilKeybinding(namespace) {
 
       _keybindings[id] = binding;
 
-      const matches = arr[i].toLowerCase().
-          match(/(?:(?:[^+⇧⌃⌥⌘])+|[⇧⌃⌥⌘]|\+\+|^\+$)/g);
+      const matches = arr[i].toLowerCase()
+        .match(/(?:(?:[^+⇧⌃⌥⌘])+|[⇧⌃⌥⌘]|\+\+|^\+$)/g);
       for (let j = 0; j < matches.length; j++) {
         // Normalise matching errors
         if (matches[j] === '++') matches[j] = '+';
@@ -460,5 +463,6 @@ while (++i < 136) {
 // a-z
 i = 64;
 while (++i < 91) {
-  utilKeybinding.keyCodes[String.fromCharCode(i).toLowerCase()] = i;
+  utilKeybinding.keyCodes[String.fromCharCode(i)
+    .toLowerCase()] = i;
 }

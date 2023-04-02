@@ -64,10 +64,12 @@ export function svgMarkerSegments(projection, graph, dt,
     let i = 0;
     let offset = dt;
     let segments = [];
-    let clip = d3_geoIdentity().clipExtent(projection.clipExtent()).stream;
-    let coordinates = graph.childNodes(entity).map(function(n) {
-      return n.loc;
-    });
+    let clip = d3_geoIdentity()
+      .clipExtent(projection.clipExtent()).stream;
+    let coordinates = graph.childNodes(entity)
+      .map(function(n) {
+        return n.loc;
+      });
     let a, b;
 
     if (shouldReverse(entity)) {
@@ -112,7 +114,7 @@ export function svgMarkerSegments(projection, graph, dt,
 
             for (j = 0; j < coord.length; j++) {
               segment += (j === 0 ? 'M' : 'L') + coord[j][0] + ',' +
-                  coord[j][1];
+                coord[j][1];
             }
             segments.push({ id: entity.id, index: i++, d: segment });
 
@@ -120,7 +122,7 @@ export function svgMarkerSegments(projection, graph, dt,
               segment = '';
               for (j = coord.length - 1; j >= 0; j--) {
                 segment += (j === coord.length - 1 ? 'M' : 'L') + coord[j][0] +
-                    ',' + coord[j][1];
+                  ',' + coord[j][1];
               }
               segments.push({ id: entity.id, index: i++, d: segment });
             }
@@ -155,13 +157,15 @@ export function svgPath(projection, graph, isArea) {
     [viewport[0][0] - padding, viewport[0][1] - padding],
     [viewport[1][0] + padding, viewport[1][1] + padding],
   ];
-  let clip = d3_geoIdentity().clipExtent(paddedExtent).stream;
+  let clip = d3_geoIdentity()
+    .clipExtent(paddedExtent).stream;
   let project = projection.stream;
-  let path = d3_geoPath().projection({
-    stream: function(output) {
-      return project(clip(output));
-    },
-  });
+  let path = d3_geoPath()
+    .projection({
+      stream: function(output) {
+        return project(clip(output));
+      },
+    });
 
   let svgpath = function(entity) {
     if (entity.id in cache) {
@@ -207,13 +211,14 @@ export function svgRelationMemberTags(graph) {
   return function(entity) {
     let tags = entity.tags;
     let shouldCopyMultipolygonTags = !entity.hasInterestingTags();
-    graph.parentRelations(entity).forEach(function(relation) {
-      let type = relation.tags.type;
-      if ((type === 'multipolygon' && shouldCopyMultipolygonTags) || type ===
+    graph.parentRelations(entity)
+      .forEach(function(relation) {
+        let type = relation.tags.type;
+        if ((type === 'multipolygon' && shouldCopyMultipolygonTags) || type ===
           'boundary') {
-        tags = Object.assign({}, relation.tags, tags);
-      }
-    });
+          tags = Object.assign({}, relation.tags, tags);
+        }
+      });
     return tags;
   };
 }

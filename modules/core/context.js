@@ -50,7 +50,8 @@ export function coreContext() {
   /* 按键绑定 */
   let _keybinding = utilKeybinding('context');
   context.keybinding = () => _keybinding;
-  d3_select(document).call(_keybinding);
+  d3_select(document)
+    .call(_keybinding);
 
   /* Straight accessors. Avoid using these if you can. */
   // Instantiate the connection here because it doesn't require passing in
@@ -136,8 +137,10 @@ export function coreContext() {
   };
 
   /* Graph */
-  context.hasEntity = (id) => _history.graph().hasEntity(id);
-  context.entity = (id) => _history.graph().entity(id);
+  context.hasEntity = (id) => _history.graph()
+    .hasEntity(id);
+  context.entity = (id) => _history.graph()
+    .entity(id);
 
   /* Modes */
   let _mode;
@@ -154,7 +157,7 @@ export function coreContext() {
   };
 
   context.selectedIDs = () => (_mode && _mode.selectedIDs &&
-      _mode.selectedIDs()) || [];
+    _mode.selectedIDs()) || [];
   context.activeID = () => _mode && _mode.activeID && _mode.activeID();
 
   /* Background */
@@ -182,7 +185,7 @@ export function coreContext() {
     collision: false,   // label collision bounding boxes
     imagery: false,     // imagery bounding polygons
     target: false,      // touch targets
-    downloaded: false   // downloaded data from osm
+    downloaded: false,   // downloaded data from osm
   };
   context.debugFlags = () => _debugFlags;
   context.getDebug = (flag) => flag && _debugFlags[flag];
@@ -202,7 +205,8 @@ export function coreContext() {
     return context;
   };
   context.containerNode = function(val) {
-    if (!arguments.length) return context.container().node();
+    if (!arguments.length) return context.container()
+      .node();
     context.container(d3_select(val));
     return context;
   };
@@ -228,7 +232,7 @@ export function coreContext() {
     if (/^http(s)?:\/\//i.test(val)) return val;
     const filename = _assetPath + val;
     return _assetMap[filename] || filename;
-  }
+  };
 
   context.imagePath = (val) => context.asset(`img/${val}`);
 
@@ -263,19 +267,22 @@ export function coreContext() {
     function initializeDependents() {
       _background.ensureLoaded();
 
-      Object.values(services).forEach(service => {
-        if (service && typeof service.init === 'function') {
-          service.init();
-        }
-      });
+      Object.values(services)
+        .forEach(service => {
+          if (service && typeof service.init === 'function') {
+            service.init();
+          }
+        });
 
       _map.init();
 
       // if the container isn't available, e.g. when testing, don't load the UI
-      if (!context.container().empty()) {
-        _ui.ensureLoaded().then(() => {
-          _background.init();
-        });
+      if (!context.container()
+        .empty()) {
+        _ui.ensureLoaded()
+          .then(() => {
+            _background.init();
+          });
       }
     }
   };

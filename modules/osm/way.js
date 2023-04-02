@@ -34,7 +34,8 @@ Object.assign(osmWay.prototype, {
     let copy = osmEntity.prototype.copy.call(this, resolver, copies);
 
     let nodes = this.nodes.map(function(id) {
-      return resolver.entity(id).copy(resolver, copies).id;
+      return resolver.entity(id)
+        .copy(resolver, copies).id;
     });
 
     copy = copy.update({ nodes: nodes });
@@ -174,7 +175,7 @@ Object.assign(osmWay.prototype, {
     // implied oneway tag..
     for (let key in this.tags) {
       if (key in osmOneWayTags &&
-          (this.tags[key] in osmOneWayTags[key])) {
+        (this.tags[key] in osmOneWayTags[key])) {
         return true;
       }
     }
@@ -189,7 +190,7 @@ Object.assign(osmWay.prototype, {
       const value = this.tags[realKey];
       const key = osmRemoveLifecyclePrefix(realKey);
       if (key in osmRightSideIsInsideTags &&
-          (value in osmRightSideIsInsideTags[key])) {
+        (value in osmRightSideIsInsideTags[key])) {
         if (osmRightSideIsInsideTags[key][value] === true) {
           return key;
         }
@@ -386,7 +387,7 @@ Object.assign(osmWay.prototype, {
 
     // If the way was closed before, append a connector node to keep it closed..
     if (isClosed &&
-        (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
+      (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
       nodes.push(nodes[0]);
     }
 
@@ -431,7 +432,7 @@ Object.assign(osmWay.prototype, {
 
     // If the way was closed before, append a connector node to keep it closed..
     if (isClosed &&
-        (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
+      (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
       nodes.push(nodes[0]);
     }
 
@@ -455,7 +456,7 @@ Object.assign(osmWay.prototype, {
 
     // If the way was closed before, append a connector node to keep it closed..
     if (isClosed &&
-        (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
+      (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
       nodes.push(nodes[0]);
     }
 
@@ -471,11 +472,12 @@ Object.assign(osmWay.prototype, {
 
     nodes = nodes.filter(function(node) {
       return node !== id;
-    }).filter(noRepeatNodes);
+    })
+      .filter(noRepeatNodes);
 
     // If the way was closed before, append a connector node to keep it closed..
     if (isClosed &&
-        (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
+      (nodes.length === 1 || nodes[0] !== nodes[nodes.length - 1])) {
       nodes.push(nodes[0]);
     }
 
@@ -490,9 +492,10 @@ Object.assign(osmWay.prototype, {
         nd: this.nodes.map(function(id) {
           return { keyAttributes: { ref: osmEntity.id.toOSM(id) } };
         }, this),
-        tag: Object.keys(this.tags).map(function(k) {
-          return { keyAttributes: { k: k, v: this.tags[k] } };
-        }, this),
+        tag: Object.keys(this.tags)
+          .map(function(k) {
+            return { keyAttributes: { k: k, v: this.tags[k] } };
+          }, this),
       },
     };
     if (changeset_id) {
@@ -503,9 +506,10 @@ Object.assign(osmWay.prototype, {
 
   asGeoJSON: function(resolver) {
     return resolver.transient(this, 'GeoJSON', function() {
-      let coordinates = resolver.childNodes(this).map(function(n) {
-        return n.loc;
-      });
+      let coordinates = resolver.childNodes(this)
+        .map(function(n) {
+          return n.loc;
+        });
 
       if (this.isArea() && this.isClosed()) {
         return {

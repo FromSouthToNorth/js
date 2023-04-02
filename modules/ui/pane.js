@@ -57,29 +57,30 @@ export function uiPane(id, context) {
   };
 
   function hidePane() {
-    context.ui().togglePanes();
+    context.ui()
+      .togglePanes();
   }
 
   pane.togglePane = function(d3_event) {
     if (d3_event) d3_event.preventDefault();
     _paneTooltip.hide();
-    context.ui().
-    togglePanes(!_paneSelection.classed('shown') ? _paneSelection : undefined);
+    context.ui()
+      .togglePanes(!_paneSelection.classed('shown') ? _paneSelection : undefined);
   };
 
   pane.renderToggleButton = function(selection) {
 
     if (!_paneTooltip) {
-      _paneTooltip = uiTooltip().
-      placement((localizer.textDirection() === 'rtl') ? 'right' : 'left').
-      title(() => _description).
-      keys([_key]);
+      _paneTooltip = uiTooltip()
+        .placement((localizer.textDirection() === 'rtl') ? 'right' : 'left')
+        .title(() => _description)
+        .keys([_key]);
     }
 
-    selection.append('button').
-    on('click', pane.togglePane).
-    call(svgIcon('#' + _iconName, 'light')).
-    call(_paneTooltip);
+    selection.append('button')
+      .on('click', pane.togglePane)
+      .call(svgIcon('#' + _iconName, 'light'))
+      .call(_paneTooltip);
   };
 
   pane.renderContent = function(selection) {
@@ -94,25 +95,29 @@ export function uiPane(id, context) {
 
   pane.renderPane = function(selection) {
 
-    _paneSelection = selection.append('div').
-    attr('class', 'fillL map-pane hide ' + id + '-pane').
-    attr('pane', id);
+    _paneSelection = selection.append('div')
+      .attr('class', 'fillL map-pane hide ' + id + '-pane')
+      .attr('pane', id);
 
-    let heading = _paneSelection.append('div').attr('class', 'pane-heading');
+    let heading = _paneSelection.append('div')
+      .attr('class', 'pane-heading');
 
-    heading.append('h2').text('').call(_label);
+    heading.append('h2')
+      .text('')
+      .call(_label);
 
-    heading.append('button').
-    attr('title', t('icons.close')).
-    on('click', hidePane).
-    call(svgIcon('#iD-icon-close'));
+    heading.append('button')
+      .attr('title', t('icons.close'))
+      .on('click', hidePane)
+      .call(svgIcon('#iD-icon-close'));
 
-    _paneSelection.append('div').
-    attr('class', 'pane-content').
-    call(pane.renderContent);
+    _paneSelection.append('div')
+      .attr('class', 'pane-content')
+      .call(pane.renderContent);
 
     if (_key) {
-      context.keybinding().on(_key, pane.togglePane);
+      context.keybinding()
+        .on(_key, pane.togglePane);
     }
   };
 

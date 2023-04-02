@@ -16,17 +16,31 @@ export function svgLayers(projection, context) {
   ];
 
   function drawLayers(selection) {
-    svg = selection.selectAll('.surface').data([0]);
-    svg = svg.enter().append('svg').attr('class', 'surface').merge(svg);
-    const defs = svg.selectAll('.surface-defs').data([0]);
-    defs.enter().append('defs').attr('class', 'surface-defs');
-    const groups = svg.selectAll('.data-layer').data(_layers);
-    groups.exit().remove();
-    groups.enter().append('g').attr('class', function(d) {
-      return 'data-layer ' + d.id;
-    }).merge(groups).each(function(d) {
-      d3_select(this).call(d.layer);
-    });
+    svg = selection.selectAll('.surface')
+      .data([0]);
+    svg = svg.enter()
+      .append('svg')
+      .attr('class', 'surface')
+      .merge(svg);
+    const defs = svg.selectAll('.surface-defs')
+      .data([0]);
+    defs.enter()
+      .append('defs')
+      .attr('class', 'surface-defs');
+    const groups = svg.selectAll('.data-layer')
+      .data(_layers);
+    groups.exit()
+      .remove();
+    groups.enter()
+      .append('g')
+      .attr('class', function(d) {
+        return 'data-layer ' + d.id;
+      })
+      .merge(groups)
+      .each(function(d) {
+        d3_select(this)
+          .call(d.layer);
+      });
   }
 
   drawLayers.all = function() {

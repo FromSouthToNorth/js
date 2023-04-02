@@ -44,7 +44,8 @@ export function geoRawMercator() {
   };
 
   projection.transform = function(obj) {
-    if (!arguments.length) return d3_zoomIdentity.translate(x, y).scale(k);
+    if (!arguments.length) return d3_zoomIdentity.translate(x, y)
+      .scale(k);
     x = +obj.x;
     y = +obj.y;
     k = +obj.k;
@@ -55,7 +56,7 @@ export function geoRawMercator() {
     point: function(x, y) {
       const vec = projection([x, y]);
       this.stream.point(vec[0], vec[1]);
-    }
+    },
   }).stream;
 
   return projection;

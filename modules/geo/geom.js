@@ -13,7 +13,7 @@ export function geoAngle(a, b, projection) {
 
 export function geoEdgeEqual(a, b) {
   return (a[0] === b[0] && a[1] === b[1]) ||
-      (a[0] === b[1] && a[1] === b[0]);
+    (a[0] === b[1] && a[1] === b[0]);
 }
 
 // Return whether point is contained in polygon.
@@ -37,7 +37,7 @@ export function geoPointInPolygon(point, polygon) {
     const yj = polygon[j][1];
 
     const intersect = ((yi > y) !== (yj > y)) &&
-        (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+      (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
     if (intersect) inside = !inside;
   }
 
@@ -58,7 +58,7 @@ export function geoPolygonIntersectsPolygon(outer, inner, checkSegments) {
   }
 
   return testPoints(outer, inner) ||
-      (!!checkSegments && geoPathHasIntersections(outer, inner));
+    (!!checkSegments && geoPathHasIntersections(outer, inner));
 }
 
 // Choose the edge with the minimal distance from `point` to its orthogonal

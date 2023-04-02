@@ -7,12 +7,12 @@ import {
 
 export function uiPaneBackground(context) {
 
-  return uiPane('background', context).
-  key(t('background.key')).
-  label(t.append('background.title')).
-  description(t.append('background.description')).
-  iconName('iD-icon-layers').
-  sections([
-    uiSectionBackgroundList(context),
-  ]);
+  return uiPane('background', context)
+    .key(t('background.key'))
+    .label(t.append('background.title'))
+    .description(t.append('background.description'))
+    .iconName('iD-icon-layers')
+    .sections([
+      uiSectionBackgroundList(context),
+    ]);
 }

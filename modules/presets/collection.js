@@ -24,20 +24,20 @@ export function presetCollection(collection) {
 
   _this.matchGeometry = (geometry) => {
     return presetCollection(
-        _this.collection.filter(d => d.matchGeometry(geometry)),
+      _this.collection.filter(d => d.matchGeometry(geometry)),
     );
   };
 
   _this.matchAllGeometry = (geometries) => {
     return presetCollection(
-        _this.collection.filter(d => d && d.matchAllGeometry(geometries)),
+      _this.collection.filter(d => d && d.matchAllGeometry(geometries)),
     );
   };
 
   _this.matchAnyGeometry = (geometries) => {
     return presetCollection(
-        _this.collection.filter(
-            d => geometries.some(geom => d.matchGeometry(geom))),
+      _this.collection.filter(
+        d => geometries.some(geom => d.matchGeometry(geom))),
     );
   };
 
@@ -51,7 +51,8 @@ export function presetCollection(collection) {
     if (!value) return _this;
 
     // don't remove diacritical characters since we're assuming the user is being intentional
-    value = value.toLowerCase().trim();
+    value = value.toLowerCase()
+      .trim();
 
     // match at name beginning or just after a space (e.g. "office" -> match "Law Office")
     function leading(a) {
@@ -76,8 +77,8 @@ export function presetCollection(collection) {
               return strings.find(s => s === value);
             }
             else {
-              return strings.filter(s => s.includes(value)).
-                  sort((a, b) => a.length - b.length)[0];
+              return strings.filter(s => s.includes(value))
+                .sort((a, b) => a.length - b.length)[0];
             }
           };
           aCompare = findMatchingAlias([aCompare].concat(a[aliasesProp]()));
@@ -108,60 +109,63 @@ export function presetCollection(collection) {
     }
 
     const searchable = pool.filter(
-        a => a.searchable !== false && a.suggestion !== true);
+      a => a.searchable !== false && a.suggestion !== true);
     const suggestions = pool.filter(a => a.suggestion === true);
 
     // matches value to preset.name
     const leadingNames = searchable.filter(
-        a => leading(a.searchName()) || a.searchAliases().some(leading)).
-        sort(sortPresets('searchName', 'searchAliases'));
+      a => leading(a.searchName()) || a.searchAliases()
+        .some(leading))
+      .sort(sortPresets('searchName', 'searchAliases'));
 
     // matches value to preset suggestion name
     const leadingSuggestions = suggestions.filter(
-        a => leadingStrict(a.searchName())).sort(sortPresets('searchName'));
+      a => leadingStrict(a.searchName()))
+      .sort(sortPresets('searchName'));
 
     const leadingNamesStripped = searchable.filter(
-        a => leading(a.searchNameStripped()) ||
-            a.searchAliasesStripped().some(leading)).
-        sort(sortPresets('searchNameStripped', 'searchAliasesStripped'));
+      a => leading(a.searchNameStripped()) ||
+        a.searchAliasesStripped()
+          .some(leading))
+      .sort(sortPresets('searchNameStripped', 'searchAliasesStripped'));
 
     const leadingSuggestionsStripped = suggestions.filter(
-        a => leadingStrict(a.searchNameStripped())).
-        sort(sortPresets('searchNameStripped'));
+      a => leadingStrict(a.searchNameStripped()))
+      .sort(sortPresets('searchNameStripped'));
 
     // matches value to preset.terms values
     const leadingTerms = searchable.filter(
-        a => (a.terms() || []).some(leading));
+      a => (a.terms() || []).some(leading));
 
     const leadingSuggestionTerms = suggestions.filter(
-        a => (a.terms() || []).some(leading));
+      a => (a.terms() || []).some(leading));
 
     // matches value to preset.tags values
-    const leadingTagValues = searchable.filter(a => Object.values(a.tags || {}).
-        filter(val => val !== '*').
-        some(leading));
+    const leadingTagValues = searchable.filter(a => Object.values(a.tags || {})
+      .filter(val => val !== '*')
+      .some(leading));
 
     // finds close matches to value in preset.name
     const similarName = searchable.map(
-        a => ({ preset: a, dist: utilEditDistance(value, a.searchName()) })).
-        filter(a => a.dist +
-            Math.min(value.length - a.preset.searchName().length, 0) < 3).
-        sort((a, b) => a.dist - b.dist).
-        map(a => a.preset);
+      a => ({ preset: a, dist: utilEditDistance(value, a.searchName()) }))
+      .filter(a => a.dist +
+        Math.min(value.length - a.preset.searchName().length, 0) < 3)
+      .sort((a, b) => a.dist - b.dist)
+      .map(a => a.preset);
 
     // finds close matches to value to preset suggestion name
     const similarSuggestions = suggestions.map(
-        a => ({ preset: a, dist: utilEditDistance(value, a.searchName()) })).
-        filter(a => a.dist +
-            Math.min(value.length - a.preset.searchName().length, 0) < 1).
-        sort((a, b) => a.dist - b.dist).
-        map(a => a.preset);
+      a => ({ preset: a, dist: utilEditDistance(value, a.searchName()) }))
+      .filter(a => a.dist +
+        Math.min(value.length - a.preset.searchName().length, 0) < 1)
+      .sort((a, b) => a.dist - b.dist)
+      .map(a => a.preset);
 
     // finds close matches to value in preset.terms
     const similarTerms = searchable.filter(a => {
       return (a.terms() || []).some(b => {
         return utilEditDistance(value, b) +
-            Math.min(value.length - b.length, 0) < 3;
+          Math.min(value.length - b.length, 0) < 3;
       });
     });
 
@@ -169,24 +173,26 @@ export function presetCollection(collection) {
     let leadingTagKeyValues = [];
     if (value.includes('=')) {
       leadingTagKeyValues = searchable.filter(a => a.tags &&
-          Object.keys(a.tags).some(key => key + '=' + a.tags[key] === value)).
-          concat(searchable.filter(a => a.tags &&
-              Object.keys(a.tags).
-                  some(key => leading(key + '=' + a.tags[key]))));
+        Object.keys(a.tags)
+          .some(key => key + '=' + a.tags[key] === value))
+        .concat(searchable.filter(a => a.tags &&
+          Object.keys(a.tags)
+            .some(key => leading(key + '=' + a.tags[key]))));
     }
 
     let results = leadingNames.concat(
-        leadingSuggestions,
-        leadingNamesStripped,
-        leadingSuggestionsStripped,
-        leadingTerms,
-        leadingSuggestionTerms,
-        leadingTagValues,
-        similarName,
-        similarSuggestions,
-        similarTerms,
-        leadingTagKeyValues,
-    ).slice(0, MAXRESULTS - 1);
+      leadingSuggestions,
+      leadingNamesStripped,
+      leadingSuggestionsStripped,
+      leadingTerms,
+      leadingSuggestionTerms,
+      leadingTagValues,
+      similarName,
+      similarSuggestions,
+      similarTerms,
+      leadingTagKeyValues,
+    )
+      .slice(0, MAXRESULTS - 1);
 
     if (geometry) {
       if (typeof geometry === 'string') {

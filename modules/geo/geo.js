@@ -9,8 +9,8 @@ export function geoLatToMeters(dLat) {
 
 export function geoLonToMeters(dLon, atLat) {
   return Math.abs(atLat) >= 90 ? 0 :
-         dLon * (TAU * EQUATORIAL_RADIUS / 360) *
-             Math.abs(Math.cos(atLat * (Math.PI / 180)));
+    dLon * (TAU * EQUATORIAL_RADIUS / 360) *
+    Math.abs(Math.cos(atLat * (Math.PI / 180)));
 }
 
 export function geoScaleToZoom(k, tileSize) {
@@ -25,8 +25,8 @@ export function geoMetersToLat(m) {
 
 export function geoMetersToLon(m, atLat) {
   return Math.abs(atLat) >= 90 ? 0 :
-         m / (TAU * EQUATORIAL_RADIUS / 360) /
-             Math.abs(Math.abs(atLat * (Math.PI / 180)));
+    m / (TAU * EQUATORIAL_RADIUS / 360) /
+    Math.abs(Math.abs(atLat * (Math.PI / 180)));
 }
 
 export function geoMetersToOffset(meters, tileSize) {
@@ -52,7 +52,7 @@ export function geoZoomToScale(z, tileSize) {
 
 // Equirectangular approximation of spherical distances on Earth
 export function geoSphericalDistance(a, b) {
-  var x = geoLonToMeters(a[0] - b[0], (a[1] + b[1]) / 2);
-  var y = geoLatToMeters(a[1] - b[1]);
+  let x = geoLonToMeters(a[0] - b[0], (a[1] + b[1]) / 2);
+  let y = geoLatToMeters(a[1] - b[1]);
   return Math.sqrt((x * x) + (y * y));
 }

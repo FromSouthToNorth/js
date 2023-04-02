@@ -20,7 +20,7 @@ import RBush from 'rbush';
 
 const tiler = utilTiler();
 const dispatch = d3_dispatch('apiStatusChange', 'authLoading', 'authDone',
-    'change', 'loading', 'loaded', 'loadedNotes');
+  'change', 'loading', 'loaded', 'loadedNotes');
 
 let urlRoot = osmApiConnections[0].url;
 const redirectPath = window.location.origin + window.location.pathname;
@@ -89,15 +89,16 @@ function hasInflightRequests(cache) {
 }
 
 function abortUnwantedRequests(cache, visibleTiles) {
-  Object.keys(cache.inflight).forEach(function(k) {
-    if (cache.toLoad[k]) return;
-    if (visibleTiles.find(function(tile) {
-      return k === tile.id;
-    })) return;
+  Object.keys(cache.inflight)
+    .forEach(function(k) {
+      if (cache.toLoad[k]) return;
+      if (visibleTiles.find(function(tile) {
+        return k === tile.id;
+      })) return;
 
-    abortRequest(cache.inflight[k]);
-    delete cache.inflight[k];
-  });
+      abortRequest(cache.inflight[k]);
+      delete cache.inflight[k];
+    });
 }
 
 function getLoc(attrs) {
@@ -260,10 +261,10 @@ let jsonparsers = {
       account_created: obj.account_created,
       image_url: obj.img && obj.img.href,
       changesets_count: obj.changesets && obj.changesets.count &&
-          obj.changesets.count.toString() || '0',
+        obj.changesets.count.toString() || '0',
       active_blocks: obj.blocks && obj.blocks.received &&
-          obj.blocks.received.active && obj.blocks.received.active.toString() ||
-          '0',
+        obj.blocks.received.active && obj.blocks.received.active.toString() ||
+        '0',
     };
   },
 };
@@ -319,7 +320,7 @@ function parseUserJSON(payload, callback, options) {
   if (typeof json !== 'object') json = JSON.parse(payload);
 
   if (!json.users && !json.user) return callback(
-      { message: 'No JSON', status: -1 });
+    { message: 'No JSON', status: -1 });
 
   let objs = json.users || [json];
 
@@ -409,7 +410,8 @@ let parsers = {
       if (coincident) {
         props.loc = geoVecAdd(props.loc, [epsilon, epsilon]);
       }
-      let bbox = geoExtent(props.loc).bbox();
+      let bbox = geoExtent(props.loc)
+        .bbox();
       coincident = _noteCache.rtree.search(bbox).length;
     } while (coincident);
 
@@ -543,7 +545,7 @@ function wrapcb(thisArg, callback, cid) {
     }
     else if (thisArg.getConnectionId() !== cid) {
       return callback.call(thisArg,
-          { message: 'Connection Switched', status: -1 });
+        { message: 'Connection Switched', status: -1 });
 
     }
     else {
@@ -559,19 +561,23 @@ export default {
   },
 
   reset: function() {
-    Array.from(_deferred).forEach(function(handle) {
-      window.cancelIdleCallback(handle);
-      _deferred.delete(handle);
-    });
+    Array.from(_deferred)
+      .forEach(function(handle) {
+        window.cancelIdleCallback(handle);
+        _deferred.delete(handle);
+      });
 
     _connectionID++;
     _userChangesets = undefined;
     _userDetails = undefined;
     _rateLimitError = undefined;
 
-    Object.values(_tileCache.inflight).forEach(abortRequest);
-    Object.values(_noteCache.inflight).forEach(abortRequest);
-    Object.values(_noteCache.inflightPost).forEach(abortRequest);
+    Object.values(_tileCache.inflight)
+      .forEach(abortRequest);
+    Object.values(_noteCache.inflight)
+      .forEach(abortRequest);
+    Object.values(_noteCache.inflightPost)
+      .forEach(abortRequest);
     if (_changeset.inflight) abortRequest(_changeset.inflight);
 
     _tileCache = {
@@ -612,9 +618,9 @@ export default {
   changesetsURL: function(center, zoom) {
     let precision = Math.max(0, Math.ceil(Math.log(zoom) / Math.LN2));
     return urlRoot + '/history#map=' +
-        Math.floor(zoom) + '/' +
-        center[1].toFixed(precision) + '/' +
-        center[0].toFixed(precision);
+      Math.floor(zoom) + '/' +
+      center[1].toFixed(precision) + '/' +
+      center[0].toFixed(precision);
   },
 
   entityURL: function(entity) {
@@ -635,7 +641,7 @@ export default {
 
   noteReportURL: function(note) {
     return urlRoot + '/reports/new?reportable_type=Note&reportable_id=' +
-        note.id;
+      note.id;
   },
 
   // Generic method to load data from the OSM API
@@ -656,7 +662,7 @@ export default {
       // 400 Bad Request, 401 Unauthorized, 403 Forbidden
       // Logout and retry the request..
       if (isAuthenticated && err && err.status &&
-          (err.status === 400 || err.status === 401 || err.status === 403)) {
+        (err.status === 400 || err.status === 401 || err.status === 403)) {
         that.logout();
         that.loadFromAPI(path, callback, options);
 
@@ -666,14 +672,14 @@ export default {
         // 509 Bandwidth Limit Exceeded, 429 Too Many Requests
         // Set the rateLimitError flag and trigger a warning..
         if (!isAuthenticated && !_rateLimitError && err && err.status &&
-            (err.status === 509 || err.status === 429)) {
+          (err.status === 509 || err.status === 429)) {
           _rateLimitError = err;
           dispatch.call('change');
           that.reloadApiStatus();
 
         }
         else if ((err && _cachedApiStatus === 'online') ||
-            (!err && _cachedApiStatus !== 'online')) {
+          (!err && _cachedApiStatus !== 'online')) {
           // If the response's error state doesn't match the status,
           // it's likely we lost or gained the connection so reload the status
           that.reloadApiStatus();
@@ -709,21 +715,23 @@ export default {
         fn = d3_xml;
       }
 
-      fn(url, { signal: controller.signal }).then(function(data) {
-        done(null, data);
-      }).catch(function(err) {
-        if (err.name === 'AbortError') return;
-        // d3-fetch includes status in the error message,
-        // but we can't access the response itself
-        // https://github.com/d3/d3-fetch/issues/27
-        let match = err.message.match(/^\d{3}/);
-        if (match) {
-          done({ status: +match[0], statusText: err.message });
-        }
-        else {
-          done(err.message);
-        }
-      });
+      fn(url, { signal: controller.signal })
+        .then(function(data) {
+          done(null, data);
+        })
+        .catch(function(err) {
+          if (err.name === 'AbortError') return;
+          // d3-fetch includes status in the error message,
+          // but we can't access the response itself
+          // https://github.com/d3/d3-fetch/issues/27
+          let match = err.message.match(/^\d{3}/);
+          if (match) {
+            done({ status: +match[0], statusText: err.message });
+          }
+          else {
+            done(err.message);
+          }
+        });
       return controller;
     }
   },
@@ -738,12 +746,12 @@ export default {
     let options = { skipSeen: false };
 
     this.loadFromAPI(
-        '/api/0.6/' + type + '/' + osmID + (type !== 'node' ? '/full' : '') +
-        '.json',
-        function(err, entities) {
-          if (callback) callback(err, { data: entities });
-        },
-        options,
+      '/api/0.6/' + type + '/' + osmID + (type !== 'node' ? '/full' : '') +
+      '.json',
+      function(err, entities) {
+        if (callback) callback(err, { data: entities });
+      },
+      options,
     );
   },
 
@@ -755,11 +763,11 @@ export default {
     let options = { skipSeen: false };
 
     this.loadFromAPI(
-        '/api/0.6/' + type + '/' + osmID + '/' + version + '.json',
-        function(err, entities) {
-          if (callback) callback(err, { data: entities });
-        },
-        options,
+      '/api/0.6/' + type + '/' + osmID + '/' + version + '.json',
+      function(err, entities) {
+        if (callback) callback(err, { data: entities });
+      },
+      options,
     );
   },
 
@@ -771,11 +779,11 @@ export default {
     let options = { skipSeen: false };
 
     this.loadFromAPI(
-        '/api/0.6/' + type + '/' + osmID + '/relations.json',
-        function(err, entities) {
-          if (callback) callback(err, { data: entities });
-        },
-        options,
+      '/api/0.6/' + type + '/' + osmID + '/relations.json',
+      function(err, entities) {
+        if (callback) callback(err, { data: entities });
+      },
+      options,
     );
   },
 
@@ -787,23 +795,25 @@ export default {
     let that = this;
     let groups = utilArrayGroupBy(utilArrayUniq(ids), osmEntity.id.type);
 
-    Object.keys(groups).forEach(function(k) {
-      let type = k + 's';   // nodes, ways, relations
-      let osmIDs = groups[k].map(function(id) {
-        return osmEntity.id.toOSM(id);
-      });
-      let options = { skipSeen: false };
+    Object.keys(groups)
+      .forEach(function(k) {
+        let type = k + 's';   // nodes, ways, relations
+        let osmIDs = groups[k].map(function(id) {
+          return osmEntity.id.toOSM(id);
+        });
+        let options = { skipSeen: false };
 
-      utilArrayChunk(osmIDs, 150).forEach(function(arr) {
-        that.loadFromAPI(
-            '/api/0.6/' + type + '.json?' + type + '=' + arr.join(),
-            function(err, entities) {
-              if (callback) callback(err, { data: entities });
-            },
-            options,
-        );
+        utilArrayChunk(osmIDs, 150)
+          .forEach(function(arr) {
+            that.loadFromAPI(
+              '/api/0.6/' + type + '.json?' + type + '=' + arr.join(),
+              function(err, entities) {
+                if (callback) callback(err, { data: entities });
+              },
+              options,
+            );
+          });
       });
-    });
   },
 
   // Create, upload, and close a changeset
@@ -815,7 +825,7 @@ export default {
 
     if (_changeset.inflight) {
       return callback({ message: 'Changeset already inflight', status: -2 },
-          changeset);
+        changeset);
 
     }
     else if (_changeset.open) {   // reuse existing open changeset..
@@ -830,8 +840,8 @@ export default {
         content: JXON.stringify(changeset.asJXON()),
       };
       _changeset.inflight = oauth.xhr(
-          options,
-          wrapcb(this, createdChangeset, cid),
+        options,
+        wrapcb(this, createdChangeset, cid),
       );
     }
 
@@ -852,8 +862,8 @@ export default {
         content: JXON.stringify(changeset.osmChangeJXON(changes)),
       };
       _changeset.inflight = oauth.xhr(
-          options,
-          wrapcb(this, uploadedChangeset, cid),
+        options,
+        wrapcb(this, uploadedChangeset, cid),
       );
     }
 
@@ -890,27 +900,29 @@ export default {
     let toLoad = [];
     let cached = [];
 
-    utilArrayUniq(uids).forEach(function(uid) {
-      if (_userCache.user[uid]) {
-        delete _userCache.toLoad[uid];
-        cached.push(_userCache.user[uid]);
-      }
-      else {
-        toLoad.push(uid);
-      }
-    });
+    utilArrayUniq(uids)
+      .forEach(function(uid) {
+        if (_userCache.user[uid]) {
+          delete _userCache.toLoad[uid];
+          cached.push(_userCache.user[uid]);
+        }
+        else {
+          toLoad.push(uid);
+        }
+      });
 
     if (cached.length || !this.authenticated()) {
       callback(undefined, cached);
       if (!this.authenticated()) return;  // require auth
     }
 
-    utilArrayChunk(toLoad, 150).forEach(function(arr) {
-      oauth.xhr(
+    utilArrayChunk(toLoad, 150)
+      .forEach(function(arr) {
+        oauth.xhr(
           { method: 'GET', path: '/api/0.6/users.json?users=' + arr.join() },
           wrapcb(this, done, _connectionID),
-      );
-    }.bind(this));
+        );
+      }.bind(this));
 
     function done(err, payload) {
       if (err) return callback(err);
@@ -932,8 +944,8 @@ export default {
     }
 
     oauth.xhr(
-        { method: 'GET', path: '/api/0.6/user/' + uid + '.json' },
-        wrapcb(this, done, _connectionID),
+      { method: 'GET', path: '/api/0.6/user/' + uid + '.json' },
+      wrapcb(this, done, _connectionID),
     );
 
     function done(err, payload) {
@@ -955,8 +967,8 @@ export default {
     }
 
     oauth.xhr(
-        { method: 'GET', path: '/api/0.6/user/details.json' },
-        wrapcb(this, done, _connectionID),
+      { method: 'GET', path: '/api/0.6/user/details.json' },
+      wrapcb(this, done, _connectionID),
     );
 
     function done(err, payload) {
@@ -979,7 +991,7 @@ export default {
     }
 
     this.userDetails(
-        wrapcb(this, gotDetails, _connectionID),
+      wrapcb(this, gotDetails, _connectionID),
     );
 
     function gotDetails(err, user) {
@@ -988,8 +1000,8 @@ export default {
       }
 
       oauth.xhr(
-          { method: 'GET', path: '/api/0.6/changesets?user=' + user.id },
-          wrapcb(this, done, _connectionID),
+        { method: 'GET', path: '/api/0.6/changesets?user=' + user.id },
+        wrapcb(this, done, _connectionID),
       );
     }
 
@@ -999,14 +1011,15 @@ export default {
       }
 
       _userChangesets = Array.prototype.map.call(
-          xml.getElementsByTagName('changeset'),
-          function(changeset) {
-            return { tags: getTags(changeset) };
-          },
-      ).filter(function(changeset) {
-        let comment = changeset.tags.comment;
-        return comment && comment !== '';
-      });
+        xml.getElementsByTagName('changeset'),
+        function(changeset) {
+          return { tags: getTags(changeset) };
+        },
+      )
+        .filter(function(changeset) {
+          let comment = changeset.tags.comment;
+          return comment && comment !== '';
+        });
 
       return callback(undefined, _userChangesets);
     }
@@ -1017,11 +1030,13 @@ export default {
   status: function(callback) {
     let url = urlRoot + '/api/capabilities';
     let errback = wrapcb(this, done, _connectionID);
-    d3_xml(url).then(function(data) {
-      errback(null, data);
-    }).catch(function(err) {
-      errback(err.message);
-    });
+    d3_xml(url)
+      .then(function(data) {
+        errback(null, data);
+      })
+      .catch(function(err) {
+        errback(err.message);
+      });
 
     function done(err, xml) {
       if (err) {
@@ -1054,7 +1069,7 @@ export default {
       else {
         let waynodes = xml.getElementsByTagName('waynodes');
         let maxWayNodes = waynodes.length &&
-            parseInt(waynodes[0].getAttribute('maximum'), 10);
+          parseInt(waynodes[0].getAttribute('maximum'), 10);
         if (maxWayNodes && isFinite(maxWayNodes)) _maxWayNodes = maxWayNodes;
 
         let apiStatus = xml.getElementsByTagName('status');
@@ -1093,7 +1108,8 @@ export default {
     if (_off) return;
 
     // determine the needed tiles to cover the view
-    let tiles = tiler.zoomExtent([_tileZoom, _tileZoom]).getTiles(projection);
+    let tiles = tiler.zoomExtent([_tileZoom, _tileZoom])
+      .getTiles(projection);
 
     // abort inflight requests that are no longer needed
     let hadRequests = hasInflightRequests(_tileCache);
@@ -1122,9 +1138,9 @@ export default {
     let options = { skipSeen: true };
 
     _tileCache.inflight[tile.id] = this.loadFromAPI(
-        path + tile.extent.toParam(),
-        tileCallback,
-        options,
+      path + tile.extent.toParam(),
+      tileCallback,
+      options,
     );
 
     function tileCallback(err, parsed) {
@@ -1158,14 +1174,16 @@ export default {
     if (Object.keys(_tileCache.toLoad).length > 50) return;
 
     let k = geoZoomToScale(_tileZoom + 1);
-    let offset = geoRawMercator().scale(k)(loc);
-    let projection = geoRawMercator().
-        transform({ k: k, x: -offset[0], y: -offset[1] });
-    let tiles = tiler.zoomExtent([_tileZoom, _tileZoom]).getTiles(projection);
+    let offset = geoRawMercator()
+      .scale(k)(loc);
+    let projection = geoRawMercator()
+      .transform({ k: k, x: -offset[0], y: -offset[1] });
+    let tiles = tiler.zoomExtent([_tileZoom, _tileZoom])
+      .getTiles(projection);
 
     tiles.forEach(function(tile) {
       if (_tileCache.toLoad[tile.id] || _tileCache.loaded[tile.id] ||
-          _tileCache.inflight[tile.id]) return;
+        _tileCache.inflight[tile.id]) return;
 
       _tileCache.toLoad[tile.id] = true;
       this.loadTile(tile, callback);
@@ -1180,7 +1198,7 @@ export default {
 
     let that = this;
     let path = '/api/0.6/notes?limit=' + noteOptions.limit + '&closed=' +
-        noteOptions.closed + '&bbox=';
+      noteOptions.closed + '&bbox=';
     let throttleLoadUsers = _throttle(function() {
       let uids = Object.keys(_userCache.toLoad);
       if (!uids.length) return;
@@ -1189,7 +1207,8 @@ export default {
     }, 750);
 
     // determine the needed tiles to cover the view
-    let tiles = tiler.zoomExtent([_noteZoom, _noteZoom]).getTiles(projection);
+    let tiles = tiler.zoomExtent([_noteZoom, _noteZoom])
+      .getTiles(projection);
 
     // abort inflight requests that are no longer needed
     abortUnwantedRequests(_noteCache, tiles);
@@ -1200,16 +1219,16 @@ export default {
 
       let options = { skipSeen: false };
       _noteCache.inflight[tile.id] = that.loadFromAPI(
-          path + tile.extent.toParam(),
-          function(err) {
-            delete _noteCache.inflight[tile.id];
-            if (!err) {
-              _noteCache.loaded[tile.id] = true;
-            }
-            throttleLoadUsers();
-            dispatch.call('loadedNotes');
-          },
-          options,
+        path + tile.extent.toParam(),
+        function(err) {
+          delete _noteCache.inflight[tile.id];
+          if (!err) {
+            _noteCache.loaded[tile.id] = true;
+          }
+          throttleLoadUsers();
+          dispatch.call('loadedNotes');
+        },
+        options,
       );
     });
   },
@@ -1222,7 +1241,7 @@ export default {
     }
     if (_noteCache.inflightPost[note.id]) {
       return callback({ message: 'Note update already inflight', status: -2 },
-          note);
+        note);
     }
 
     if (!note.loc[0] || !note.loc[1] || !note.newComment) return; // location & description required
@@ -1233,11 +1252,11 @@ export default {
     }
 
     let path = '/api/0.6/notes?' +
-        utilQsString({ lon: note.loc[0], lat: note.loc[1], text: comment });
+      utilQsString({ lon: note.loc[0], lat: note.loc[1], text: comment });
 
     _noteCache.inflightPost[note.id] = oauth.xhr(
-        { method: 'POST', path: path },
-        wrapcb(this, done, _connectionID),
+      { method: 'POST', path: path },
+      wrapcb(this, done, _connectionID),
     );
 
     function done(err, xml) {
@@ -1271,7 +1290,7 @@ export default {
     }
     if (_noteCache.inflightPost[note.id]) {
       return callback({ message: 'Note update already inflight', status: -2 },
-          note);
+        note);
     }
 
     let action;
@@ -1292,8 +1311,8 @@ export default {
     }
 
     _noteCache.inflightPost[note.id] = oauth.xhr(
-        { method: 'POST', path: path },
-        wrapcb(this, done, _connectionID),
+      { method: 'POST', path: path },
+      wrapcb(this, done, _connectionID),
     );
 
     function done(err, xml) {
@@ -1362,20 +1381,22 @@ export default {
   caches: function(obj) {
     function cloneCache(source) {
       let target = {};
-      Object.keys(source).forEach(function(k) {
-        if (k === 'rtree') {
-          target.rtree = new RBush().fromJSON(source.rtree.toJSON());  // clone rbush
-        }
-        else if (k === 'note') {
-          target.note = {};
-          Object.keys(source.note).forEach(function(id) {
-            target.note[id] = osmNote(source.note[id]);   // copy notes
-          });
-        }
-        else {
-          target[k] = JSON.parse(JSON.stringify(source[k]));   // clone deep
-        }
-      });
+      Object.keys(source)
+        .forEach(function(k) {
+          if (k === 'rtree') {
+            target.rtree = new RBush().fromJSON(source.rtree.toJSON());  // clone rbush
+          }
+          else if (k === 'note') {
+            target.note = {};
+            Object.keys(source.note)
+              .forEach(function(id) {
+                target.note[id] = osmNote(source.note[id]);   // copy notes
+              });
+          }
+          else {
+            target[k] = JSON.parse(JSON.stringify(source[k]));   // clone deep
+          }
+        });
       return target;
     }
 
@@ -1464,11 +1485,13 @@ export default {
     let viewport = projection.clipExtent();
     let min = [viewport[0][0], viewport[1][1]];
     let max = [viewport[1][0], viewport[0][1]];
-    let bbox = geoExtent(projection.invert(min), projection.invert(max)).bbox();
+    let bbox = geoExtent(projection.invert(min), projection.invert(max))
+      .bbox();
 
-    return _noteCache.rtree.search(bbox).map(function(d) {
-      return d.data;
-    });
+    return _noteCache.rtree.search(bbox)
+      .map(function(d) {
+        return d.data;
+      });
   },
 
   // get a single note from the cache
@@ -1496,7 +1519,8 @@ export default {
   // Get an array of note IDs closed during this session.
   // Used to populate `closed:note` changeset tag
   getClosedIDs: function() {
-    return Object.keys(_noteCache.closed).sort();
+    return Object.keys(_noteCache.closed)
+      .sort();
   },
 
 };

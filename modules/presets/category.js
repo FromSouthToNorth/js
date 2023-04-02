@@ -13,8 +13,8 @@ export function presetCategory(categoryID, category, allPresets) {
   _this.id = categoryID;
 
   _this.members = presetCollection(
-      (category.members || []).map(presetID => allPresets[presetID]).
-          filter(Boolean),
+    (category.members || []).map(presetID => allPresets[presetID])
+      .filter(Boolean),
   );
 
   _this.geometry = _this.members.collection.reduce((acc, preset) => {
@@ -30,23 +30,23 @@ export function presetCategory(categoryID, category, allPresets) {
   _this.matchGeometry = (geom) => _this.geometry.indexOf(geom) >= 0;
 
   _this.matchAllGeometry = (geometries) => _this.members.collection.some(
-      preset => preset.matchAllGeometry(geometries));
+    preset => preset.matchAllGeometry(geometries));
 
   _this.matchScore = () => -1;
 
   _this.name = () => t(`_tagging.presets.categories.${categoryID}.name`,
-      { 'default': categoryID });
+    { 'default': categoryID });
   _this.nameLabel = () => t.append(
-      `_tagging.presets.categories.${categoryID}.name`,
-      { 'default': categoryID });
+    `_tagging.presets.categories.${categoryID}.name`,
+    { 'default': categoryID });
 
   _this.terms = () => [];
 
   _this.searchName = () => {
     if (!_searchName) {
       _searchName = (_this.suggestion ?
-                     _this.originalName :
-                     _this.name()).toLowerCase();
+        _this.originalName :
+        _this.name()).toLowerCase();
     }
     return _searchName;
   };
@@ -56,7 +56,7 @@ export function presetCategory(categoryID, category, allPresets) {
       _searchNameStripped = _this.searchName();
       // split combined diacritical characters into their parts
       if (_searchNameStripped.normalize) _searchNameStripped = _searchNameStripped.normalize(
-          'NFD');
+        'NFD');
       // remove diacritics
       _searchNameStripped = _searchNameStripped.replace(/[\u0300-\u036f]/g, '');
     }

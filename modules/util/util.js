@@ -10,13 +10,14 @@ export function utilStringQs(str) {
   while (i < str.length && (str[i] === '?' || str[i] === '#')) i++;
   str = str.slice(i);
 
-  return str.split('&').reduce((obj, pair) => {
-    const parts = pair.split('=');
-    if (parts.length === 2) {
-      obj[parts[0]] = (null === parts[1]) ? '' : decodeURIComponent(parts[1]);
-    }
-    return obj;
-  }, {});
+  return str.split('&')
+    .reduce((obj, pair) => {
+      const parts = pair.split('=');
+      if (parts.length === 2) {
+        obj[parts[0]] = (null === parts[1]) ? '' : decodeURIComponent(parts[1]);
+      }
+      return obj;
+    }, {});
 }
 
 export function utilEntitySelector(ids) {
@@ -70,7 +71,8 @@ export function utilGetAllNodes(ids, graph) {
     else {
       entity.members.map(function(member) {
         return member.id;
-      }).forEach(collectNodes);   // recurse
+      })
+        .forEach(collectNodes);   // recurse
     }
   }
 }
@@ -79,14 +81,17 @@ export function utilQsString(obj, noencode) {
   // encode everything except special characters used in certain hash parameters:
   // "/" in map states, ":", ",", {" and "}" in background
   function softEncode(s) {
-    return encodeURIComponent(s).
-    replace(/(%2F|%3A|%2C|%7B|%7D)/g, decodeURIComponent);
+    return encodeURIComponent(s)
+      .replace(/(%2F|%3A|%2C|%7B|%7D)/g, decodeURIComponent);
   }
 
-  return Object.keys(obj).sort().map((key) => {
-    return encodeURIComponent(key) + '=' + (
+  return Object.keys(obj)
+    .sort()
+    .map((key) => {
+      return encodeURIComponent(key) + '=' + (
         noencode ? softEncode(obj[key]) : encodeURIComponent(obj[key]));
-  }).join('&');
+    })
+    .join('&');
 }
 
 // returns an selector to select entity ids for:
@@ -106,7 +111,8 @@ export function utilEntityAndDeepMemberIDs(ids, graph) {
 
     entity.members.map(function(member) {
       return member.id;
-    }).forEach(collectDeepDescendants);   // recurse
+    })
+      .forEach(collectDeepDescendants);   // recurse
   }
 }
 
@@ -132,7 +138,8 @@ export function utilDeepMemberSelector(ids, graph, skipMultipolgonMembers) {
     if (skipMultipolgonMembers && entity.isMultipolygon()) return;
     entity.members.map(function(member) {
       return member.id;
-    }).forEach(collectDeepDescendants);   // recurse
+    })
+      .forEach(collectDeepDescendants);   // recurse
   }
 }
 
@@ -144,10 +151,10 @@ export function utilDeepMemberSelector(ids, graph, skipMultipolgonMembers) {
  */
 export function utilFastMouse(container) {
   const rect = container.getBoundingClientRect(),
-      rectLeft = rect.left,
-      rectTop = rect.top,
-      clientLeft = +container.clientLeft,
-      clientTop = +container.clientTop;
+    rectLeft = rect.left,
+    rectTop = rect.top,
+    clientLeft = +container.clientLeft,
+    clientTop = +container.clientTop;
 
   return function(e) {
     return [
@@ -179,7 +186,8 @@ export function utilPrefixCSSProperty(property) {
   while (++i < n) {
     if (prefixes[i] + property in s) {
       return '-' + prefixes[i].toLowerCase() +
-          property.replace(/([A-Z])/g, '-$1').toLowerCase();
+        property.replace(/([A-Z])/g, '-$1')
+          .toLowerCase();
     }
   }
 
@@ -190,18 +198,20 @@ let transformProperty;
 
 export function utilSetTransform(el, x, y, scale) {
   const prop = transformProperty = transformProperty ||
-      utilPrefixCSSProperty('Transform');
+    utilPrefixCSSProperty('Transform');
   const translate = utilDetect().opera ?
-      'translate(' + x + 'px,' + y + 'px)'
-      :
-      'translate3d(' + x + 'px,' + y + 'px,0)';
+    'translate(' + x + 'px,' + y + 'px)'
+    :
+    'translate3d(' + x + 'px,' + y + 'px,0)';
   return el.style(prop, translate + (scale ? ' scale(' + scale + ')' : ''));
 }
 
 // Returns a new string representing `str` cut from its start to `limit` length
 // in unicode characters. Note that this runs the risk of splitting graphemes.
 export function utilUnicodeCharsTruncated(str, limit) {
-  return Array.from(str).slice(0, limit).join('');
+  return Array.from(str)
+    .slice(0, limit)
+    .join('');
 }
 
 // returns a normalized and truncated string to `maxChars` utf-8 characters
@@ -225,7 +235,8 @@ export function utilCleanOsmString(val, maxChars) {
 }
 
 export function utilDisplayName(entity) {
-  let localizedNameKey = 'name:' + localizer.languageCode().toLowerCase();
+  let localizedNameKey = 'name:' + localizer.languageCode()
+    .toLowerCase();
   let name = entity.tags[localizedNameKey] || entity.tags.name || '';
   if (name) return name;
 
@@ -269,8 +280,13 @@ export function utilDisplayName(entity) {
 
 export function utilDisplayNameForPath(entity) {
   let name = utilDisplayName(entity);
-  let isFirefox = utilDetect().browser.toLowerCase().indexOf('firefox') > -1;
-  let isNewChromium = Number(utilDetect().version.split('.')[0]) >= 96.0;
+  let isFirefox = utilDetect()
+    .browser
+    .toLowerCase()
+    .indexOf('firefox') > -1;
+  let isNewChromium = Number(utilDetect()
+    .version
+    .split('.')[0]) >= 96.0;
 
   if (!isFirefox && !isNewChromium && name && rtlRegex.test(name)) {
     name = fixRTLTextForSvg(name);
@@ -298,13 +314,14 @@ export function utilDisplayLabel(entity, graphOrGeometry, verbose) {
   let result;
   let displayName = utilDisplayName(entity);
   let preset = typeof graphOrGeometry === 'string' ?
-      presetManager.matchTags(entity.tags, graphOrGeometry) :
-      presetManager.match(entity, graphOrGeometry);
+    presetManager.matchTags(entity.tags, graphOrGeometry) :
+    presetManager.match(entity, graphOrGeometry);
   let presetName = preset &&
-      (preset.suggestion ? preset.subtitle() : preset.name());
+    (preset.suggestion ? preset.subtitle() : preset.name());
 
   if (verbose) {
-    result = [presetName, displayName].filter(Boolean).join(' ');
+    result = [presetName, displayName].filter(Boolean)
+      .join(' ');
   }
   else {
     result = displayName || presetName;
@@ -337,8 +354,8 @@ export function utilEditDistance(a, b) {
       }
       else {
         matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, // substitution
-            Math.min(matrix[i][j - 1] + 1, // insertion
-                matrix[i - 1][j] + 1)); // deletion
+          Math.min(matrix[i][j - 1] + 1, // insertion
+            matrix[i - 1][j] + 1)); // deletion
       }
     }
   }
@@ -346,15 +363,17 @@ export function utilEditDistance(a, b) {
 }
 
 export function utilNoAuto(selection) {
-  let isText = (selection.size() && selection.node().tagName.toLowerCase() ===
-      'textarea');
+  let isText = (selection.size() && selection.node()
+      .tagName
+      .toLowerCase() ===
+    'textarea');
 
   return selection
-  // assign 'new-password' even for non-password fields to prevent browsers (Chrome) ignoring 'off'
-  .attr('autocomplete', 'new-password').
-  attr('autocorrect', 'off').
-  attr('autocapitalize', 'off').
-  attr('spellcheck', isText ? 'true' : 'false');
+    // assign 'new-password' even for non-password fields to prevent browsers (Chrome) ignoring 'off'
+    .attr('autocomplete', 'new-password')
+    .attr('autocorrect', 'off')
+    .attr('autocapitalize', 'off')
+    .attr('spellcheck', isText ? 'true' : 'false');
 }
 
 // https://stackoverflow.com/questions/194846/is-there-any-kind-of-hash-code-function-in-javascript
@@ -375,5 +394,6 @@ export function utilHashcode(str) {
 // Returns version of `str` with all runs of special characters replaced by `_`;
 // suitable for HTML ids, classes, selectors, etc.
 export function utilSafeClassName(str) {
-  return str.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  return str.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_');
 }

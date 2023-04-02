@@ -74,7 +74,8 @@ export function rendererTileLayer(context) {
       _projection.translate()[1] + pixelOffset[1],
     ];
 
-    tiler.scale(_projection.scale() * 2 * Math.PI).translate(translate);
+    tiler.scale(_projection.scale() * 2 * Math.PI)
+      .translate(translate);
 
     _tileOrigin = [
       _projection.scale() * Math.PI - translate[0],
@@ -94,34 +95,39 @@ export function rendererTileLayer(context) {
     if (_source.validZoom(_zoom)) {
       tiler.skipNullIsland(!!_source.overlay);
 
-      tiler().forEach(function(d) {
-        addSource(d);
-        if (d[3] === '') return;
-        if (typeof d[3] !== 'string') return; // Workaround for #2295
-        requests.push(d);
-        if (_cache[d[3]] === false && lookUp(d)) {
-          requests.push(addSource(lookUp(d)));
-        }
-      });
+      tiler()
+        .forEach(function(d) {
+          addSource(d);
+          if (d[3] === '') return;
+          if (typeof d[3] !== 'string') return; // Workaround for #2295
+          requests.push(d);
+          if (_cache[d[3]] === false && lookUp(d)) {
+            requests.push(addSource(lookUp(d)));
+          }
+        });
 
-      requests = uniqueBy(requests, 3).filter(function(r) {
-        // don't re-request tiles which have failed in the past
-        return _cache[r[3]] !== false;
-      });
+      requests = uniqueBy(requests, 3)
+        .filter(function(r) {
+          // don't re-request tiles which have failed in the past
+          return _cache[r[3]] !== false;
+        });
     }
 
     function load(d3_event, d) {
       _cache[d[3]] = true;
-      d3_select(this).
-      on('error', null).
-      on('load', null).
-      classed('tile-loaded', true);
+      d3_select(this)
+        .on('error', null)
+        .on('load', null)
+        .classed('tile-loaded', true);
       render(selection);
     }
 
     function error(d3_event, d) {
       _cache[d[3]] = false;
-      d3_select(this).on('error', null).on('load', null).remove();
+      d3_select(this)
+        .on('error', null)
+        .on('load', null)
+        .remove();
       render(selection);
     }
 
@@ -129,9 +135,9 @@ export function rendererTileLayer(context) {
       let ts = _tileSize * Math.pow(2, _zoom - d[2]);
       let scale = tileSizeAtZoom(d, _zoom);
       return 'translate(' +
-          ((d[0] * ts) - _tileOrigin[0]) + 'px,' +
-          ((d[1] * ts) - _tileOrigin[1]) + 'px) ' +
-          'scale(' + scale + ',' + scale + ')';
+        ((d[0] * ts) - _tileOrigin[0]) + 'px,' +
+        ((d[1] * ts) - _tileOrigin[1]) + 'px) ' +
+        'scale(' + scale + ',' + scale + ')';
     }
 
     function tileCenter(d) {
@@ -163,41 +169,42 @@ export function rendererTileLayer(context) {
       }
     });
 
-    let image = selection.selectAll('img').data(requests, function(d) {
-      return d[3];
-    });
+    let image = selection.selectAll('img')
+      .data(requests, function(d) {
+        return d[3];
+      });
 
-    image.exit().
-    style(transformProp, imageTransform).
-    classed('tile-removing', true).
-    classed('tile-center', false).
-    each(function() {
-      let tile = d3_select(this);
-      window.setTimeout(function() {
-        if (tile.classed('tile-removing')) {
-          tile.remove();
-        }
-      }, 300);
-    });
+    image.exit()
+      .style(transformProp, imageTransform)
+      .classed('tile-removing', true)
+      .classed('tile-center', false)
+      .each(function() {
+        let tile = d3_select(this);
+        window.setTimeout(function() {
+          if (tile.classed('tile-removing')) {
+            tile.remove();
+          }
+        }, 300);
+      });
 
-    image.enter().
-    append('img').
-    attr('class', 'tile').
-    attr('alt', '').
-    attr('draggable', 'false').
-    style('width', _tileSize + 'px').
-    style('height', _tileSize + 'px').
-    attr('src', function(d) {
-      return d[3];
-    }).
-    on('error', error).
-    on('load', load).
-    merge(image).
-    style(transformProp, imageTransform).
-    classed('tile-removing', false).
-    classed('tile-center', function(d) {
-      return d === nearCenter;
-    });
+    image.enter()
+      .append('img')
+      .attr('class', 'tile')
+      .attr('alt', '')
+      .attr('draggable', 'false')
+      .style('width', _tileSize + 'px')
+      .style('height', _tileSize + 'px')
+      .attr('src', function(d) {
+        return d[3];
+      })
+      .on('error', error)
+      .on('load', load)
+      .merge(image)
+      .style(transformProp, imageTransform)
+      .classed('tile-removing', false)
+      .classed('tile-center', function(d) {
+        return d === nearCenter;
+      });
   }
 
   background.projection = function(val) {
@@ -217,7 +224,8 @@ export function rendererTileLayer(context) {
     _source = val;
     _tileSize = _source.tileSize;
     _cache = {};
-    tiler.tileSize(_source.tileSize).zoomExtent(_source.zoomExtent);
+    tiler.tileSize(_source.tileSize)
+      .zoomExtent(_source.zoomExtent);
     return background;
   };
 

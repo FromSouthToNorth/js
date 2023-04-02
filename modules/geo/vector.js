@@ -2,7 +2,7 @@
 export function geoVecEqual(a, b, epsilon) {
   if (epsilon) {
     return (Math.abs(a[0] - b[0]) <= epsilon) &&
-        (Math.abs(a[1] - b[1]) <= epsilon);
+      (Math.abs(a[1] - b[1]) <= epsilon);
   }
   else {
     return (a[0] === b[0]) && (a[1] === b[1]);

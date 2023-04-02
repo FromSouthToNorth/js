@@ -54,9 +54,9 @@ Object.assign(osmNode.prototype, {
 
   isDegenerate: function() {
     return !(
-        Array.isArray(this.loc) && this.loc.length === 2 &&
-        this.loc[0] >= -180 && this.loc[0] <= 180 &&
-        this.loc[1] >= -90 && this.loc[1] <= 90
+      Array.isArray(this.loc) && this.loc.length === 2 &&
+      this.loc[0] >= -180 && this.loc[0] <= 180 &&
+      this.loc[1] >= -90 && this.loc[1] <= 90
     );
   },
 
@@ -67,7 +67,7 @@ Object.assign(osmNode.prototype, {
 
     // which tag to use?
     if (this.isHighwayIntersection(resolver) &&
-        (this.tags.stop || '').toLowerCase() === 'all') {
+      (this.tags.stop || '').toLowerCase() === 'all') {
       // all-way stop tag on a highway intersection
       val = 'all';
     }
@@ -105,36 +105,38 @@ Object.assign(osmNode.prototype, {
 
       // string direction - inspect parent ways
       let lookBackward =
-          (this.tags['traffic_sign:backward'] || v === 'backward' || v ===
-              'both' || v === 'all');
+        (this.tags['traffic_sign:backward'] || v === 'backward' || v ===
+          'both' || v === 'all');
       let lookForward =
-          (this.tags['traffic_sign:forward'] || v === 'forward' || v ===
-              'both' || v === 'all');
+        (this.tags['traffic_sign:forward'] || v === 'forward' || v ===
+          'both' || v === 'all');
 
       if (!lookForward && !lookBackward) return;
 
       let nodeIds = {};
-      resolver.parentWays(this).forEach(function(parent) {
-        let nodes = parent.nodes;
-        for (i = 0; i < nodes.length; i++) {
-          if (nodes[i] === this.id) {  // match current entity
-            if (lookForward && i > 0) {
-              nodeIds[nodes[i - 1]] = true;  // look back to prev node
-            }
-            if (lookBackward && i < nodes.length - 1) {
-              nodeIds[nodes[i + 1]] = true;  // look ahead to next node
+      resolver.parentWays(this)
+        .forEach(function(parent) {
+          let nodes = parent.nodes;
+          for (i = 0; i < nodes.length; i++) {
+            if (nodes[i] === this.id) {  // match current entity
+              if (lookForward && i > 0) {
+                nodeIds[nodes[i - 1]] = true;  // look back to prev node
+              }
+              if (lookBackward && i < nodes.length - 1) {
+                nodeIds[nodes[i + 1]] = true;  // look ahead to next node
+              }
             }
           }
-        }
-      }, this);
+        }, this);
 
-      Object.keys(nodeIds).forEach(function(nodeId) {
-        // +90 because geoAngle returns angle from X axis, not Y (north)
-        results.push(
+      Object.keys(nodeIds)
+        .forEach(function(nodeId) {
+          // +90 because geoAngle returns angle from X axis, not Y (north)
+          results.push(
             (geoAngle(this, resolver.entity(nodeId), projection) *
-                (180 / Math.PI)) + 90,
-        );
-      }, this);
+              (180 / Math.PI)) + 90,
+          );
+        }, this);
 
     }, this);
 
@@ -143,15 +145,16 @@ Object.assign(osmNode.prototype, {
 
   isCrossing: function() {
     return this.tags.highway === 'crossing' ||
-        this.tags.railway && this.tags.railway.indexOf('crossing') !== -1;
+      this.tags.railway && this.tags.railway.indexOf('crossing') !== -1;
   },
 
   isEndpoint: function(resolver) {
     return resolver.transient(this, 'isEndpoint', function() {
       let id = this.id;
-      return resolver.parentWays(this).filter(function(parent) {
-        return !parent.isClosed() && !!parent.affix(id);
-      }).length > 0;
+      return resolver.parentWays(this)
+        .filter(function(parent) {
+          return !parent.isClosed() && !!parent.affix(id);
+        }).length > 0;
     });
   },
 
@@ -163,7 +166,7 @@ Object.assign(osmNode.prototype, {
         // vertex is connected to multiple parent ways
         for (let i in parents) {
           if (parents[i].geometry(resolver) === 'line' &&
-              parents[i].hasInterestingTags()) return true;
+            parents[i].hasInterestingTags()) return true;
         }
       }
       else if (parents.length === 1) {
@@ -183,13 +186,14 @@ Object.assign(osmNode.prototype, {
 
   parentIntersectionWays: function(resolver) {
     return resolver.transient(this, 'parentIntersectionWays', function() {
-      return resolver.parentWays(this).filter(function(parent) {
-        return (parent.tags.highway ||
-                parent.tags.waterway ||
-                parent.tags.railway ||
-                parent.tags.aeroway) &&
+      return resolver.parentWays(this)
+        .filter(function(parent) {
+          return (parent.tags.highway ||
+              parent.tags.waterway ||
+              parent.tags.railway ||
+              parent.tags.aeroway) &&
             parent.geometry(resolver) === 'line';
-      });
+        });
     });
   },
 
@@ -199,18 +203,20 @@ Object.assign(osmNode.prototype, {
 
   isHighwayIntersection: function(resolver) {
     return resolver.transient(this, 'isHighwayIntersection', function() {
-      return resolver.parentWays(this).filter(function(parent) {
-        return parent.tags.highway && parent.geometry(resolver) === 'line';
-      }).length > 1;
+      return resolver.parentWays(this)
+        .filter(function(parent) {
+          return parent.tags.highway && parent.geometry(resolver) === 'line';
+        }).length > 1;
     });
   },
 
   isOnAddressLine: function(resolver) {
     return resolver.transient(this, 'isOnAddressLine', function() {
-      return resolver.parentWays(this).filter(function(parent) {
-        return parent.tags.hasOwnProperty('addr:interpolation') &&
+      return resolver.parentWays(this)
+        .filter(function(parent) {
+          return parent.tags.hasOwnProperty('addr:interpolation') &&
             parent.geometry(resolver) === 'line';
-      }).length > 0;
+        }).length > 0;
     });
   },
 
@@ -221,9 +227,10 @@ Object.assign(osmNode.prototype, {
         '@lon': this.loc[0],
         '@lat': this.loc[1],
         '@version': (this.version || 0),
-        tag: Object.keys(this.tags).map(function(k) {
-          return { keyAttributes: { k: k, v: this.tags[k] } };
-        }, this),
+        tag: Object.keys(this.tags)
+          .map(function(k) {
+            return { keyAttributes: { k: k, v: this.tags[k] } };
+          }, this),
       },
     };
     if (changeset_id) r.node['@changeset'] = changeset_id;

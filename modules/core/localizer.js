@@ -67,7 +67,8 @@ export function coreLocalizer() {
     if (!arguments.length) return _preferredLocaleCodes;
     if (typeof codes === 'string') {
       // be generous and accept delimited strings as input
-      _preferredLocaleCodes = codes.split(/,|;| /gi).filter(Boolean);
+      _preferredLocaleCodes = codes.split(/,|;| /gi)
+        .filter(Boolean);
     }
     else {
       _preferredLocaleCodes = codes;
@@ -75,7 +76,7 @@ export function coreLocalizer() {
     return localizer;
   };
 
-  var _loadPromise;
+  let _loadPromise;
 
   localizer.ensureLoaded = () => {
     if (_loadPromise) return _loadPromise;
@@ -100,38 +101,42 @@ export function coreLocalizer() {
     }
 
     return _loadPromise = Promise.all(
-        filesToFetch.map(key => fileFetcher.get(key))).then(results => {
-      _dataLanguages = results[0];
-      _dataLocales = results[1];
+      filesToFetch.map(key => fileFetcher.get(key)))
+      .then(results => {
+        _dataLanguages = results[0];
+        _dataLocales = results[1];
 
-      let indexes = results.slice(2);
-      let requestedLocales = (_preferredLocaleCodes || []).concat(
+        let indexes = results.slice(2);
+        let requestedLocales = (_preferredLocaleCodes || []).concat(
           utilDetect().browserLocales)   // List of locales preferred by the browser in priority order.
           .concat(['en']);   // fallback to English since it's the only guaranteed complete language
 
-      _localeCodes = localesToUseFrom(requestedLocales);
-      _localeCode = _localeCodes[0];   // Run iD in the highest-priority locale; the rest are fallbacks
+        _localeCodes = localesToUseFrom(requestedLocales);
+        _localeCode = _localeCodes[0];   // Run iD in the highest-priority locale; the rest are fallbacks
 
-      let loadStringsPromises = [];
+        let loadStringsPromises = [];
 
-      indexes.forEach((index, i) => {
-        // Will always return the index for `en` if nothing else
-        const fullCoverageIndex = _localeCodes.findIndex(function(locale) {
-          return index[locale] && index[locale].pct === 1;
+        indexes.forEach((index, i) => {
+          // Will always return the index for `en` if nothing else
+          const fullCoverageIndex = _localeCodes.findIndex(function(locale) {
+            return index[locale] && index[locale].pct === 1;
+          });
+          // We only need to load locales up until we find one with full coverage
+          _localeCodes.slice(0, fullCoverageIndex + 1)
+            .forEach(function(code) {
+              let scopeId = Object.keys(localeDirs)[i];
+              let directory = Object.values(localeDirs)[i];
+              if (index[code]) loadStringsPromises.push(
+                localizer.loadLocale(code, scopeId, directory));
+            });
         });
-        // We only need to load locales up until we find one with full coverage
-        _localeCodes.slice(0, fullCoverageIndex + 1).forEach(function(code) {
-          let scopeId = Object.keys(localeDirs)[i];
-          let directory = Object.values(localeDirs)[i];
-          if (index[code]) loadStringsPromises.push(
-              localizer.loadLocale(code, scopeId, directory));
-        });
-      });
 
-      return Promise.all(loadStringsPromises);
-    }).then(() => {
-      updateForCurrentLocale();
-    }).catch(err => console.error(err));  // eslint-disable-line
+        return Promise.all(loadStringsPromises);
+      })
+      .then(() => {
+        updateForCurrentLocale();
+      })
+      .catch(err => console.error(err));  // eslint-disable-line
   };
 
   // Returns the locales from `requestedLocales` supported by iD that we should use
@@ -159,7 +164,7 @@ export function coreLocalizer() {
     _languageCode = _localeCode.split('-')[0];
 
     const currentData = _dataLocales[_localeCode] ||
-        _dataLocales[_languageCode];
+      _dataLocales[_languageCode];
 
     const hash = utilStringQs(window.location.hash);
 
@@ -178,7 +183,8 @@ export function coreLocalizer() {
     _languageNames = _localeStrings.general[locale].languageNames;
     _scriptNames = _localeStrings.general[locale].scriptNames;
 
-    _usesMetric = _localeCode.slice(-3).toLowerCase() !== '-us';
+    _usesMetric = _localeCode.slice(-3)
+      .toLowerCase() !== '-us';
   }
 
   /* Locales */
@@ -198,11 +204,12 @@ export function coreLocalizer() {
       fileMap[key] = `${directory}/${locale}.min.json`;
     }
 
-    return fileFetcher.get(key).then(d => {
-      if (!_localeStrings[scopeId]) _localeStrings[scopeId] = {};
-      _localeStrings[scopeId][locale] = d[locale];
-      return locale;
-    });
+    return fileFetcher.get(key)
+      .then(d => {
+        if (!_localeStrings[scopeId]) _localeStrings[scopeId] = {};
+        _localeStrings[scopeId][locale] = d[locale];
+        return locale;
+      });
   };
 
   localizer.pluralRule = function(number) {
@@ -215,7 +222,7 @@ export function coreLocalizer() {
 
     // modern browsers have this functionality built-in
     const rules = 'Intl' in window && Intl.PluralRules &&
-        new Intl.PluralRules(localeCode);
+      new Intl.PluralRules(localeCode);
     if (rules) {
       return rules.select(number);
     }
@@ -243,20 +250,21 @@ export function coreLocalizer() {
     if (stringId[0] === '_') {
       let split = stringId.split('.');
       scopeId = split[0].slice(1);
-      stringId = split.slice(1).join('.');
+      stringId = split.slice(1)
+        .join('.');
     }
 
     locale = locale || _localeCode;
 
-    let path = stringId.split('.').
-        map(s => s.replace(/<TX_DOT>/g, '.')).
-        reverse();
+    let path = stringId.split('.')
+      .map(s => s.replace(/<TX_DOT>/g, '.'))
+      .reverse();
 
     let stringsKey = locale;
     // US English is the default
     if (stringsKey.toLowerCase() === 'en-us') stringsKey = 'en';
     let result = _localeStrings && _localeStrings[scopeId] &&
-        _localeStrings[scopeId][stringsKey];
+      _localeStrings[scopeId][stringsKey];
 
     while (result !== undefined && path.length) {
       result = result[path.pop()];
@@ -267,9 +275,10 @@ export function coreLocalizer() {
         if (typeof result === 'object' && Object.keys(result).length) {
           // If plural forms are provided, dig one level deeper based on the
           // first numeric token replacement provided.
-          const number = Object.values(replacements).find(function(value) {
-            return typeof value === 'number';
-          });
+          const number = Object.values(replacements)
+            .find(function(value) {
+              return typeof value === 'number';
+            });
           if (number !== undefined) {
             const rule = pluralRule(number, locale);
             if (result[rule]) {
@@ -357,12 +366,12 @@ export function coreLocalizer() {
   localizer.t.html = function(stringId, replacements, locale) {
     // replacement string might be html unsafe, so we need to escape it except if it is explicitly marked as html code
     replacements = Object.assign({}, replacements);
-    for (var k in replacements) {
+    for (let k in replacements) {
       if (typeof replacements[k] === 'string') {
         replacements[k] = escape(replacements[k]);
       }
       if (typeof replacements[k] === 'object' && typeof replacements[k].html ===
-          'string') {
+        'string') {
         replacements[k] = replacements[k].html;
       }
     }
@@ -382,12 +391,12 @@ export function coreLocalizer() {
   localizer.t.append = function(stringId, replacements, locale) {
     const ret = function(selection) {
       const info = localizer.tInfo(stringId, replacements, locale);
-      return selection.append('span').
-          attr('class', 'localized-text').
-          attr('lang', info.locale || 'und').
-          text((replacements && replacements.prefix || '')
-              + info.text
-              + (replacements && replacements.suffix || ''));
+      return selection.append('span')
+        .attr('class', 'localized-text')
+        .attr('lang', info.locale || 'und')
+        .text((replacements && replacements.prefix || '')
+          + info.text
+          + (replacements && replacements.suffix || ''));
     };
     ret.stringId = stringId;
     return ret;
@@ -408,7 +417,7 @@ export function coreLocalizer() {
       if (langInfo.nativeName) {  // name in native language
         // e.g. "Deutsch (de)"
         return localizer.t('translate.language_and_code',
-            { language: langInfo.nativeName, code: code });
+          { language: langInfo.nativeName, code: code });
 
       }
       else if (langInfo.base && langInfo.script) {
@@ -419,13 +428,13 @@ export function coreLocalizer() {
           const script = _scriptNames[scriptCode] || scriptCode;
           // e.g. "Serbian (Cyrillic)"
           return localizer.t('translate.language_and_code',
-              { language: _languageNames[base], code: script });
+            { language: _languageNames[base], code: script });
 
         }
         else if (_dataLanguages[base] && _dataLanguages[base].nativeName) {
           // e.g. "српски (sr-Cyrl)"
           return localizer.t('translate.language_and_code',
-              { language: _dataLanguages[base].nativeName, code: code });
+            { language: _dataLanguages[base].nativeName, code: code });
         }
       }
     }

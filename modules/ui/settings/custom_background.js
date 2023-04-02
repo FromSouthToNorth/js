@@ -19,68 +19,70 @@ export function uiSettingsCustomBackground() {
     };
 
     let example = 'https://{switch:a,b,c}.tile.openstreetmap.org/{zoom}/{x}/{y}.png';
-    let modal = uiConfirm(selection).okButton();
+    let modal = uiConfirm(selection)
+      .okButton();
 
     modal.classed('settings-modal settings-custom-background', true);
 
-    modal.select('.modal-section.header').
-    append('h3').
-    call(t.append('settings.custom_background.header'));
+    modal.select('.modal-section.header')
+      .append('h3')
+      .call(t.append('settings.custom_background.header'));
 
     let textSection = modal.select('.modal-section.message-text');
 
     let instructions =
-        `${t.html('settings.custom_background.instructions.info')}\n` +
-        '\n' +
-        `#### ${t.html(
-            'settings.custom_background.instructions.wms.tokens_label')}\n` +
-        `* ${t.html(
-            'settings.custom_background.instructions.wms.tokens.proj')}\n` +
-        `* ${t.html(
-            'settings.custom_background.instructions.wms.tokens.wkid')}\n` +
-        `* ${t.html(
-            'settings.custom_background.instructions.wms.tokens.dimensions')}\n` +
-        `* ${t.html(
-            'settings.custom_background.instructions.wms.tokens.bbox')}\n` +
-        '\n' +
-        `#### ${t.html(
-            'settings.custom_background.instructions.tms.tokens_label')}\n` +
-        `* ${t.html(
-            'settings.custom_background.instructions.tms.tokens.xyz')}\n` +
-        `* ${t.html(
-            'settings.custom_background.instructions.tms.tokens.flipped_y')}\n` +
-        `* ${t.html(
-            'settings.custom_background.instructions.tms.tokens.switch')}\n` +
-        `* ${t.html(
-            'settings.custom_background.instructions.tms.tokens.quadtile')}\n` +
-        `* ${t.html(
-            'settings.custom_background.instructions.tms.tokens.scale_factor')}\n` +
-        '\n' +
-        `#### ${t.html('settings.custom_background.instructions.example')}\n` +
-        `\`${example}\``;
+      `${t.html('settings.custom_background.instructions.info')}\n` +
+      '\n' +
+      `#### ${t.html(
+        'settings.custom_background.instructions.wms.tokens_label')}\n` +
+      `* ${t.html(
+        'settings.custom_background.instructions.wms.tokens.proj')}\n` +
+      `* ${t.html(
+        'settings.custom_background.instructions.wms.tokens.wkid')}\n` +
+      `* ${t.html(
+        'settings.custom_background.instructions.wms.tokens.dimensions')}\n` +
+      `* ${t.html(
+        'settings.custom_background.instructions.wms.tokens.bbox')}\n` +
+      '\n' +
+      `#### ${t.html(
+        'settings.custom_background.instructions.tms.tokens_label')}\n` +
+      `* ${t.html(
+        'settings.custom_background.instructions.tms.tokens.xyz')}\n` +
+      `* ${t.html(
+        'settings.custom_background.instructions.tms.tokens.flipped_y')}\n` +
+      `* ${t.html(
+        'settings.custom_background.instructions.tms.tokens.switch')}\n` +
+      `* ${t.html(
+        'settings.custom_background.instructions.tms.tokens.quadtile')}\n` +
+      `* ${t.html(
+        'settings.custom_background.instructions.tms.tokens.scale_factor')}\n` +
+      '\n' +
+      `#### ${t.html('settings.custom_background.instructions.example')}\n` +
+      `\`${example}\``;
 
-    textSection.append('div').
-    attr('class', 'instructions-template').
-    html(marked(instructions));
+    textSection.append('div')
+      .attr('class', 'instructions-template')
+      .html(marked(instructions));
 
-    textSection.append('textarea').
-    attr('class', 'field-template').
-    attr('placeholder', t('settings.custom_background.template.placeholder')).
-    call(utilNoAuto).
-    property('value', _currSettings.template);
+    textSection.append('textarea')
+      .attr('class', 'field-template')
+      .attr('placeholder', t('settings.custom_background.template.placeholder'))
+      .call(utilNoAuto)
+      .property('value', _currSettings.template);
 
     // insert a cancel button
     let buttonSection = modal.select('.modal-section.buttons');
 
-    buttonSection.insert('button', '.ok-button').
-    attr('class', 'button cancel-button secondary-action').
-    call(t.append('confirm.cancel'));
+    buttonSection.insert('button', '.ok-button')
+      .attr('class', 'button cancel-button secondary-action')
+      .call(t.append('confirm.cancel'));
 
-    buttonSection.select('.cancel-button').on('click.cancel', clickCancel);
+    buttonSection.select('.cancel-button')
+      .on('click.cancel', clickCancel);
 
-    buttonSection.select('.ok-button').
-    attr('disabled', isSaveDisabled).
-    on('click.save', clickSave);
+    buttonSection.select('.ok-button')
+      .attr('disabled', isSaveDisabled)
+      .on('click.save', clickSave);
 
     function isSaveDisabled() {
       return null;
@@ -88,8 +90,8 @@ export function uiSettingsCustomBackground() {
 
     // restore the original template
     function clickCancel() {
-      textSection.select('.field-template').
-      property('value', _origSettings.template);
+      textSection.select('.field-template')
+        .property('value', _origSettings.template);
       prefs('background-custom-template', _origSettings.template);
       this.blur();
       modal.close();
@@ -97,8 +99,8 @@ export function uiSettingsCustomBackground() {
 
     // accept the current template
     function clickSave() {
-      _currSettings.template = textSection.select('.field-template').
-      property('value');
+      _currSettings.template = textSection.select('.field-template')
+        .property('value');
       prefs('background-custom-template', _currSettings.template);
       this.blur();
       modal.close();

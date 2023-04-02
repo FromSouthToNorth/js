@@ -68,19 +68,19 @@ export function rendererMap(context) {
   // 如果支持，使用指针事件交互；回退到 d3-zoom 中的触摸/鼠标事件
   let _zoomerPannerFunction = 'PointerEvent' in window ? utilZoomPan : d3_zoom;
 
-  let _zoomerPanner = _zoomerPannerFunction().
-  scaleExtent([kMin, kMax]).
-  interpolate(d3_interpolate).
-  filter(zoomEventFilter).
-  on('zoom.map', zoomPan).
-  on('start.map', function(d3_event) {
-    _pointerDown = d3_event && (d3_event.type === 'pointerdown' ||
+  let _zoomerPanner = _zoomerPannerFunction()
+    .scaleExtent([kMin, kMax])
+    .interpolate(d3_interpolate)
+    .filter(zoomEventFilter)
+    .on('zoom.map', zoomPan)
+    .on('start.map', function(d3_event) {
+      _pointerDown = d3_event && (d3_event.type === 'pointerdown' ||
         (d3_event.sourceEvent && d3_event.sourceEvent.type ===
-            'pointerdown'));
-  }).
-  on('end.map', function() {
-    _pointerDown = false;
-  });
+          'pointerdown'));
+    })
+    .on('end.map', function() {
+      _pointerDown = false;
+    });
 
   const _doubleUpHandler = utilDoubleUp();
 
@@ -95,36 +95,51 @@ export function rendererMap(context) {
   function map(selection) {
     _selection = selection;
     context.on('change.map', immediateRedraw);
+
     const osm = context.connection();
     if (osm) {
       osm.on('change.map', immediateRedraw);
     }
 
+    context.background()
+      .on('change.map', immediateRedraw);
+
+    drawLayers
+      .on('change.map', function() {
+        context.background()
+          .updateImagery();
+        immediateRedraw();
+      });
+
+
     selection.on('wheel.map mousewheel.map', function(d3_event) {
       // disable swipe-to-navigate browser pages on trackpad/magic mouse – #5552
       d3_event.preventDefault();
-    }).
-    call(_zoomerPanner).
-    call(_zoomerPanner.transform, projection.transform()).
-    on('dblclick.zoom', null); // override d3-zoom dblclick handling
+    })
+      .call(_zoomerPanner)
+      .call(_zoomerPanner.transform, projection.transform())
+      .on('dblclick.zoom', null); // override d3-zoom dblclick handling
 
-    map.supersurface = supersurface = selection.append('div').
-    attr('class', 'supersurface').
-    call(utilSetTransform, 0, 0);
+    map.supersurface = supersurface = selection.append('div')
+      .attr('class', 'supersurface')
+      .call(utilSetTransform, 0, 0);
 
     // Need a wrapper div because Opera can't cope with an absolutely positioned
     // SVG element: http://bl.ocks.org/jfirebaugh/6fbfbd922552bf776c16
-    wrapper = supersurface.append('div').attr('class', 'layer layer-data');
+    wrapper = supersurface.append('div')
+      .attr('class', 'layer layer-data');
 
-    map.surface = surface = wrapper.call(drawLayers).selectAll('.surface');
+    map.surface = surface = wrapper.call(drawLayers)
+      .selectAll('.surface');
 
     surface.call(_doubleUpHandler);
     _doubleUpHandler.on('doubleUp.map', function(d3_event, p0) {
       if (!_dblClickZoomEnabled) return;
 
       if (typeof d3_event.target.__data__ === 'object' &&
-          // or area fills
-          !d3_select(d3_event.target).classed('fill')) return;
+        // or area fills
+        !d3_select(d3_event.target)
+          .classed('fill')) return;
       const zoomOut = d3_event.shiftKey;
 
       let t = projection.transform();
@@ -214,9 +229,9 @@ export function rendererMap(context) {
         let lines = Math.abs(source.deltaY);
         let sign = (source.deltaY > 0) ? 1 : -1;
         dY = sign * clamp(
-            Math.exp((lines - 1) * 0.75) * 4.000244140625,
-            4.000244140625,    // min
-            350.000244140625,   // max
+          Math.exp((lines - 1) * 0.75) * 4.000244140625,
+          4.000244140625,    // min
+          350.000244140625,   // max
         );
 
         // On Firefox Windows and Linux we always get +/- the scroll line amount (default 3)
@@ -283,7 +298,7 @@ export function rendererMap(context) {
         // - `deltaX`,`deltaY` are round integer pixels
       }
       else if (detected.os === 'mac' && detected.browser !== 'Firefox' &&
-          !source.ctrlKey && isInteger(dX) && isInteger(dY)) {
+        !source.ctrlKey && isInteger(dX) && isInteger(dY)) {
         p1 = projection.translate();
         x2 = p1[0] - dX;
         y2 = p1[1] - dY;
@@ -296,7 +311,8 @@ export function rendererMap(context) {
         x = x2;
         y = y2;
         k = k2;
-        eventTransform = d3_zoomIdentity.translate(x2, y2).scale(k2);
+        eventTransform = d3_zoomIdentity.translate(x2, y2)
+          .scale(k2);
         if (_zoomerPanner._transform) {
           // utilZoomPan interface
           _zoomerPanner._transform(eventTransform);
@@ -310,8 +326,8 @@ export function rendererMap(context) {
     }
 
     if (_transformStart.x === x &&
-        _transformStart.y === y &&
-        _transformStart.k === k) {
+      _transformStart.y === y &&
+      _transformStart.k === k) {
       return;  // no change
     }
 
@@ -341,7 +357,7 @@ export function rendererMap(context) {
 
     function isInteger(val) {
       return typeof val === 'number' && isFinite(val) && Math.floor(val) ===
-          val;
+        val;
     }
   }
 
@@ -375,10 +391,10 @@ export function rendererMap(context) {
 
     // class surface as `lowzoom` around z17-z18.5 (based on latitude)
     const lat = map.center()[1];
-    const lowZoom = d3_scaleLinear().
-    domain([-60, 0, 60]).
-    range([17, 18.5, 17]).
-    clamp(true);
+    const lowZoom = d3_scaleLinear()
+      .domain([-60, 0, 60])
+      .range([17, 18.5, 17])
+      .clamp(true);
 
     surface.classed('low-zoom', zoom <= lowZoom(lat));
 
@@ -426,13 +442,14 @@ export function rendererMap(context) {
     if (!force && t2.k === t.k && t2.x === t.x && t2.y === t.y) return false;
 
     if (duration) {
-      _selection.transition().
-      duration(duration).
-      on('start', function() {
-        map.startEase();
-      }).
-      call(_zoomerPanner.transform,
-          d3_zoomIdentity.translate(t2.x, t2.y).scale(t2.k));
+      _selection.transition()
+        .duration(duration)
+        .on('start', function() {
+          map.startEase();
+        })
+        .call(_zoomerPanner.transform,
+          d3_zoomIdentity.translate(t2.x, t2.y)
+            .scale(t2.k));
     }
     else {
       projection.transform(t2);
@@ -449,7 +466,8 @@ export function rendererMap(context) {
     if (loc2[0] === c[0] && loc2[1] === c[1] && z2 === z && !force) {
       return false;
     }
-    const proj = geoRawMercator().transform(projection.transform()); // copy projection
+    const proj = geoRawMercator()
+      .transform(projection.transform()); // copy projection
     const k2 = clamp(geoZoomToScale(z2, TILESIZE), kMin, kMax);
     proj.scale(k2);
 
@@ -461,7 +479,8 @@ export function rendererMap(context) {
     t[1] += center[1] - point[1];
 
     return setTransform(
-        d3_zoomIdentity.translate(t[0], t[1]).scale(k2), duration, force);
+      d3_zoomIdentity.translate(t[0], t[1])
+        .scale(k2), duration, force);
   }
 
   function zoomEventFilter(d3_event) {
@@ -500,13 +519,14 @@ export function rendererMap(context) {
     t[1] += delta[1];
 
     if (duration) {
-      _selection.transition().
-      duration(duration).
-      on('start', function() {
-        map.startEase();
-      }).
-      call(_zoomerPanner.transform,
-          d3_zoomIdentity.translate(t[0], t[1]).scale(k));
+      _selection.transition()
+        .duration(duration)
+        .on('start', function() {
+          map.startEase();
+        })
+        .call(_zoomerPanner.transform,
+          d3_zoomIdentity.translate(t[0], t[1])
+            .scale(k));
     }
     else {
       projection.translate(t);
@@ -524,7 +544,8 @@ export function rendererMap(context) {
 
     _dimensions = val;
     drawLayers.dimensions(_dimensions);
-    context.background().dimensions(_dimensions);
+    context.background()
+      .dimensions(_dimensions);
     projection.clipExtent([[0, 0], _dimensions]);
     _getMouseCoords = utilFastMouse(supersurface.node());
 
@@ -632,8 +653,8 @@ export function rendererMap(context) {
   map.extent = function(val) {
     if (!arguments.length) {
       return new geoExtent(
-          projection.invert([0, _dimensions[1]]),
-          projection.invert([_dimensions[0], 0]),
+        projection.invert([0, _dimensions[1]]),
+        projection.invert([_dimensions[0], 0]),
       );
     }
     else {
@@ -648,8 +669,8 @@ export function rendererMap(context) {
       let footerY = 30;
       let pad = 10;
       return new geoExtent(
-          projection.invert([pad, _dimensions[1] - footerY - pad]),
-          projection.invert([_dimensions[0] - pad, headerY + pad]),
+        projection.invert([pad, _dimensions[1] - footerY - pad]),
+        projection.invert([_dimensions[0] - pad, headerY + pad]),
       );
     }
     else {

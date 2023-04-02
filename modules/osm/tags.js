@@ -1,11 +1,11 @@
 export function osmIsInterestingTag(key) {
   return key !== 'attribution' &&
-      key !== 'created_by' &&
-      key !== 'source' &&
-      key !== 'odbl' &&
-      key.indexOf('source:') !== 0 &&
-      key.indexOf('source_ref') !== 0 && // purposely exclude colon
-      key.indexOf('tiger:') !== 0;
+    key !== 'created_by' &&
+    key !== 'source' &&
+    key !== 'odbl' &&
+    key.indexOf('source:') !== 0 &&
+    key.indexOf('source_ref') !== 0 && // purposely exclude colon
+    key.indexOf('tiger:') !== 0;
 }
 
 export const osmLifecyclePrefixes = {
@@ -89,7 +89,7 @@ export function osmTagSuggestingArea(tags) {
       return returnTags;
     }
     if (key in osmAreaKeysExceptions && tags[key] in
-        osmAreaKeysExceptions[key]) {
+      osmAreaKeysExceptions[key]) {
       returnTags[realKey] = tags[realKey];
       return returnTags;
     }
@@ -123,11 +123,11 @@ export function osmNodeGeometriesForTags(nodeTags) {
   let geometries = {};
   for (let key in nodeTags) {
     if (osmPointTags[key] &&
-        (osmPointTags[key]['*'] || osmPointTags[key][nodeTags[key]])) {
+      (osmPointTags[key]['*'] || osmPointTags[key][nodeTags[key]])) {
       geometries.point = true;
     }
     if (osmVertexTags[key] &&
-        (osmVertexTags[key]['*'] || osmVertexTags[key][nodeTags[key]])) {
+      (osmVertexTags[key]['*'] || osmVertexTags[key][nodeTags[key]])) {
       geometries.vertex = true;
     }
     // break early if both are already supported

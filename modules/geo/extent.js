@@ -8,7 +8,7 @@ export function geoExtent(min, max) {
     return min;
   }
   else if (min && min.length === 2 && min[0].length === 2 && min[1].length ===
-      2) {
+    2) {
     this[0] = min[0];
     this[1] = min[1];
   }
@@ -23,9 +23,9 @@ geoExtent.prototype = new Array(2);
 Object.assign(geoExtent.prototype, {
   equals: function(obj) {
     return this[0][0] === obj[0][0] &&
-        this[0][1] === obj[0][1] &&
-        this[1][0] === obj[1][0] &&
-        this[1][1] === obj[1][1];
+      this[0][1] === obj[0][1] &&
+      this[1][0] === obj[1][0] &&
+      this[1][1] === obj[1][1];
   },
 
   extend: function(obj) {
@@ -33,8 +33,8 @@ Object.assign(geoExtent.prototype, {
       obj = new geoExtent(obj);
     }
     return geoExtent(
-        [Math.min(obj[0][0], this[0][0]), Math.min(obj[0][1], this[0][1])],
-        [Math.max(obj[1][0], this[1][0]), Math.min(obj[1][1], this[1][1])],
+      [Math.min(obj[0][0], this[0][0]), Math.min(obj[0][1], this[0][1])],
+      [Math.max(obj[1][0], this[1][0]), Math.min(obj[1][1], this[1][1])],
     );
   },
 
@@ -79,30 +79,31 @@ Object.assign(geoExtent.prototype, {
   contains: function(obj) {
     if (!(obj instanceof geoExtent)) obj = new geoExtent(obj);
     return obj[0][0] >= this[0][0] &&
-        obj[0][1] >= this[0][1] &&
-        obj[1][0] <= this[1][0] &&
-        obj[1][1] <= this[1][1];
+      obj[0][1] >= this[0][1] &&
+      obj[1][0] <= this[1][0] &&
+      obj[1][1] <= this[1][1];
   },
 
   intersects: function(obj) {
     if (!(obj instanceof geoExtent)) obj = new geoExtent(obj);
     return obj[0][0] <= this[1][0] &&
-        obj[0][1] <= this[1][1] &&
-        obj[1][0] >= this[0][0] &&
-        obj[1][1] >= this[0][1];
+      obj[0][1] <= this[1][1] &&
+      obj[1][0] >= this[0][0] &&
+      obj[1][1] >= this[0][1];
   },
 
   intersection: function(obj) {
     if (!this.intersects(obj)) return new geoExtent();
     return new geoExtent(
-        [Math.max(obj[0][0], this[0][0]), Math.max(obj[0][1], this[0][1])],
-        [Math.min(obj[1][0], this[1][0]), Math.min(obj[1][1], this[1][1])],
+      [Math.max(obj[0][0], this[0][0]), Math.max(obj[0][1], this[0][1])],
+      [Math.min(obj[1][0], this[1][0]), Math.min(obj[1][1], this[1][1])],
     );
   },
 
   percentContainedIn: function(obj) {
     if (!(obj instanceof geoExtent)) obj = new geoExtent(obj);
-    const a1 = this.intersection(obj).area();
+    const a1 = this.intersection(obj)
+      .area();
     const a2 = this.area();
 
     if (a1 === Infinity || a2 === Infinity) {
@@ -123,12 +124,13 @@ Object.assign(geoExtent.prototype, {
     const dLat = geoMetersToLat(meters);
     const dLon = geoMetersToLon(meters, this.center()[1]);
     return geoExtent(
-        [this[0][0] - dLon, this[0][1] - dLat],
-        [this[1][0] + dLon, this[1][1] + dLat],
+      [this[0][0] - dLon, this[0][1] - dLat],
+      [this[1][0] + dLon, this[1][1] + dLat],
     );
   },
 
   toParam: function() {
-    return this.rectangle().join(',');
+    return this.rectangle()
+      .join(',');
   },
 });

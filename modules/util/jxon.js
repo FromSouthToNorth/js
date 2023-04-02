@@ -1,8 +1,8 @@
 export let JXON = new (function() {
   let
-      sValueProp = 'keyValue', sAttributesProp = 'keyAttributes',
-      sAttrPref = '@', /* you can customize these values */
-      aCache = [], rIsNull = /^\s*$/, rIsBool = /^(?:true|false)$/i;
+    sValueProp = 'keyValue', sAttributesProp = 'keyAttributes',
+    sAttrPref = '@', /* you can customize these values */
+    aCache = [], rIsNull = /^\s*$/, rIsBool = /^(?:true|false)$/i;
 
   function parseText(sValue) {
     if (rIsNull.test(sValue)) {
@@ -32,21 +32,21 @@ export let JXON = new (function() {
 
   function objectify(vValue) {
     return vValue === null ?
-           new EmptyTree() :
-           vValue instanceof Object ? vValue : new vValue.constructor(vValue);
+      new EmptyTree() :
+      vValue instanceof Object ? vValue : new vValue.constructor(vValue);
   }
 
   function createObjTree(oParentNode, nVerb, bFreeze, bNesteAttr) {
     let
-        nLevelStart = aCache.length, bChildren = oParentNode.hasChildNodes(),
-        bAttributes = oParentNode.hasAttributes(),
-        bHighVerb = Boolean(nVerb & 2);
+      nLevelStart = aCache.length, bChildren = oParentNode.hasChildNodes(),
+      bAttributes = oParentNode.hasAttributes(),
+      bHighVerb = Boolean(nVerb & 2);
 
     let
-        sProp, vContent, nLength = 0, sCollectedTxt = '',
-        vResult = bHighVerb ?
-            {} : /* put here the default value for empty nodes: */
-                  true;
+      sProp, vContent, nLength = 0, sCollectedTxt = '',
+      vResult = bHighVerb ?
+        {} : /* put here the default value for empty nodes: */
+        true;
 
     if (bChildren) {
       for (let oNode, nItem = 0; nItem <
@@ -90,14 +90,14 @@ export let JXON = new (function() {
 
     if (bAttributes) {
       const
-          nAttrLen = oParentNode.attributes.length,
-          sAPrefix = bNesteAttr ? '' : sAttrPref,
-          oAttrParent = bNesteAttr ? {} : vResult;
+        nAttrLen = oParentNode.attributes.length,
+        sAPrefix = bNesteAttr ? '' : sAttrPref,
+        oAttrParent = bNesteAttr ? {} : vResult;
 
       for (let oAttrib, nAttrib = 0; nAttrib < nAttrLen; nLength++, nAttrib++) {
         oAttrib = oParentNode.attributes.item(nAttrib);
         oAttrParent[sAPrefix + oAttrib.name.toLowerCase()] = parseText(
-            oAttrib.value.trim());
+          oAttrib.value.trim());
       }
 
       if (bNesteAttr) {
@@ -110,7 +110,7 @@ export let JXON = new (function() {
     }
 
     if (nVerb === 3 || (nVerb === 2 || nVerb === 1 && nLength > 0) &&
-        sCollectedTxt) {
+      sCollectedTxt) {
       vResult[sValueProp] = vBuiltVal;
     }
     else if (!bHighVerb && nLength === 0 && sCollectedTxt) {
@@ -130,7 +130,7 @@ export let JXON = new (function() {
     let vValue, oChild;
 
     if (oParentObj instanceof String || oParentObj instanceof Number ||
-        oParentObj instanceof Boolean) {
+      oParentObj instanceof Boolean) {
       oParentEl.appendChild(oXMLDoc.createTextNode(oParentObj.toString())); /* verbosity level is 0 */
     }
     else if (oParentObj.constructor === Date) {
@@ -145,7 +145,7 @@ export let JXON = new (function() {
       if (sName === sValueProp) {
         if (vValue !== null && vValue !== true) {
           oParentEl.appendChild(oXMLDoc.createTextNode(
-              vValue.constructor === Date ?
+            vValue.constructor === Date ?
               vValue.toGMTString() :
               String(vValue)));
         }
@@ -181,10 +181,10 @@ export let JXON = new (function() {
   this.build = function(oXMLParent, nVerbosity /* optional */, bFreeze /* optional */,
                         bNesteAttributes /* optional */) {
     let _nVerb = arguments.length > 1 && typeof nVerbosity === 'number' ?
-                 nVerbosity & 3 : /* put here the default verbosity level: */
-                 1;
+      nVerbosity & 3 : /* put here the default verbosity level: */
+      1;
     return createObjTree(oXMLParent, _nVerb, bFreeze || false,
-        arguments.length > 3 ? bNesteAttributes : _nVerb === 3);
+      arguments.length > 3 ? bNesteAttributes : _nVerb === 3);
   };
 
   this.unbuild = function(oObjTree) {

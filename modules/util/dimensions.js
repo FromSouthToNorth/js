@@ -10,7 +10,7 @@ export function utilGetDimensions(selection, force) {
     return [0, 0];
   }
   const node = selection.node(),
-      cached = selection.property('__dimensions__');
+    cached = selection.property('__dimensions__');
   return (!cached || force) ? refresh(selection, node) : cached;
 }
 
@@ -23,7 +23,7 @@ export function utilSetDimensions(selection, dimensions) {
     refresh(selection, node);
     return selection;
   }
-  return selection.property('__dimensions__', [dimensions[0], dimensions[1]]).
-      attr('width', dimensions[0]).
-      attr('height', dimensions[1]);
+  return selection.property('__dimensions__', [dimensions[0], dimensions[1]])
+    .attr('width', dimensions[0])
+    .attr('height', dimensions[1]);
 }

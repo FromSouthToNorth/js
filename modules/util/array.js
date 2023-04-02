@@ -3,7 +3,7 @@ export function utilArrayIdentical(a, b) {
   // an array is always identical to itself
   if (a === b) return true;
 
-  var i = a.length;
+  let i = a.length;
   if (i !== b.length) return false;
   while (i--) {
     if (a[i] !== b[i]) return false;
@@ -23,9 +23,10 @@ export function utilArrayIdentical(a, b) {
 //   [4]
 export function utilArrayDifference(a, b) {
   const other = new Set(b);
-  return Array.from(new Set(a)).filter(function(v) {
-    return !other.has(v);
-  });
+  return Array.from(new Set(a))
+    .filter(function(v) {
+      return !other.has(v);
+    });
 }
 
 // Intersection (a ∩ b): create a set that contains those elements of set a that are also in set b.
@@ -35,9 +36,10 @@ export function utilArrayDifference(a, b) {
 //   [2,3]
 export function utilArrayIntersection(a, b) {
   let other = new Set(b);
-  return Array.from(new Set(a)).filter(function(v) {
-    return other.has(v);
-  });
+  return Array.from(new Set(a))
+    .filter(function(v) {
+      return other.has(v);
+    });
 }
 
 /**
@@ -51,7 +53,7 @@ export function utilArrayUniq(a) {
 }
 
 // Flattens two level array into a single level
-// var a = [[1,2,3],[4,5,6],[7]];
+// let a = [[1,2,3],[4,5,6],[7]];
 // utilArrayFlatten(a);
 //   [1,2,3,4,5,6,7];
 export function utilArrayFlatten(a) {

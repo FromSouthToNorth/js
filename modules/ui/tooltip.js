@@ -4,7 +4,8 @@ import { uiPopover } from './popover.js';
 
 export function uiTooltip(klass) {
 
-  let tooltip = uiPopover((klass || '') + ' tooltip').displayType('hover');
+  let tooltip = uiPopover((klass || '') + ' tooltip')
+    .displayType('hover');
 
   let _title = function() {
     let title = this.getAttribute('data-original-title');
@@ -46,57 +47,61 @@ export function uiTooltip(klass) {
     let keys = _keys.apply(this, arguments);
 
     let headingCallback = typeof heading === 'function' ?
-                          heading :
-                          s => s.text(heading);
+      heading :
+      s => s.text(heading);
     let textCallback = typeof text === 'function' ? text : s => s.text(text);
 
     return function(selection) {
 
-      let headingSelect = selection.selectAll('.tooltip-heading').
-          data(heading ? [heading] : []);
+      let headingSelect = selection.selectAll('.tooltip-heading')
+        .data(heading ? [heading] : []);
 
-      headingSelect.exit().remove();
+      headingSelect.exit()
+        .remove();
 
-      headingSelect.enter().
-          append('div').
-          attr('class', 'tooltip-heading').
-          merge(headingSelect).
-          text('').
-          call(headingCallback);
+      headingSelect.enter()
+        .append('div')
+        .attr('class', 'tooltip-heading')
+        .merge(headingSelect)
+        .text('')
+        .call(headingCallback);
 
-      let textSelect = selection.selectAll('.tooltip-text').
-          data(text ? [text] : []);
+      let textSelect = selection.selectAll('.tooltip-text')
+        .data(text ? [text] : []);
 
-      textSelect.exit().remove();
+      textSelect.exit()
+        .remove();
 
-      textSelect.enter().
-          append('div').
-          attr('class', 'tooltip-text').
-          merge(textSelect).
-          text('').
-          call(textCallback);
+      textSelect.enter()
+        .append('div')
+        .attr('class', 'tooltip-text')
+        .merge(textSelect)
+        .text('')
+        .call(textCallback);
 
-      let keyhintWrap = selection.selectAll('.keyhint-wrap').
-          data(keys && keys.length ? [0] : []);
+      let keyhintWrap = selection.selectAll('.keyhint-wrap')
+        .data(keys && keys.length ? [0] : []);
 
-      keyhintWrap.exit().remove();
+      keyhintWrap.exit()
+        .remove();
 
-      let keyhintWrapEnter = keyhintWrap.enter().
-          append('div').
-          attr('class', 'keyhint-wrap');
+      let keyhintWrapEnter = keyhintWrap.enter()
+        .append('div')
+        .attr('class', 'keyhint-wrap');
 
-      keyhintWrapEnter.append('span').call(t.append('tooltip_keyhint'));
+      keyhintWrapEnter.append('span')
+        .call(t.append('tooltip_keyhint'));
 
       keyhintWrap = keyhintWrapEnter.merge(keyhintWrap);
 
-      keyhintWrap.selectAll('kbd.shortcut').
-          data(keys && keys.length ? keys : []).
-          enter().
-          append('kbd').
-          attr('class', 'shortcut').
-          text(function(d) {
-            return d;
-          });
+      keyhintWrap.selectAll('kbd.shortcut')
+        .data(keys && keys.length ? keys : [])
+        .enter()
+        .append('kbd')
+        .attr('class', 'shortcut')
+        .text(function(d) {
+          return d;
+        });
     };
   });
 

@@ -9,14 +9,16 @@ export function uiLoading(context) {
   let loading = (selection) => {
     _modalSelection = uiModal(selection, _blocking);
 
-    let loadertext = _modalSelection.select('.content').
-        classed('loading-modal', true).
-        append('div').
-        attr('class', 'modal-section fillL');
+    let loadertext = _modalSelection.select('.content')
+      .classed('loading-modal', true)
+      .append('div')
+      .attr('class', 'modal-section fillL');
 
-    loadertext.append('h3').html(_message);
+    loadertext.append('h3')
+      .html(_message);
 
-    _modalSelection.select('button.close').attr('class', 'hide');
+    _modalSelection.select('button.close')
+      .attr('class', 'hide');
 
     return loading;
   };
@@ -39,7 +41,7 @@ export function uiLoading(context) {
 
   loading.isShown = () => {
     return _modalSelection && !_modalSelection.empty() &&
-        _modalSelection.node().parentNode;
+      _modalSelection.node().parentNode;
   };
 
   return loading;

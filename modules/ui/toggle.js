@@ -6,13 +6,15 @@ import { select as d3_select } from 'd3-selection';
 // value actually changes between calls.
 export function uiToggle(show, callback) {
   return function(selection) {
-    selection.style('opacity', show ? 0 : 1).
-    classed('hide', false).
-    transition().
-    style('opacity', show ? 1 : 0).
-    on('end', function() {
-      d3_select(this).classed('hide', !show).style('opacity', null);
-      if (callback) callback.apply(this);
-    });
+    selection.style('opacity', show ? 0 : 1)
+      .classed('hide', false)
+      .transition()
+      .style('opacity', show ? 1 : 0)
+      .on('end', function() {
+        d3_select(this)
+          .classed('hide', !show)
+          .style('opacity', null);
+        if (callback) callback.apply(this);
+      });
   };
 }

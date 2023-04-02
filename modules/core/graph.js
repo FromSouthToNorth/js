@@ -8,9 +8,9 @@ export function coreGraph(other, mutable) {
     let base = other.base();
     this.entities = Object.assign(Object.create(base.entities), other.entities);
     this._parentWays = Object.assign(Object.create(base.parentWays),
-        other._parentWays);
+      other._parentWays);
     this._parentRels = Object.assign(Object.create(base.parentRels),
-        other._parentRels);
+      other._parentRels);
 
   }
   else {
@@ -46,7 +46,8 @@ coreGraph.prototype = {
   },
 
   geometry: function(id) {
-    return this.entity(id).geometry(this);
+    return this.entity(id)
+      .geometry(this);
   },
 
   transient: function(entity, key, fn) {
@@ -95,9 +96,10 @@ coreGraph.prototype = {
   },
 
   parentMultipolygons: function(entity) {
-    return this.parentRelations(entity).filter(function(relation) {
-      return relation.isMultipolygon();
-    });
+    return this.parentRelations(entity)
+      .filter(function(relation) {
+        return relation.isMultipolygon();
+      });
   },
 
   childNodes: function(entity) {
@@ -139,7 +141,7 @@ coreGraph.prototype = {
       // Merging data into the base graph
       base.entities[entity.id] = entity;
       this._updateCalculated(undefined, entity, base.parentWays,
-          base.parentRels);
+        base.parentRels);
 
       // Restore provisionally-deleted nodes that are discovered to have an extant parent
       if (entity.type === 'way') {
@@ -163,25 +165,27 @@ coreGraph.prototype = {
   _updateRebased: function() {
     let base = this.base();
 
-    Object.keys(this._parentWays).forEach(function(child) {
-      if (base.parentWays[child]) {
-        base.parentWays[child].forEach(function(id) {
-          if (!this.entities.hasOwnProperty(id)) {
-            this._parentWays[child].add(id);
-          }
-        }, this);
-      }
-    }, this);
+    Object.keys(this._parentWays)
+      .forEach(function(child) {
+        if (base.parentWays[child]) {
+          base.parentWays[child].forEach(function(id) {
+            if (!this.entities.hasOwnProperty(id)) {
+              this._parentWays[child].add(id);
+            }
+          }, this);
+        }
+      }, this);
 
-    Object.keys(this._parentRels).forEach(function(child) {
-      if (base.parentRels[child]) {
-        base.parentRels[child].forEach(function(id) {
-          if (!this.entities.hasOwnProperty(id)) {
-            this._parentRels[child].add(id);
-          }
-        }, this);
-      }
-    }, this);
+    Object.keys(this._parentRels)
+      .forEach(function(child) {
+        if (base.parentRels[child]) {
+          base.parentRels[child].forEach(function(id) {
+            if (!this.entities.hasOwnProperty(id)) {
+              this._parentRels[child].add(id);
+            }
+          }, this);
+        }
+      }, this);
 
     this.transients = {};
 
