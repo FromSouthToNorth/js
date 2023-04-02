@@ -9,6 +9,7 @@ import { uiZoom } from './zoom.js';
 import { svgDefs } from '../svg/index.js';
 import { uiAttribution } from './attribution.js';
 import { uiPaneBackground } from './panes/index.js';
+import { uiMapInMap } from './map_in_map.js';
 
 export function uiInit(context) {
 
@@ -42,6 +43,8 @@ export function uiInit(context) {
     overMap.append('div')
       .attr('class', 'select-trap')
       .text('t');
+
+    overMap.call(uiMapInMap(context));
 
     overMap.append('div')
       .attr('class', 'attribution-wrap')
@@ -111,21 +114,6 @@ export function uiInit(context) {
           .pan(d, 100);
       };
     }
-
-    function zoomInFurther(d3_event) {
-      if (d3_event.shiftKey) return;
-      d3_event.preventDefault();
-      context.map()
-        .zoomInFurther();
-    }
-
-    function zoomOutFurther(d3_event) {
-      if (d3_event.shiftKey) return;
-      d3_event.preventDefault();
-      context.map()
-        .zoomOutFurther();
-    }
-
   }
 
   let ui = {};
@@ -146,6 +134,8 @@ export function uiInit(context) {
       })
       .catch(err => console.error(err)); // eslint-disable-line
   };
+
+  ui.svgDefs = svgDefs(context);
 
   ui.onResize = function(withPan) {
     let map = context.map();
@@ -215,7 +205,6 @@ export function uiInit(context) {
     }
   };
 
-  ui.svgDefs = svgDefs(context);
 
   return ui;
 

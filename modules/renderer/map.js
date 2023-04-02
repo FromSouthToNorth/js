@@ -193,6 +193,10 @@ export function rendererMap(context) {
     drawLayers = svgLayers(projection, context);
   };
 
+  function editOff() {
+    dispatch.call('drawn', this, { full: true });
+  }
+
   function zoomPan(event, key, transform) {
     let source = event && event.sourceEvent || event;
     let eventTransform = transform || (event && event.transform);
@@ -402,6 +406,8 @@ export function rendererMap(context) {
       supersurface.call(context.background());
       wrapper.call(drawLayers);
     }
+
+    editOff();
 
     _transformStart = projection.transform();
 

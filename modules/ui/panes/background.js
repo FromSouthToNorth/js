@@ -2,7 +2,7 @@ import { t } from '../../core/localizer';
 import { uiPane } from '../pane';
 
 import {
-  uiSectionBackgroundList,
+  uiSectionBackgroundList, uiSectionBackgroundOffset,
 } from '../sections/index.js';
 
 export function uiPaneBackground(context) {
@@ -14,5 +14,6 @@ export function uiPaneBackground(context) {
     .iconName('iD-icon-layers')
     .sections([
       uiSectionBackgroundList(context),
+      uiSectionBackgroundOffset(context),
     ]);
 }

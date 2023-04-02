@@ -12,6 +12,7 @@ import { svgIcon } from '../../svg/icon';
 import { uiCmd } from '../cmd';
 import { uiSettingsCustomBackground } from '../settings/index.js';
 import { uiSection } from '../section';
+import { uiMapInMap } from '../map_in_map.js';
 
 export function uiSectionBackgroundList(context) {
 
@@ -42,6 +43,35 @@ export function uiSectionBackgroundList(context) {
       .attr('class', 'layer-list layer-background-list')
       .attr('dir', 'auto')
       .merge(container);
+
+    // add minimap toggle below list
+    const bgExtrasListEnter = selection.selectAll('.bg-extras-list')
+      .data([0])
+      .enter()
+      .append('ul')
+      .attr('class', 'layer-list bg-extras-list');
+
+    const minimapLabelEnter = bgExtrasListEnter
+      .append('li')
+      .attr('class', 'minimap-toggle-item')
+      .append('label')
+      .call(uiTooltip()
+        .title(() => t.append('background.minimap.tooltip'))
+        .keys([t('background.minimap.key')])
+        .placement('top'),
+      );
+
+    minimapLabelEnter
+      .append('input')
+      .attr('type', 'checkbox')
+      .on('change', function(d3_event) {
+        d3_event.preventDefault();
+        uiMapInMap.toggle();
+      });
+
+    minimapLabelEnter
+      .append('span')
+      .call(t.append('background.minimap.description'));
 
     // "Info / Report a Problem" link
     selection.selectAll('.imagery-faq')
