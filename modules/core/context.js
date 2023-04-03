@@ -17,6 +17,7 @@ import {
   utilKeybinding,
   utilRebind,
 } from '../util';
+import { modeSelect } from '../modes/index.js';
 
 export function coreContext() {
   const dispatch = d3_dispatch('enter', 'exit', 'change');
@@ -118,6 +119,13 @@ export function coreContext() {
           _map.zoomTo(entity);
         }
       }
+    });
+
+    _map.on('drawn.zoomToEntity', () => {
+      if (!context.hasEntity(entityID)) return;
+      _map.on('drawn.zoomToEntity', null);
+      context.on('enter.zoomToEntity', null);
+      context.enter(modeSelect(context, [entityID]));
     });
 
     context.on('enter.zoomToEntity', () => {

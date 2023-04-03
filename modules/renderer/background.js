@@ -420,28 +420,28 @@ export function rendererBackground(context) {
   background.brightness = function(d) {
     if (!arguments.length) return _brightness;
     _brightness = d;
-    if (context.mode()) dispatch.call('change');
+    dispatch.call('change');
     return background;
   };
 
   background.contrast = function(d) {
     if (!arguments.length) return _contrast;
     _contrast = d;
-    if (context.mode()) dispatch.call('change');
+    dispatch.call('change');
     return background;
   };
 
   background.saturation = function(d) {
     if (!arguments.length) return _saturation;
     _saturation = d;
-    if (context.mode()) dispatch.call('change');
+    dispatch.call('change');
     return background;
   };
 
   background.sharpness = function(d) {
     if (!arguments.length) return _sharpness;
     _sharpness = d;
-    if (context.mode()) dispatch.call('change');
+    dispatch.call('change');
     return background;
   };
 

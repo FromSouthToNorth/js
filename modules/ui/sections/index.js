@@ -9,3 +9,7 @@ export {
 export {
   uiSectionOverlayList,
 } from './overlay_list.js';
+
+export {
+  uiSectionBackgroundDisplayOptions,
+} from './background_display_options.js';
