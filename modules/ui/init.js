@@ -10,6 +10,7 @@ import { svgDefs } from '../svg/index.js';
 import { uiAttribution } from './attribution.js';
 import { uiPaneBackground } from './panes/index.js';
 import { uiMapInMap } from './map_in_map.js';
+import { uiInfo } from './info.js';
 
 export function uiInit(context) {
 
@@ -77,6 +78,9 @@ export function uiInit(context) {
 
       panes.call(pane.renderPane);
     });
+
+    ui.info = uiInfo(context);
+    overMap.call(ui.info);
 
     ui.onResize();
     map.redrawEnable(true);

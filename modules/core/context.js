@@ -160,6 +160,13 @@ export function coreContext() {
     _mode.selectedIDs()) || [];
   context.activeID = () => _mode && _mode.activeID && _mode.activeID();
 
+  let _selectedNoteID;
+  context.selectedNoteID = function(noteID) {
+    if (!arguments.length) return _selectedNoteID;
+    _selectedNoteID = noteID;
+    return context;
+  };
+
   /* Background */
   let _background;
   context.background = () => _background;

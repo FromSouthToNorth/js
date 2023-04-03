@@ -2,6 +2,7 @@ import { select as d3_select } from 'd3-selection';
 
 import { geoScaleToZoom, geoVecLength } from '../geo';
 import { utilPrefixCSSProperty, utilTiler } from '../util';
+import { t } from '../core/index.js';
 
 export function rendererTileLayer(context) {
   let transformProp = utilPrefixCSSProperty('Transform');
@@ -21,11 +22,7 @@ export function rendererTileLayer(context) {
 
   function atZoom(t, distance) {
     let power = Math.pow(2, distance);
-    return [
-      Math.floor(t[0] * power),
-      Math.floor(t[1] * power),
-      t[2] + distance,
-    ];
+    return [Math.floor(t[0] * power), Math.floor(t[1] * power), t[2] + distance];
   }
 
   function lookUp(d) {
@@ -60,27 +57,18 @@ export function rendererTileLayer(context) {
 
     let pixelOffset;
     if (_source) {
-      pixelOffset = [
-        _source.offset()[0] * Math.pow(2, _zoom),
-        _source.offset()[1] * Math.pow(2, _zoom),
-      ];
+      pixelOffset = [_source.offset()[0] * Math.pow(2, _zoom), _source.offset()[1] * Math.pow(2, _zoom)];
     }
     else {
       pixelOffset = [0, 0];
     }
 
-    let translate = [
-      _projection.translate()[0] + pixelOffset[0],
-      _projection.translate()[1] + pixelOffset[1],
-    ];
+    let translate = [_projection.translate()[0] + pixelOffset[0], _projection.translate()[1] + pixelOffset[1]];
 
     tiler.scale(_projection.scale() * 2 * Math.PI)
       .translate(translate);
 
-    _tileOrigin = [
-      _projection.scale() * Math.PI - translate[0],
-      _projection.scale() * Math.PI - translate[1],
-    ];
+    _tileOrigin = [_projection.scale() * Math.PI - translate[0], _projection.scale() * Math.PI - translate[1]];
 
     render(selection);
   }
@@ -91,6 +79,7 @@ export function rendererTileLayer(context) {
   function render(selection) {
     if (!_source) return;
     let requests = [];
+    const showDebug = context.getDebug('tile') && !_source.overlay;
 
     if (_source.validZoom(_zoom)) {
       tiler.skipNullIsland(!!_source.overlay);
@@ -201,10 +190,58 @@ export function rendererTileLayer(context) {
       .on('load', load)
       .merge(image)
       .style(transformProp, imageTransform)
+      .classed('tile-debug', showDebug)
       .classed('tile-removing', false)
       .classed('tile-center', function(d) {
         return d === nearCenter;
       });
+
+    let debug = selection.selectAll('.tile-label-debug')
+      .data(showDebug ? requests : [], function(d) {
+        return d[3];
+      });
+
+    debug.exit()
+      .remove();
+
+    if (showDebug) {
+      const debugEnter = debug.enter()
+        .append('div')
+        .attr('class', 'tile-label-debug');
+
+      debugEnter
+        .append('div')
+        .attr('class', 'tile-label-debug-coord');
+
+      debugEnter
+        .append('div')
+        .attr('class', 'tile-label-debug-vintage');
+
+      debug = debug.merge(debugEnter);
+
+      debug.style(transformProp, debugTransform);
+
+      debug.selectAll('.tile-label-debug-coord').text(function(d) {
+        return d[2] + ' /' + d[0] + ' /' + d[1];
+      });
+
+      debug.selectAll('.tile-label-debug-vintage')
+        .each(function(d) {
+          const span = d3_select(this);
+          const center = context.projection.invert(tileCenter(d));
+          _source.getMetadata(center, d, function(err, result) {
+            if (result && result.vintage && result.vintage.range) {
+              span.text(result.vintage.range);
+            }
+            else {
+              span.text('');
+              span.call(t.append('info_panels.background.vintage'));
+              span.append('span').text(': ');
+              span.call(t.append('info_panels.background.unknown'));
+            }
+          });
+        });
+    }
   }
 
   background.projection = function(val) {

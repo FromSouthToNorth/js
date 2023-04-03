@@ -7,12 +7,14 @@ import {
   utilRebind,
 } from '../util/index.js';
 import { svgOsm } from './osm.js';
+import { svgDebug } from './debug.js';
 
 export function svgLayers(projection, context) {
   const dispatch = d3_dispatch('change');
   let svg = d3_select(null);
   let _layers = [
     { id: 'osm', layer: svgOsm(projection, context, dispatch) },
+    { id: 'debug', layer: svgDebug(projection, context, dispatch) },
   ];
 
   function drawLayers(selection) {

@@ -73,6 +73,54 @@ export function uiSectionBackgroundList(context) {
       .append('span')
       .call(t.append('background.minimap.description'));
 
+    const panelLabelEnter = bgExtrasListEnter
+      .append('li')
+      .attr('class', 'background-panel-toggle-item')
+      .append('label')
+      .call(uiTooltip()
+        .title(() => t.append('background.panel.tooltip'))
+        .keys([uiCmd('⌘⇧' + t('info_panels.background.key'))])
+        .placement('top'),
+      );
+
+    panelLabelEnter
+      .append('input')
+      .attr('type', 'checkbox')
+      .on('change', function(d3_event) {
+        d3_event.preventDefault();
+        context.ui()
+          .info
+          .toggle('background');
+      });
+
+    panelLabelEnter
+      .append('span')
+      .call(t.append('background.panel.description'));
+
+    const locPanelLabelEnter = bgExtrasListEnter
+      .append('li')
+      .attr('class', 'location-panel-toggle-item')
+      .append('label')
+      .call(uiTooltip()
+        .title(() => t.append('background.location_panel.tooltip'))
+        .keys([uiCmd('⌘⇧' + t('info_panels.location.key'))])
+        .placement('top'),
+      );
+
+    locPanelLabelEnter
+      .append('input')
+      .attr('type', 'checkbox')
+      .on('change', function(d3_event) {
+        d3_event.preventDefault();
+        context.ui()
+          .info
+          .toggle('location');
+      });
+
+    locPanelLabelEnter
+      .append('span')
+      .call(t.append('background.location_panel.description'));
+
     // "Info / Report a Problem" link
     selection.selectAll('.imagery-faq')
       .data([0])

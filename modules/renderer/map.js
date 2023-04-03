@@ -431,6 +431,12 @@ export function rendererMap(context) {
     return null;
   };
 
+  // returns Lng/Lat
+  map.mouseCoordinates = function() {
+    const coord = map.mouse() || pxCenter();
+    return projection.invert(coord);
+  };
+
   map.dblclickZoomEnable = function(val) {
     if (!arguments.length) return _dblClickZoomEnabled;
     _dblClickZoomEnabled = val;
