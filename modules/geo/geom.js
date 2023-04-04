@@ -1,6 +1,8 @@
 import {
   geoVecAngle,
   geoVecCross,
+  geoVecDot,
+  geoVecInterp,
   geoVecLength,
   geoVecSubtract,
 } from './vector.js';
@@ -125,6 +127,20 @@ export function geoPathIntersections(path1, path2) {
     }
   }
   return intersections;
+}
+
+export function geoPathHasIntersections(path1, path2) {
+  for (let i = 0; i < path1.length - 1; i++) {
+    for (let j = 0; j < path2.length - 1; j++) {
+      const a = [ path1[i], path1[i+1] ];
+      const b = [ path2[j], path2[j+1] ];
+      const hit = geoLineIntersection(a, b);
+      if (hit) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 // Return the intersection point of 2 line segments.
